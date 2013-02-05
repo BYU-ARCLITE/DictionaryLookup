@@ -1,0 +1,21 @@
+@()(implicit request: RequestHeader)
+
+@main("ARCLITE Dictionary Lookup Service") {
+
+    <h1>API Information for V1</h1>
+
+    <p>Endpoint:</p>
+    <code>@{routes.LookupV1.lookup().absoluteURL()}?srcLang=XX&destLang=XX&word=XXXX</code>
+
+    <p>The supported languages for V1 are the following:</p>
+    <ul>
+        <li>English (en)</li>
+        <li>French (fr)</li>
+        <li>German (de)</li>
+        <li>Italian (it)</li>
+    </ul>
+    <p>
+        One of the languages has to be English.
+    </p>
+    
+}
