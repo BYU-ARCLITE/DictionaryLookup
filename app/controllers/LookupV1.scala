@@ -20,7 +20,7 @@ object LookupV1 extends Controller {
         // Get the languages and key word
         val sourceLanguage = request.queryString("srcLang")(0)
         val destinationLanguage = request.queryString("destLang")(0)
-        val word = request.queryString("word")(0)
+        val word = request.queryString("word")(0).trim
 
         // Figure out which dictionary to use
         val dictionary = sourceLanguage + "-" + destinationLanguage
