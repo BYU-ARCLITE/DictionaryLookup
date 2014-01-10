@@ -17,33 +17,22 @@ import java.text.Normalizer
  */
 object DictionaryCache {
 
-  def loadDictionary(language: String) {
+  val expiration = Play.configuration.getInt("dictionary.expiration").get
 
-    // Get the information. We'll set a expiration period on the dictionary so if it's not being used it won't take up
-    // memory space
-    val key = "dictionary." + language
-    Logger.info("Loading dictionary " + key)
-    val dictionary = Dictionary.loadFromFile(new File("./dictionaries/" + language + ".bin"))
-    val expiration = Play.configuration.getInt("dictionary.expiration").get
-
-    Cache.set(key, dictionary, expiration)
-  }
-
-  def getDictionaryEntry(language: String, key: String): List[String] = {
-    val dictionaryName = "dictionary." + language
-    val dictionary = Cache.getAs[TrieMap[String, ListBuffer[String]]](dictionaryName)
-
-    // Make sure the dictionary is still there. If not, reload it
-    val normalizedKey = Normalizer.normalize(key, Normalizer.Form.NFC)
-    if (dictionary.isDefined) {
-      val entry = dictionary.get.get(normalizedKey)
-      if (entry.isDefined)
-        entry.get.toList
-      else
-        List()
-    } else {
-      loadDictionary(language)
-      getDictionaryEntry(language, key)
+  def getDictionaryEntry(language: String, key: String): Option[List[String]] = {
+    try {
+      val dictionary = Cache.getOrElse[TrieMap[String, ListBuffer[String]]](language, expiration) {
+        Logger.info("Loading dictionary " + language)
+        Dictionary.loadFromFile(new File("./dictionaries/" + language + ".bin"))
+      }
+      val normalizedKey = Normalizer.normalize(key, Normalizer.Form.NFC)
+      dictionary.get(normalizedKey).flatMap { buf =>
+        if(buf.length > 0) Some(buf.toList) else None
+      }
+    } catch {
+      case _: Throwable => //Should be more specific, but... eh.
+        Logger.info("Dictionary " + language + " not found.")
+        None
     }
   }
 }

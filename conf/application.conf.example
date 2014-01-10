@@ -11,6 +11,13 @@ application.secret="fX0W;2]Se_3ed/wVc5Bw=IydQU2o@3NJyjBvkI`?9?GH9;RvU1`V?4Kgia@X
 # ~~~~~
 application.langs="en"
 
+# Service configuration
+# WordReference
+wordReference.key="#####"
+
+# Google Translate
+google.key="#######################################"
+            
 # Global object class
 # ~~~~~
 # Define the Global object class for this application.

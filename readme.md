@@ -27,3 +27,17 @@ You can use the <code>Dictionary.saveToFile(dictionary, file)</code> method to s
     {srcLang}-{destLang}.bin
 
 So a dictionary going from English to French would be saved here: <code>dictionaries/en-fr.bin</code>.
+
+
+### Configure translation keys
+
+DictionaryLookup supports text translations using WordReference and Google Translate. To use these services you must specify the
+right authentication credentials in the configuration file.
+
+For WordReference, enter the API key:
+
+    wordReference.key="word reference key goes here"
+
+For Google Translate, enter the API key:
+
+    google.key="Google Translate key goes here"
