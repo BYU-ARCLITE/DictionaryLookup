@@ -48,6 +48,7 @@ object Lookup extends Controller {
             "source" -> name
           )
           Cache.set(key, response, exp)
+          Logger.info(response.toString)
           Ok(response)
         }
         case None => NotFound(Json.obj("success" -> false, "message" -> "No dictionary entries."))
