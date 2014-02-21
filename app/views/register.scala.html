@@ -1,0 +1,14 @@
+@()(implicit request: RequestHeader)
+
+@main("ARCLITE Dictionary Lookup Service") {
+
+    <h1>Register a New User</h1>
+
+    <form method="POST" action="@{routes.UserManager.register().absoluteURL()}">
+        <label>Username: <input type="text" name="username" /></label><br/>
+        <label>E-mail address: <input type="text" name="email" /></label><br/>
+        <label>Password: <input type="password" name="password" /></label><br/>
+        <input type="submit"/>
+    </form>
+
+}

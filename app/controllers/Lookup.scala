@@ -1,37 +1,29 @@
 package controllers
 
 import scala.util.control.ControlThrowable
+import controllers.authentication.Authentication
 import play.api.mvc.{Action, Controller}
 import play.api.libs.json._
 import play.api.cache.Cache
 import play.api.Play.current
 import play.api.Logger
 
-trait Translator {
-  val name: String
-
-  /**
-   * Endpoint for translating
-   * @param src The source language
-   * @param dest The destination language
-   * @param text The text to translate
-   */
-  def translate(src: String, dest: String, text: String): Option[Seq[String]]
-}
-
 object Lookup extends Controller {
-  type TResult = (String,Seq[String])
+  type TResult = (String,Int,Seq[String])
   type Extractor = Translator => Option[Seq[String]]
 
-  val services = List( LookupBYU,
-                       LookupWordReference,
-                       LookupGoogle )
+  val serviceMap = Map( "BYUDictionaries" -> LookupBYU,
+                        "WordReference" -> LookupWordReference,
+                        "GoogleTranslate" -> LookupGoogle )
 
-  def getFirst(input: List[Translator], extractor: Extractor): Option[TResult] = {
-    for(t <- input) try {
+  val defaultServices = List("BYUDictionaries", "WordReference", "GoogleTranslate")
+
+  def getFirst(input: List[String], extractor: Extractor): Option[TResult] = {
+    for(name <- input; t <- serviceMap.get(name)) try {
+      Logger.info("Checking "+name)
       val res = extractor(t)
       if(res.isDefined)
-        return res.map((t.name,_))
+        return res.map((t.name,t.expiration,_))
     } catch {
       case e: ControlThrowable => throw e
       case e: Throwable => {
@@ -42,31 +34,38 @@ object Lookup extends Controller {
     None
   }
 
-  def lookup = Action {
-    implicit request =>
-      (try {
-        // Get the languages and key word
-        val srcLang = request.queryString("srcLang")(0)
-        val destLang = request.queryString("destLang")(0)
-        val text = request.queryString("word")(0).trim
-        val key = srcLang+"-"+destLang+":"+text
-        Cache.getAs[JsObject](key).map { response => Ok(response) }.getOrElse {
-          getFirst(services, _.translate(srcLang,destLang,text)) match {
-            case Some((name,tseq)) => {
-              val response = Json.obj(
-                "success" -> true,
-                "entries" -> tseq,
-                "source" -> name
-              )
-              Cache.set(key, response, 3600*24) //keep it for a day
-              Ok(response)
-            }
-            case None => NotFound(Json.obj("success" -> false, "message" -> "No dictionary entries."))
-          }
+  def lookup(opts: Map[String, Seq[String]], priority: List[String]) = (try {
+    val srcLang = opts("srcLang")(0)
+    val destLang = opts("destLang")(0)
+    val text = opts("word")(0)
+    val key = s"$srcLang-$destLang:$text"
+    Cache.getAs[JsObject](key).map(json => Ok(json)).getOrElse {
+      getFirst(priority, _.translate(srcLang,destLang,text)) match {
+        case Some((name,exp,tseq)) => {
+          val response = Json.obj(
+            "success" -> true,
+            "entries" -> tseq,
+            "source" -> name
+          )
+          Cache.set(key, response, exp)
+          Ok(response)
         }
-      } catch {
-        case e: ControlThrowable => throw e
-        case _: Throwable => BadRequest
-      }).withHeaders("Access-Control-Allow-Origin" -> "*")
+        case None => NotFound(Json.obj("success" -> false, "message" -> "No dictionary entries."))
+      }
+    }
+  } catch {
+    case e: ControlThrowable => throw e
+    case _: Throwable => BadRequest
+  }).withHeaders("Access-Control-Allow-Origin" -> "*")
+
+  def getlookup = Action {
+    implicit request =>
+      lookup(request.queryString, defaultServices)
+  }
+
+  def authlookup = Authentication.keyedAction(parse.urlFormEncoded) {
+    implicit request =>
+      implicit user =>
+        lookup(request.body, user.getServices)
   }
 }

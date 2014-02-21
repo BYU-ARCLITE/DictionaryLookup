@@ -9,8 +9,9 @@ import play.api.Play.{current, configuration}
 import ExecutionContext.Implicits.global
 
 object LookupWordReference extends Translator {
-  val name = "WordReference"
   //See http://www.wordreference.com/docs/api.aspx
+  val name = "WordReference"
+  val expiration = Utils.getExpiration("wordReference")
   val wordReferenceKey = configuration.getString("wordReference.key")
   val TranslationList = List("FirstTranslation", "SecondTranslation", "ThirdTranslations", "FourthTranslation")
   val PartsList = List("Entries","PrincipalTranslations","AdditionalTranslations")
@@ -53,7 +54,7 @@ object LookupWordReference extends Translator {
   }
 
   def requestEntries(key: String, scode: String, dcode: String, text: String) = {
-    val url = "http://api.wordreference.com/0.8/" + URLEncoder.encode(key + "/json/" + scode + dcode + "/" + text, "UTF-8")
+    val url = "http://api.wordreference.com/0.8/" + URLEncoder.encode(s"$key/json/$scode$dcode/$text", "UTF-8")
     val result = Await.result(WS.url(url).get(), Duration.Inf)
     if(result.status != 200) None
     else mapEntriesIn(result.json.as[JsObject]) { entry =>

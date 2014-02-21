@@ -12,38 +12,33 @@ application.secret="fX0W;2]Se_3ed/wVc5Bw=IydQU2o@3NJyjBvkI`?9?GH9;RvU1`V?4Kgia@X
 application.langs="en"
 
 # Service configuration
+
 # WordReference
 wordReference.key="#####"
+wordReference.expiration = 1 day
 
 # Google Translate
 google.key="#######################################"
-            
-# Global object class
-# ~~~~~
-# Define the Global object class for this application.
-# Default to Global in the root package.
-# application.global=Global
+google.expiration = 1 day
 
-# Router 
-# ~~~~~
-# Define the Router object to use for this application.
-# This router will be looked up first when the application is starting up,
-# so make sure this is the entry point. 
-# Furthermore, it's assumed your route file is named properly. 
-# So for an application router like `my.application.Router`,
-# you may need to define a router file `conf/my.application.routes`.
-# Default to Routes in the root package (and conf/routes)
-# application.router=my.application.Routes
+# Service Defaults
+services.expiration = 10 minutes
+
+# Local dictionary in-memory caching time
+dictionary.expiration = 10 minutes
+
+# User defaults
+user.servicelist = ["BYUDictionaries","WordReference","GoogleTranslate"]
 
 # Database configuration
 # ~~~~~ 
 # You can declare as many datasources as you want.
 # By convention, the default datasource is named `default`
-#
-# db.default.driver=org.h2.Driver
-# db.default.url="jdbc:h2:mem:play"
-# db.default.user=sa
-# db.default.password=""
+
+db.default.driver=com.mysql.jdbc.Driver
+db.default.url="jdbc:mysql://localhost/dictionary?characterEncoding=UTF-8"
+db.default.user=root
+db.default.password=root
 
 # Evolutions
 # ~~~~~
@@ -62,7 +57,3 @@ logger.play=INFO
 
 # Logger provided to your application:
 logger.application=DEBUG
-
-# Dictionary configuration
-#  - Expiration: 10 mins
-dictionary.expiration=600

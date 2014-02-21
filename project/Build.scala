@@ -10,7 +10,9 @@ object ApplicationBuild extends Build {
   val appDependencies = Seq(
     // Add your project dependencies here,
     jdbc,
-    anorm
+    anorm,
+    "mysql" % "mysql-connector-java" % "5.1.10",
+    "org.mindrot" % "jbcrypt" % "0.3m"
   )
 
 

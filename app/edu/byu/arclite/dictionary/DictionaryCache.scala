@@ -17,7 +17,9 @@ import Play.{current, configuration}
  */
 object DictionaryCache {
 
-  val expiration = configuration.getInt("dictionary.expiration").get
+  val expiration = configuration.getMilliseconds("dictionary.expiration")
+    .map(_.toInt / 1000)
+    .getOrElse(600) //default 10 minutes
 
   def getDictionaryEntry(language: String, key: String): Option[List[String]] = try {
     val dictionary = Cache.getOrElse[TrieMap[String, ListBuffer[String]]](language, expiration) {
