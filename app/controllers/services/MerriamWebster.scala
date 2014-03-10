@@ -12,72 +12,65 @@ import java.io.InputStream;
 import java.net.URL;
 
 object LookupMerriamWebster extends Translator {
-  val name = "Merriam-Webster"
+  val name = "Merriam-Webster Inc."
   val expiration = Utils.getExpiration("merriamWebster")
-  val merriamWebsterKey = configuration.getString("merriamWebster.key")
-
-    def request(urlString:String): (Boolean, InputStream) =
-    try {
-        val url = new URL(urlString)
-        val body = url.openStream
-        (true, body)
+  val merriamWebsterSpanishKey = configuration.getString("merriamWebster.spanishKey")
+  val merriamWebsterCollegiateKey = configuration.getString("merriamWebster.collegiateKey")
+    
+  def parseXMLResponse(URL:String, headWordTag:String) : Seq[String] = {
+    val (true, body) = try {
+      val url = new URL(URL)
+      val body = url.openStream
+      (true, body)
+    } catch { case ex:Exception => (false, null) }
+	
+    val XMLDoc = XML.load(body)
+    val response = (XMLDoc \\ "entry_list") 
+    val defList : Seq[String] = for {
+      entry <- response \\ "entry"
+      defins <- entry \\ "dt"
+      } yield {   
+        val word = (entry \\ headWordTag).text
+        val defns = defins.text
+        "(" + word + ") " + defns
     }
-    catch {
-        case ex:Exception => (false, null)
-    }
-
-    def fetchAndParseURL(URL:String) = {
-        val (true, body) = request(URL)
-        XML.load(body)
-    }
+    defList
+  }
   
   /**
    * Endpoint for translating via merriamWebster
    */
   def translate(src: String, dest: String, text: String) = {
-
     if((src == "es" && dest == "en") || (src == "en" && dest == "es")){
-        merriamWebsterKey.flatMap { key => 
-            val url =  "http://www.dictionaryapi.com/api/v1/references/spanish/xml/" + text +"?key=" + key;
-            val result = Await.result(WS.url(url).get(), Duration.Inf)
+      merriamWebsterSpanishKey.flatMap { key => 
+        val url =  "http://www.dictionaryapi.com/api/v1/references/spanish/xml/" + text +"?key=" + key;
+        val result = Await.result(WS.url(url).get(), Duration.Inf)
     
-            if(result.status != 200) None   // if there is an error, return None
-            else {
+          if(result.status != 200) None
+          else {
+            val defList : Seq[String] = parseXMLResponse(url, "hw")
+
+            if(defList.length > 0)
+              Some(defList)
+            else None
+          }
+      }
+    }
+    else if(src == "en" && dest == "en"){
+      merriamWebsterCollegiateKey.flatMap { key => 
+        val url =  "http://www.dictionaryapi.com/api/v1/references/collegiate/xml/" + text +"?key=" + key;
+        val result = Await.result(WS.url(url).get(), Duration.Inf)
+    
+        if(result.status != 200) None
+        else {            
+          val defList : Seq[String] = parseXMLResponse(url, "ew")
                 
-                /**
-                * Testing this code
-                *
-                */
-        
-            
-                val pauDoc = fetchAndParseURL(url);
-          
-          
-                /**
-                * Tryig to parse an xml string to change to json
-                *
-                */
-                
-                //def translations = Seq[String];
-                
-                //def run = List{"" ; "" ; ""};
-                
-                val response = (pauDoc \\ "entry_list") 
-                val defList : Seq[String] = for {
-                  entry <- response \\ "entry"
-                } yield {   
-                  val word = (entry \\ "hw").text
-                  val defns = (entry \\ "dt").text
-                  word + ": " + defns
-                }
-                
-                //println(response);
-                    //val translations = (result.json \ "data" \ "translations" \\ "translatedText").map(_.toString)
-                    if(defList.length > 0)
-                        Some(defList)
-                    else None
-            }
+          if(defList.length > 0)
+            Some(defList)
+          else None
         }
-    } 
-  else None; }
+      }
+    }
+    else None
+  }
 }

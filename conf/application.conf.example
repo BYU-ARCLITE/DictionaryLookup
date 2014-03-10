@@ -21,8 +21,9 @@ wordReference.expiration = 1 day
 google.key="#######################################"
 google.expiration = 1 day
 
-# Merriam-Webster
-merriamWebster.key="########-####-####-####-############"
+# Merriam-Webster Services
+merriamWebster.spanishKey="########-####-####-####-############"
+merriamWebster.collegiateKey="########-####-####-####-############"
 merriamWebster.expiration = 1 day
 
 # Service Defaults
