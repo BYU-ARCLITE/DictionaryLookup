@@ -23,18 +23,31 @@ object LookupMerriamWebster extends Translator {
       val body = url.openStream
       (true, body)
     } catch { case ex:Exception => (false, null) }
-	
+    
     val XMLDoc = XML.load(body)
     val response = (XMLDoc \\ "entry_list") 
-    val defList : Seq[String] = for {
+    def defList : Seq[String] = for {
       entry <- response \\ "entry"
       defins <- entry \\ "dt"
       } yield {   
         val word = (entry \\ headWordTag).text
+        val wav = (entry \\ "wav").text
         val defns = defins.text
-        "(" + word + ") " + defns
+        "(" + word + ")" + defns //+ " Sound: " + wav
     }
-    defList
+    
+    val sound : Seq[String] = for {
+      entry <- XMLDoc \\ "wav"
+      } yield {   
+        val file = entry.text
+        val firstLetter = file.split(" ").flatMap(_.headOption).mkString
+        val html = "<audio controls class='merriamAudio'><source src='http://media.merriam-webster.com/soundc11/" + firstLetter + "/" + file + "' type='audio/wav'>Audio File Not Found.</audio>"
+        html
+    }
+    
+    val defs = defList:+ "Audio Examples:"
+    defs ++ sound
+    
   }
   
   /**
