@@ -10,6 +10,8 @@ object LookupBYU extends Translator {
   /**
    * Endpoint for translating via BYU Dictionaries
    */
-  def translate(src: String, dest: String, text: String) =
-    DictionaryCache.getDictionaryEntry(src + "-" + dest, text)
+  def translate(src: String, dest: String, text: String) = {
+      val firstTry = DictionaryCache.getDictionaryEntry(src + "-" + dest, text)
+      if (firstTry != None) firstTry else DictionaryCache.getDictionaryEntry(src + "-" + dest, text.toLowerCase)
+    }
 }
