@@ -59,19 +59,19 @@ object LookupMerriamWebster extends Translator {
     }
 
 	/* If you want to reduce the amount of definitions or audio files, uncomment below*/ 
-	/*val exampleSound : Seq[String] = if(sound.length > 0)
-		{val snd : Seq[String] = Seq[String]("<br/>Audio Examples:", sound(0)); snd} else {sound}
+	val exampleSound : Seq[String] = if(sound.length > 0)
+		{val snd : Seq[String] = Seq[String](sound(0)); snd} else {sound}
     val definitions : Seq[String] = if(defList.length > 5)
 	    {
 		    val defin : Seq[String] = Seq[String](defList(0), defList(1), defList(2), defList(3), defList(4))
 			defin
 		} else {defList}
 
-    definitions ++ exampleSound*/
+    definitions ++ exampleSound
 	
-	val exampleSound : Seq[String] = if(sound.length > 0)
+	/*val exampleSound : Seq[String] = if(sound.length > 0)
 		{"<br/>Audio Examples:" +: sound} else {sound}
-	defList ++ exampleSound.distinct
+	defList ++ exampleSound.distinct*/
 	
   }
 
