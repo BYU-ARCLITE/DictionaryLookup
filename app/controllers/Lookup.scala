@@ -15,9 +15,10 @@ object Lookup extends Controller {
   val serviceMap = Map( "BYUDictionaries" -> LookupBYU,
                         "WordReference" -> LookupWordReference,
                         "MerriamWebster" -> LookupMerriamWebster,
+                        "Glosbe" -> LookupGlosbe,
                         "GoogleTranslate" -> LookupGoogle )
 
-  val defaultServices = List("BYUDictionaries", "WordReference", "MerriamWebster", "GoogleTranslate")
+  val defaultServices = List("BYUDictionaries", "WordReference", "MerriamWebster", "Glosbe", "GoogleTranslate")
 
   def getFirst(input: List[String], extractor: Extractor): Option[TResult] = {
     for(name <- input; t <- serviceMap.get(name)) try {

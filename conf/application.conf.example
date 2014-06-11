@@ -26,6 +26,9 @@ merriamWebster.spanishKey="########-####-####-####-############"
 merriamWebster.collegiateKey="########-####-####-####-############"
 merriamWebster.expiration = 1 day
 
+# Glosbe Dictionary/Translator
+glosbe.expiration = 1 day
+
 # Service Defaults
 services.expiration = 10 minutes
 
@@ -33,7 +36,7 @@ services.expiration = 10 minutes
 dictionary.expiration = 10 minutes
 
 # User defaults
-user.servicelist = ["BYUDictionaries","WordReference","GoogleTranslate"]
+user.servicelist = ["BYUDictionaries","WordReference","MerriamWebster","Glosbe","GoogleTranslate"]
 
 # Database configuration
 # ~~~~~ 
