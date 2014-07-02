@@ -71,4 +71,14 @@ object Lookup extends Controller {
       implicit user =>
         lookup(request.body, user.getServices)
   }
+
+  def preflight = Action {
+    implicit request =>
+      Ok.withHeaders(
+        "Allow" -> "OPTIONS, POST, GET",
+        "Access-Control-Allow-Origin" -> "*",
+        "Access-Control-Allow-Methods" -> "POST, GET",
+        "Access-Control-Allow-Headers" -> "Origin, Authorization, Content-Type"
+      )
+  }
 }

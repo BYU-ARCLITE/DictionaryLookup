@@ -7,6 +7,7 @@ GET     /                           controllers.Application.index
 
 GET     /api/v1/lookup              controllers.Lookup.getlookup
 POST    /api/lookup                 controllers.Lookup.authlookup
+OPTIONS /api/lookup                 controllers.Lookup.preflight
 
 GET     /api/register               controllers.Application.register
 #GET     /api/user/{name}/newkey     controllers.Application.resetKey(name)
