@@ -81,7 +81,7 @@ object LookupMerriamWebster extends Translator {
   def translate(src: String, dest: String, text: String) = {
     if((src == "es" && dest == "en") || (src == "en" && dest == "es")){
       merriamWebsterSpanishKey.flatMap { key => 
-        val url =  "http://www.dictionaryapi.com/api/v1/references/spanish/xml/" + text.trim.replaceAll(" ","%20") +"?key=" + key;
+        val url = "http://www.dictionaryapi.com/api/v1/references/spanish/xml/" + text.replaceAll("[^\\p{L}\\p{Nd}]+", "%20").trim +"?key="+key
         val result = Await.result(WS.url(url).get(), Duration.Inf)
 
           if(result.status != 200) None
@@ -96,7 +96,7 @@ object LookupMerriamWebster extends Translator {
     }
     else if(src == "en" && dest == "en"){
       merriamWebsterCollegiateKey.flatMap { key => 
-        val url =  "http://www.dictionaryapi.com/api/v1/references/collegiate/xml/" + text.trim.replaceAll(" ","%20") +"?key=" + key
+        val url =  "http://www.dictionaryapi.com/api/v1/references/collegiate/xml/" + text.replaceAll("[^\\p{L}\\p{Nd}]+", "%20").trim +"?key="+key
         val result = Await.result(WS.url(url).get(), Duration.Inf)
 
         if(result.status != 200) None

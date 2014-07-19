@@ -61,11 +61,6 @@ object Lookup extends Controller {
     case _: Throwable => BadRequest
   }).withHeaders("Access-Control-Allow-Origin" -> "*")
 
-  def getlookup = Action {
-    implicit request =>
-      lookup(request.queryString, defaultServices)
-  }
-
   def authlookup = Authentication.keyedAction(parse.urlFormEncoded) {
     implicit request =>
       implicit user =>

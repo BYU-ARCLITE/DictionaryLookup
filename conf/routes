@@ -5,15 +5,10 @@
 # Home page
 GET     /                           controllers.Application.index
 
-GET     /api/v1/lookup              controllers.Lookup.getlookup
 POST    /api/lookup                 controllers.Lookup.authlookup
 OPTIONS /api/lookup                 controllers.Lookup.preflight
 
 GET     /api/register               controllers.Application.register
-#GET     /api/user/{name}/newkey     controllers.Application.resetKey(name)
-#GET     /api/user/{name}/newpass    controllers.Application.resetPass(name)
-#GET     /api/user/{name}/services   controllers.Application.resetServiceList(name)
-
 POST    /api/register               controllers.UserManager.register
 POST    /api/user/{name}/newkey     controllers.UserManager.resetKey(name)
 POST    /api/user/{name}/newpass    controllers.UserManager.resetPass(name)

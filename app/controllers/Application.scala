@@ -14,19 +14,4 @@ object Application extends Controller {
     implicit request =>
       Ok(views.html.register())
   }
-/*
-  def resetKey(name: String) = Action {
-    implicit request =>
-      Ok(views.html.resetKey(name))
-  }
-
-  def resetPass(name: String) = Action {
-    implicit request =>
-      Ok(views.html.resetPass(name))
-
-  def resetServiceList(name: String) = Action {
-    implicit request =>
-      Ok(views.html.resetPass(name))
-  }
-*/
 }

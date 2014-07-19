@@ -62,8 +62,10 @@ object LookupGlosbe extends Translator {
    * Makes request to Glosbe Api, then creates a Seq[String] from a valid response
    */
   def requestEntries(scode: String, dcode: String, text: String) = {
-    val url = "http://glosbe.com/gapi/translate?from="+ scode + "&dest=" + dcode + "&format=json&phrase=" +  text.trim.replaceAll(" ","%20")
-    val result = Await.result(WS.url(url).get(), Duration.Inf)
+
+    val query = WS.url("http://glosbe.com/gapi/translate")
+        .withQueryString("from" -> scode, "dest" -> dcode, "format" -> "json", "phrase" -> text).get()
+    val result = Await.result(query, Duration.Inf)
     val json = result.json.as[JsObject]
 
     /* Glosbe gives own status, but at this point in time, it seems glitchy

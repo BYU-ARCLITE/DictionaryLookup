@@ -2,20 +2,207 @@
 
 @main("ARCLITE Dictionary Lookup Service") {
 
-    <h1>API Information for V1</h1>
-
-    <p>Endpoint:</p>
-    <code>@{routes.Lookup.getlookup().absoluteURL()}?srcLang=XX&destLang=XX&word=XXXX</code>
-
-    <p>The supported languages for are the following:</p>
-    <ul>
-        <li>English (en)</li>
-        <li>French (fr)</li>
-        <li>German (de)</li>
-        <li>Italian (it)</li>
-    </ul>
+    <h1>API Information for DictionaryLookup</h1>
+    <h2>Endpoint:</h2>
+    <code>@{routes.Lookup.authlookup().absoluteURL()}</code>
+<hr>
+    <h2>How to make a request:</h2>
     <p>
-        One of the languages has to be English.
+    <code>xhr = new XMLHttpRequest();</code><br>
+    <code>xhr.open("POST", @{routes.Lookup.authlookup().absoluteURL()}", true);</code><br>
+    <code>xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");</code><br>
+    <code>xhr.setRequestHeader("Authorization", <strong>key</strong>);</code><br>
+    <code>xhr.send("srcLang="+encodeURIComponent(<strong>srcLang</strong>)+"&destLang="+encodeURIComponent(<strong>destLang</strong>)+"&word="+encodeURIComponent(<strong>text</strong>));</code>
     </p>
+<hr>
+    <h2>The supported languages for each source are as follows:</h2>
     
+    <b>BYUDictionaries</b>
+    <table style="width:150px">
+    <tr>
+        <td>Chinese</td>
+        <td>Japanese</td>
+    </tr>
+    <tr>
+        <td>Dutch</td>
+        <td>Korean</td>
+    </tr>
+    <tr>
+        <td>English</td>
+        <td>Portuguese</td>
+    </tr>
+    <tr>
+        <td>French</td>
+        <td>Russian</td>
+    </tr>
+    <tr>
+        <td>German</td>
+        <td>Spanish</td>
+    </tr>
+    <tr>
+        <td>Hebrew</td>
+        <td>Swedish</td>
+    </tr>
+    <tr>
+        <td>Italian</td>
+    </tr>
+    </table>
+    <br>
+    <b>Merriam Webster Inc.</b>
+    <table style="width:150px">
+    <tr><td>English</td><td>Spanish</td></tr>
+    </table>
+    <br>
+    <b>Glosbe</b>
+    <table>
+    <tr><td>Most languages</td></tr>
+    </table>
+    <br>
+    <b>Word Reference</b>
+    <table style="width:150px">
+    <tr>
+        <td>Arabic</td>
+        <td>Chinese</td>
+    </tr>
+    <tr>
+        <td>Czech</td>
+        <td>English</td>
+    </tr>
+    <tr>
+        <td>French</td>
+        <td>Greek</td>
+    </tr>
+    <tr>
+        <td>Italian</td>
+        <td>Japanese</td>
+    </tr>
+    <tr>
+        <td>Korean</td>
+        <td>Polish</td>
+    </tr>
+    <tr>
+        <td>Portuguese</td>
+        <td>Romanian</td>
+    </tr>
+    <tr>
+        <td>Spanish</td>
+        <td>Turkish</td>
+    </tr>
+    </table>
+    <br>
+    <table style="width:550px">
+    <tr span="5"><b>Google Translate</b></tr>
+    <tr>
+        <td>Afrikaans</td>
+        <td>Dutch</td>
+        <td>Hmong</td>
+        <td>Macedonian</td>
+        <td>Slovenian</td>
+    </tr>
+    <tr>
+        <td>Albanian</td>
+        <td>English</td>
+        <td>Hungarian</td>
+        <td>Malay</td>
+        <td>Somali</td>
+    </tr>
+    <tr>
+        <td>Arabic</td>
+        <td>Esperanto</td>
+        <td>Icelandic</td>
+        <td>Maltese</td>
+        <td>Spanish</td>
+    </tr>
+    <tr>
+        <td>Armenian</td>
+        <td>Estonian</td>
+        <td>Igbo</td>
+        <td>Maori</td>
+        <td>Swahili</td>
+    </tr>
+    <tr>
+        <td>Azerbaijani</td>
+        <td>Filipino</td>
+        <td>Indonesian</td>
+        <td>Marathi</td>
+        <td>Swedish</td>
+    </tr>
+    <tr>
+        <td>Basque</td>
+        <td>Finnish</td>
+        <td>Irish</td>
+        <td>Mongolian</td>
+        <td>Tamil</td>
+    </tr>
+    <tr>
+        <td>Belarusian</td>
+        <td>French</td>
+        <td>Italian</td>
+        <td>Nepali</td>
+        <td>Telugu</td>
+    </tr>
+    <tr>
+        <td>Bengali</td>
+        <td>Galician</td>
+        <td>Japanese</td>
+        <td>Norwegian</td>
+        <td>Thai</td>
+    </tr>
+    <tr>
+        <td>Bosnian</td>
+        <td>Georgian</td>
+        <td>Javanese</td>
+        <td>Persian</td>
+        <td>Turkish</td>
+    </tr>
+    <tr>
+        <td>Bulgarian</td>
+        <td>German</td>
+        <td>Kannada</td>
+        <td>Polish</td>
+        <td>Ukrainian</td>
+    </tr>
+    <tr>
+        <td>Catalan</td>
+        <td>Greek</td>
+        <td>Khmer</td>
+        <td>Portuguese</td>
+        <td>Urdu</td>
+    </tr>
+    <tr>
+        <td>Cebuano</td>
+        <td>Gujarati</td>
+        <td>Korean</td>
+        <td>Punjabi</td>
+        <td>Vietnamese</td>
+    </tr>
+    <tr>
+        <td>Chinese</td>
+        <td>Haitian Creole</td>
+        <td>Lao</td>
+        <td>Romanian</td>
+        <td>Welsh</td>
+    </tr>
+    <tr>
+        <td>Croatian</td>
+        <td>Hausa</td>
+        <td>Latin</td>
+        <td>Russian</td>
+        <td>Yiddish</td>
+    </tr>
+    <tr>
+        <td>Czech</td>
+        <td>Hebrew</td>
+        <td>Latvian</td>
+        <td>Serbian</td>
+        <td>Yoruba</td>
+    </tr>
+    <tr>
+        <td>Danish</td>
+        <td>Hindi</td>
+        <td>Lithuanian</td>
+        <td>Slovak</td>
+        <td>Zulu</td>
+    </tr>
+    </table>
 }
