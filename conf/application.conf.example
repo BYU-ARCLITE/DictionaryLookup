@@ -36,7 +36,7 @@ services.expiration = 10 minutes
 dictionary.expiration = 10 minutes
 
 # User defaults
-user.servicelist = ["BYUDictionaries","WordReference","MerriamWebster","Glosbe","GoogleTranslate"]
+user.servicelist = ["BYUDictionaries","WordReference","MerriamWebster","Glosbe","SeaLang","GoogleTranslate"]
 
 # Database configuration
 # ~~~~~ 

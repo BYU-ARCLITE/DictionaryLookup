@@ -84,6 +84,7 @@ object LookupGlosbe extends Translator {
             val addTransTitle = if (trans.length > 0) ("<b><i>Translations:</i></b><br>"+trans+"<br><br>") else ""
 
             if (defs.isEmpty && (addTransTitle == "")) None
+            else if (defs.isEmpty) Some(Seq(addTransTitle))
             else Some((defs.updated(0, addTransTitle + "<b><i>Definitions:</i></b><br>" + defs(0))).filterNot(w=>w=="").slice(0,5))
         }
     }
