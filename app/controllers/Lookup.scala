@@ -2,6 +2,7 @@ package controllers
 
 import scala.util.control.ControlThrowable
 import controllers.authentication.Authentication
+import models.{User, ServiceLog}
 import play.api.mvc.{Action, Controller}
 import play.api.libs.json._
 import play.api.cache.Cache
@@ -10,7 +11,6 @@ import play.api.Logger
 
 object Lookup extends Controller {
   type TResult = (String,Int,Seq[String])
-  type Extractor = Translator => Option[Seq[String]]
 
   val serviceMap = Map( "BYUDictionaries" -> LookupBYU,
                         "WordReference" -> LookupWordReference,
@@ -21,12 +21,16 @@ object Lookup extends Controller {
 
   val defaultServices = List("BYUDictionaries", "WordReference", "MerriamWebster", "Glosbe", "SeaLang", "GoogleTranslate")
 
-  def getFirst(input: List[String], extractor: Extractor): Option[TResult] = {
-    for(name <- input; t <- serviceMap.get(name)) try {
+  def getFirst(user: User, srcLang: String, destLang: String, text: String): Option[TResult] = {
+    for(name <- user.getServices; t <- serviceMap.get(name)) try {
       Logger.info("Checking "+name)
-      val res = extractor(t)
-      if(res.isDefined)
-        return res.map((t.name,t.expiration,_))
+      t.translate(srcLang, destLang, text) match {
+        case Some(res) =>
+          ServiceLog.record(user, srcLang, destLang, text, name, true)
+          return Some((t.name,t.expiration,res))
+        case None =>
+          ServiceLog.record(user, srcLang, destLang, text, name, false)
+      }
     } catch {
       case e: ControlThrowable => throw e
       case e: Throwable => {
@@ -37,13 +41,13 @@ object Lookup extends Controller {
     None
   }
 
-  def lookup(opts: Map[String, Seq[String]], priority: List[String]) = (try {
+  def lookup(opts: Map[String, Seq[String]], user: User) = (try {
     val srcLang = opts("srcLang")(0)
     val destLang = opts("destLang")(0)
     val text = opts("word")(0)
     val key = s"$srcLang-$destLang:$text"
     Cache.getAs[JsObject](key).map(json => Ok(json)).getOrElse {
-      getFirst(priority, _.translate(srcLang,destLang,text)) match {
+      getFirst(user, srcLang, destLang, text) match {
         case Some((name,exp,tseq)) => {
           val response = Json.obj(
             "success" -> true,
@@ -65,7 +69,7 @@ object Lookup extends Controller {
   def authlookup = Authentication.keyedAction(parse.urlFormEncoded) {
     implicit request =>
       implicit user =>
-        lookup(request.body, user.getServices)
+        lookup(request.body, user)
   }
 
   def preflight = Action {
