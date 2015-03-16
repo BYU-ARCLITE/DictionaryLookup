@@ -19,8 +19,6 @@ object Lookup extends Controller {
                         "SeaLang" -> LookupSeaLang,
                         "GoogleTranslate" -> LookupGoogle )
 
-  val defaultServices = List("BYUDictionaries", "WordReference", "MerriamWebster", "Glosbe", "SeaLang", "GoogleTranslate")
-
   def getFirst(user: User, srcLang: String, destLang: String, text: String): Option[TResult] = {
     for(name <- user.getServices; t <- serviceMap.get(name)) try {
       Logger.info("Checking "+name)
