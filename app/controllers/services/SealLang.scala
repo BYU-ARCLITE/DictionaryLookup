@@ -8,6 +8,8 @@ import play.api.libs.ws.WS
 import play.api.Play.{current, configuration}
 import ExecutionContext.Implicits.global
 
+import play.api.Logger
+
 object LookupSeaLang extends Translator {
   /**
    *  Russian Digital Reference Project Web API:
@@ -20,13 +22,13 @@ object LookupSeaLang extends Translator {
    *     Russian Dictionary: http://www.sealang.net/russtest/api.pl?service=dictionary&query=злой&format=html&encode=unicode&number=5&fold=yes&return=syn&sort=down&rank=alpha&resource=all
    */
 
-  val name = "SealLang"
+  val name = "SeaLang"
   val expiration = Utils.getExpiration("seaLang")
 
   /* Grabs all the direct Translations */
   def grabTranslations(json:Seq[JsValue]) : Seq[String] = {
     (for { entry <- json } yield {
-      val word = (entry\"$t").asOpt[String]
+      val word = (entry\ "$t").asOpt[String]
       word.getOrElse("").replaceAll("\\n", "<br/>").stripPrefix("<br/>").stripSuffix("<br/>")
     }).filterNot(w=>w=="")
   }
@@ -36,13 +38,13 @@ object LookupSeaLang extends Translator {
    * This function is here in case the api ever gets updated
    */
   def englishToRussian(src: String, dest: String, text: String) = {
-      None
+    None
   }
 
  /**
   * Russian To English Translations
-  * TODO: After evaluation by users, possibly remove if it is to cumbersome to view.
-  *       Similar prblem to function englishToRussian(src: String, dest: String, text: String)
+  * TODO: After evaluation by users, possibly remove if it is too cumbersome to view.
+  *       Similar problem to function englishToRussian(src: String, dest: String, text: String)
   */
   def russianToEnglish(src: String, dest: String, text: String) = {
     val query = WS.url("http://www.sealang.net/russtest/api.pl")
@@ -53,7 +55,7 @@ object LookupSeaLang extends Translator {
 
     if(result.status != 200) None
     else {
-      val entries = (json.get \ "return" \ "entry"\\"sense")
+      val entries = (json.get \ "return" \ "entry" \\ "sense")
 
       if (entries.size == 0) None
       else {

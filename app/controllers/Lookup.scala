@@ -13,6 +13,7 @@ object Lookup extends Controller {
   type TResult = (String,Int,Seq[String])
 
   val serviceMap = Map( "BYUDictionaries" -> LookupBYU,
+                        "WWWJDIC" -> LookupWWWJDIC,
                         "WordReference" -> LookupWordReference,
                         "MerriamWebster" -> LookupMerriamWebster,
                         "Glosbe" -> LookupGlosbe,
