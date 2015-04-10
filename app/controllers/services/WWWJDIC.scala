@@ -18,18 +18,25 @@ object LookupWWWJDIC extends Translator {
    *      EN-JA Dictionary: http://www.csse.monash.edu.au/~jwb/cgi-bin/wwwjdic.cgi?QMUQbuild
    *      JA-EN Dictionary: http://www.csse.monash.edu.au/~jwb/cgi-bin/wwwjdic.cgi?QMUQ%E6%8E%9B%E3%81%91%E6%B8%A1%E3%81%99
    *
+   *  All dictionaries in this list are two way.
+   *
    */
 
   val name = "WWWJDIC"
   val expiration = Utils.getExpiration("WWWJDIC")
-
+  /** Maps the languages to the dictionary letter **/
+  val dictionaries = Map("en" -> "1",
+                         "de" -> "G",
+                         "fr" -> "H",
+                         "ru" -> "I",
+                         "sv" -> "J",
+                         "hu" -> "K",
+                         "es" -> "L",
+                         "nl" -> "M",
+                         "sl" -> "N",
+                         "it" -> "O").withDefaultValue("None")
   /**
-   * Gets the first meaning of a definition
-   */
-  def getFirst(x: String) = x.split("""\,?\ ?\/?\(2\).*$""")(0)
-
-  /**
-   *  Transalte English to Japanese and Japanese to English
+   *  Translate To and From Japanese for all of the languages in the list above.
    *  Uses the xml.Elem and XML class
    *  Can't be loaded by the xml parser for 3 reasons:
    *    1. Needs a systemId. The first .replace() gets rid of the doctype tag to avoid this error
@@ -40,9 +47,10 @@ object LookupWWWJDIC extends Translator {
    *    Z: backdoor entry. Returns definitions as text inside <pre>...</pre> element. (replace with M for a fully formatted HTML response)
    *    U: results in UTF-8
    *    Q: get exact matches (replace with P = common matches, R = P && Q, E every match)
+   *    TODO: Create a way to toggle between the amount of results returned
    */
-  def english_Japanese(text: String) = {
-    val query = WS.url("http://www.csse.monash.edu.au/~jwb/cgi-bin/wwwjdic.cgi?1ZUQ" + text).get()
+  def getTranslations(text: String, dictCode: String) = {
+    val query = WS.url("http://www.csse.monash.edu.au/~jwb/cgi-bin/wwwjdic.cgi?" + dictCode + "ZUQ" + text).get()
     
     // Get Results, remove newlines for ease of use with re
     val response = Await.result(query, Duration.Inf)
@@ -55,20 +63,24 @@ object LookupWWWJDIC extends Translator {
       val XMLdoc = XML.loadString(data)
       // drops 1 to compensate for the leading newline
       var raw = (XMLdoc \\ "pre").text.split("\n")
-      if (raw.size == 0) None
-      else {
-        if (raw(0) == "") raw = raw.drop(1)
-        val defins: Seq[String] = raw.map(x => getFirst(x))
-        Some(defins)
-      }
+      // Gets the first meaning of a definition which ends with (2)
+      val defins: Seq[String] = raw.map(x => x.split("""\,?\ ?\/?\(2\).*$""")(0)).filterNot(_.trim == "")
+      if (defins.length == 0) None
+      else Some(defins)
     }
   }
 
   def translate(src: String, dest: String, text: String) = {
-    val langVal = Map( "en" -> 1, "ja" -> 2).withDefaultValue(0)
-
-    if(langVal(src) + langVal(dest) < 3) { None }
-
-    else { english_Japanese(text) }
+    if (src == "ja") {
+      if (dictionaries(dest) != "None") {
+        getTranslations(text, dictionaries(dest))
+      } else None
+    }
+    else if (dest == "ja") {
+      if (dictionaries(src) != "None") {
+        getTranslations(text, dictionaries(src))
+      } else None
+    }
+    else None
   }
 }
