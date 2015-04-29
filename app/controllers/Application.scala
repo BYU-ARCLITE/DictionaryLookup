@@ -14,4 +14,11 @@ object Application extends Controller {
     implicit request =>
       Ok(views.html.register())
   }
+
+def lookupTest = Action {
+    implicit request =>
+    play.Logger.debug("DAGAN")
+      Ok(views.html.lookupTest())
+  }
+
 }

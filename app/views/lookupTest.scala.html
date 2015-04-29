@@ -1,0 +1,124 @@
+@()(implicit request: RequestHeader)
+
+@main("ARCLITE Dictionary Lookup Service") {
+
+    <h1>Look Up Test</h1>
+
+    <form action="#"> <!--"@{routes.Lookup.authlookup}"-->
+        <label>Words to Translate: <input type="text" id="words_to_translate" /></label><br/>
+
+         <label> Native Language: 
+         <select id = "nativelanguageselection">
+        <option value = "en">English</option>
+        <option value = "fr">French</option>
+        <option value = "de">German</option>
+        <option value = "ja">Japanese</option> 
+        </select>
+
+        <label> Second Language: 
+        <select id = "secondlanguageselection">
+        <option value = "en">English</option>
+        <option value = "fr">French</option>
+        <option value = "de">German</option> 
+        <option value = "ja">Japanese</option> 
+        </select>
+
+        <input type="submit" id = "submitButton" />
+
+    </form>
+
+
+<script type ="text/javascript"> 
+
+var e = document.getElementById("nativelanguageselection");
+var f = document.getElementById("secondlanguageselection");
+
+
+
+document.getElementById("submitButton").addEventListener("click",function(){
+	var xhr = new XMLHttpRequest();
+
+xhr.addEventListener('load',function(){
+				var resp = JSON.parse(xhr.responseText),
+					data = {
+						text: document.getElementById("words_to_translate").value,
+						translations: resp.entries,
+						engine: resp.source,
+						srcLang: e.options[e.selectedIndex].value,
+						destLang: f.options[f.selectedIndex].value
+					};
+				if (data.translations === void 0) {  // Make sure we actually received translations
+					err("No Data"); 
+				} else {
+					document.dispatchEvent(new CustomEvent("translation", {
+						bubbles: true,
+						cancelable: true,
+						detail: data
+					}));
+				}
+			},false);
+
+	xhr.open("POST", "http://localhost:9010/api/lookup", true);
+	xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	xhr.setRequestHeader("Authorization", "fb5a000ce046a9d3d5b565acfdd455b2");
+	xhr.send("srcLang="+encodeURIComponent(e.options[e.selectedIndex].value)+"&destLang="+encodeURIComponent(f.options[f.selectedIndex].value)+"&word="+encodeURIComponent(document.getElementById("words_to_translate").value));
+});
+
+
+document.addEventListener("translation", function(data){
+	console.log(data.detail);
+	document.getElementById('myField1').innerHTML = data.detail.text;
+	document.getElementById('myField2').innerHTML = data.detail.translations;
+	document.getElementById('myField3').innerHTML = data.detail.engine;
+});
+
+//var text = translation.data.detail;
+
+
+
+
+//var translation = translation.data.detail.translations;
+//var engine = translation.data.detail.engine;
+
+</script>
+
+<p></p>
+
+<div>ORIGINAL WORD</div>
+<div id = 'myField1'> </div>
+
+<div>TRANSLATION</div>
+<div id = 'myField2'> </div>
+
+<div>DICTIONARY USED</div>
+<div id = 'myField3'> </div>
+
+
+}
+@*
+ document.addEventListener("translation", function(data){
+	console.log(data.detail); 
+
+			xhr.addEventListener('load',function(){
+				var resp = JSON.parse(xhr.responseText),
+					data = {
+						text: text,
+						translations: resp.entries,
+						engine: resp.source,
+						srcLang: Ayamel.utils.upgradeLangCode(srcLang),
+						destLang: Ayamel.utils.upgradeLangCode(destLang),
+						data: params.data
+					};
+				if (data.translations === void 0) {  // Make sure we actually received translations
+					err("No Data"); 
+				} else {
+					that.e.dispatchEvent(new CustomEvent("translation", {
+						bubbles: true,
+						cancelable: true,
+						detail: data
+					}));
+					resolve(data);
+				}
+			},false);
+
+			*@

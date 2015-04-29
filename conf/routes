@@ -13,7 +13,7 @@ POST    /api/register               controllers.UserManager.register
 POST    /api/user/{name}/newkey     controllers.UserManager.resetKey(name)
 POST    /api/user/{name}/newpass    controllers.UserManager.resetPass(name)
 POST    /api/user/{name}/services   controllers.UserManager.resetServiceList(name)
-
+GET 	/api/lookupTest				controllers.Application.lookupTest
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
