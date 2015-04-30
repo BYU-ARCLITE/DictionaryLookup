@@ -67,7 +67,7 @@ object LookupMerriamWebster extends Translator {
             defin
         } else {defList}
 
-    definitions ++ exampleSound
+    exampleSound ++ definitions
     
     /*val exampleSound : Seq[String] = if(sound.length > 0)
         {"<br/>Audio Examples:" +: sound} else {sound}
