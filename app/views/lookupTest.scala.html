@@ -58,7 +58,7 @@ xhr.addEventListener('load',function(){
 				}
 			},false);
 
-	xhr.open("POST", "http://localhost:9010/api/lookup", true);
+	xhr.open("POST", "http://sartre3.byu.edu:9009/api/lookup", true);
 	xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 	xhr.setRequestHeader("Authorization", "314329e0c0ba2c68156cd4b0baa1773");
 	xhr.send("srcLang="+encodeURIComponent(e.options[e.selectedIndex].value)+"&destLang="+encodeURIComponent(f.options[f.selectedIndex].value)+"&word="+encodeURIComponent(document.getElementById("words_to_translate").value));
