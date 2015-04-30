@@ -60,7 +60,7 @@ xhr.addEventListener('load',function(){
 
 	xhr.open("POST", "http://localhost:9010/api/lookup", true);
 	xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-	xhr.setRequestHeader("Authorization", "fb5a000ce046a9d3d5b565acfdd455b2");
+	xhr.setRequestHeader("Authorization", "314329e0c0ba2c68156cd4b0baa1773");
 	xhr.send("srcLang="+encodeURIComponent(e.options[e.selectedIndex].value)+"&destLang="+encodeURIComponent(f.options[f.selectedIndex].value)+"&word="+encodeURIComponent(document.getElementById("words_to_translate").value));
 });
 
