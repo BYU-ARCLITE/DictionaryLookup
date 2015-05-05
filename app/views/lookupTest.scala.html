@@ -1,39 +1,116 @@
+
+
 @()(implicit request: RequestHeader)
 
+
+
 @main("ARCLITE Dictionary Lookup Service") {
+<html>
+
+
+<head>
+	<link media ="screen" rel="stylesheet" href='@routes.Assets.at("css/lookutTest.css")'/>
+
+	<style type="text/css">
+	
+	p1 {font-style:italic;
+		font-style:bold;
+	   font-size:15px}
+
+	div{font-weight: lighter;}
+
+	body{background-color: #BEE9E4;}  
+
+	</style>
+</head>
+
+<body>
 
     <h1>Look Up Test</h1>
 
     <form action="#"> <!--"@{routes.Lookup.authlookup}"-->
         <label>Words to Translate: <input type="text" id="words_to_translate" /></label><br/>
 
-         <label> Native Language: 
+         <label> Native Language: </label>
          <select id = "nativelanguageselection">
         <option value = "en">English</option>
+        <option value = "es">Spanish</option>
         <option value = "fr">French</option>
         <option value = "de">German</option>
         <option value = "ja">Japanese</option> 
+        <option value = "it">Italian</option> 
+        <option value = "zh">Chinese</option> 
+        <option value = "pt">Portuguese</option>
+        <option value = "ru">Russian</option>
+        <option value = "ko">Korean</option>
+        <option value = "nl">Dutch</option>  
+
         </select>
 
-        <label> Second Language: 
+        <label> Second Language: </label>
         <select id = "secondlanguageselection">
         <option value = "en">English</option>
+        <option value = "es">Spanish</option>
         <option value = "fr">French</option>
         <option value = "de">German</option> 
         <option value = "ja">Japanese</option> 
+        <option value = "it">Italian</option> 
+        <option value = "zh">Chinese</option> 
+        <option value = "pt">Portuguese</option>
+        <option value = "ru">Russian</option>
+        <option value = "ko">Korean</option> 
+        <option value = "nl">Dutch</option> 
+
         </select>
 
         <input type="submit" id = "submitButton" />
 
     </form>
+<br>
 
+<!-- <p>ORIGINAL WORD</p>
+<div id = 'myField1'> </div> -->
+
+<!-- <br>
+<p>TRANSLATION</p>
+<div id = 'myField2'> </div> -->
+
+
+
+<br>
+<p1 id ='myField1'> Original Word </p1>
+
+<p id = 'final_translation'>Translations</p>
+
+<p id = 'myField3'>Dictionary Service</p>
+<div id = 'myField3'> </div>
+<!-- 
+ THIS IS THE ORIGINAL OUTPUT CODE, IT WORKS BUT IS LESS PRETTY
+<p>ORIGINAL WORD</p>
+<div id = 'myField1'> </div>
+
+<br>
+<p>TRANSLATION</p>
+<div id = 'myField2'> </div>
+
+<br>
+<p>DICTIONARY USED</p>
+<div id = 'myField3'> </div>
+
+<br>
+<p> Testing Space final_translation </p>
+<div id = 'final_translation'> </div>
+ -->
+</body>
 
 <script type ="text/javascript"> 
 
 var e = document.getElementById("nativelanguageselection");
 var f = document.getElementById("secondlanguageselection");
-
-
+var number_of_entries;
+var word;
+var size_of_word;
+var final_translation = "";
 
 document.getElementById("submitButton").addEventListener("click",function(){
 	var xhr = new XMLHttpRequest();
@@ -41,7 +118,7 @@ document.getElementById("submitButton").addEventListener("click",function(){
 xhr.addEventListener('load',function(){
 				var resp = JSON.parse(xhr.responseText),
 					data = {
-						text: document.getElementById("words_to_translate").value,
+						text: document.getElementById("words_to_translate").value.toLowerCase(),
 						translations: resp.entries,
 						engine: resp.source,
 						srcLang: e.options[e.selectedIndex].value,
@@ -60,41 +137,65 @@ xhr.addEventListener('load',function(){
 
 	xhr.open("POST", "@{routes.Lookup.authlookup().absoluteURL()}", true);
 	xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-	xhr.setRequestHeader("Authorization", "314329e0c0ba2c68156cd4b0baa1773");
+	xhr.setRequestHeader("Authorization", "fb5a000ce046a9d3d5b565acfdd455b2");
 	xhr.send("srcLang="+encodeURIComponent(e.options[e.selectedIndex].value)+"&destLang="+encodeURIComponent(f.options[f.selectedIndex].value)+"&word="+encodeURIComponent(document.getElementById("words_to_translate").value));
 });
 
-
 document.addEventListener("translation", function(data){
 	console.log(data.detail);
-	document.getElementById('myField1').innerHTML = data.detail.text;
-	document.getElementById('myField2').innerHTML = data.detail.translations;
+	var length_of_myField2 = (data.detail.translations[1]);
+	var final_translation = '';
+
+
+	document.getElementById('myField1').innerHTML = data.detail.text.toUpperCase();
+	//document.getElementById('myField2').innerHTML = data.detail.translations;
 	document.getElementById('myField3').innerHTML = data.detail.engine;
+	
+
+number_of_entries = data.detail.translations.length;
+word = data.detail.text;
+size_of_word = data.detail.text.length;
+
+var i = 0;
+//if(data.detail.engine == "Merriam-Webster Inc."){var i }
+
+var index;
+var entry;
+var result;
+
+for (i ; i < number_of_entries; i++)
+{	console.log("final_translation is " + final_translation);
+	entry = data.detail.translations[i];
+	index = size_of_word + 3;
+
+		result = entry.replace("(" + data.detail.text + "):", i + ": ");
+		//result = entry.split("(" + data.detail.text + "):");
+		// mystring = mystring.replace('/r','/')
+		// result = result.replace(',','')
+		console.log("result is " + result);
+
+if (i == number_of_entries - 1 /*|| i == 0*/ ){final_translation += result;}
+
+else if ( i == 0) {final_translation += result + "<br> <br>";}
+
+
+	else{final_translation += (result + "<br> <br>");}
+	//console.log(final_translation);
+}
+
+ // final_translation = semi_final_translation.split("undefined");
+ // final_translation = semi_final_translation.shift();
+
+
+
+document.getElementById('final_translation').innerHTML = final_translation;
+
 });
 
-//var text = translation.data.detail;
-
-
-
-
-//var translation = translation.data.detail.translations;
-//var engine = translation.data.detail.engine;
 
 </script>
 
-<p></p>
 
-<div>ORIGINAL WORD</div>
-<div id = 'myField1'> </div>
-
-<div>TRANSLATION</div>
-<div id = 'myField2'> </div>
-
-<div>DICTIONARY USED</div>
-<div id = 'myField3'> </div>
-
-
-}
 @*
  document.addEventListener("translation", function(data){
 	console.log(data.detail); 
@@ -122,3 +223,6 @@ document.addEventListener("translation", function(data){
 			},false);
 
 			*@
+
+</html>
+}
