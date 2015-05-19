@@ -1,31 +1,92 @@
-
-
 @()(implicit request: RequestHeader)
 
-
 @main("ARCLITE Dictionary Lookup Service") {
+
 <html>
 
 <head>
-	<link media ="screen" rel="stylesheet" href='@routes.Assets.at("css/lookutTest.css")'/>
 
 	<style type="text/css">
-	
+
 	p1 {font-weight:bold;
-	   font-size: 45px}
+	   font-size: 45px;}
 
 	p2	{font-style:italic;
-		 font-size: 20px}   
+		 font-size: 20px;
+		 background-color: #373737;}   
 
 	div{font-weight: lighter;}
 
-	body{background-color: #BEE9E4;}  
+	body{}  
+
+.header{ height				: 102px;
+		 background-color	: #104E8B;
+		 border             : 1px solid #CCC;
+		 width				: 100%;
+		 position			: fixed;
+		 top 				: 0px;
+		 font-family		: Impact; 
+		 font-size			: 70px;
+		 font-position		: center;
+		 font-color			: #E1E8FA;
+		 font-left-padding
+		}
+
+/*.headerBar {
+
+    font-family: 'Source Sans Pro', sans-serif;
+
+    color: white;
+    min-height: 40px;
+    border-bottom: 1px solid #242424;
+
+    -webkit-box-shadow: 0 0 25px rgba(0,0,0,0.1);
+       -moz-box-shadow: 0 0 25px rgba(0,0,0,0.1);
+            box-shadow: 0 0 25px rgba(0,0,0,0.1);
+
+    background-color: #575757;
+    *background-color: #575757;
+    background-image: -moz-linear-gradient(top, #646464, #494949);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#646464), to(#494949));
+    background-image: -webkit-linear-gradient(top, #646464, #494949);
+    background-image: -o-linear-gradient(top, #646464, #494949);
+    background-image: linear-gradient(to bottom, #646464, #494949);
+    background-repeat: repeat-x;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#646464', endColorstr='#494949', GradientType=0);
+    filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+}
+
+.headerBar .logo {
+    background: url("..images/logo-small-light.png") top left no-repeat;
+    width: 137px;
+    height: 37px;
+    margin-top: 2px;
+}
+
+.headerBar .links {
+    margin-top: 8px;
+}
+
+.headerBar .links > .link {
+    display: inline-block;
+    margin: 0 15px;
+    color: white;
+    font-size: 16px;
+    position: relative;
+}*/
 
 	</style>
 </head>
 
 <body>
+	<div class ="header">
+		WORDS
+<!-- 	<a href ="http://home.byu.edu/home/" target ="_blank"><img style = "position: fixed;  height:99px; padding-left: 1px;"  src ="http://upload.wikimedia.org/wikipedia/en/4/4b/BYU_Logo_1969-1998.png"; ></a>
+	THINGS -->
+	</div>
 
+	<div id ="wrap">
+		<div id ='headline1'>SOME TEXT,...</div>
     <h1>Look Up Test</h1>
 
     <form action="javascript:checkIfEmpty();"> <!--"@{routes.Lookup.authlookup}"-->
@@ -68,7 +129,6 @@
 		<br>
 		<input type="submit" id = "submitButton" />
 		<br>
-
     </form>
 
 <br>
@@ -77,18 +137,26 @@
 <p2 id = "Def"> </p2> 
 
 <p id = 'final_translation'>Translations</p>
+<br>
+
 <br><br><br>
 <p id = 'myField3'>Dictionary Service</p>
 <div id = 'myField3'> </div>
 
+<a href="#" id="example-show" class="showLink" onclick="showHide('example');return true;">See THINGS more.</a></p>
+      <div id="example" class="more">
+         <p>Congratulations! You've found the magic hidden text! Clicking the link below will hide this content again.</p>
+         <p><a href="#" id="example-hide" class="hideLink" onclick="showHide('example');return false;">Hide this content.</a></p>
+      </div>
 
-<br>
-<!-- <p id ='security_key_we_put_in'>Security Key we get back</p> -->
-
+<p id ="contact" onclick ="contactInfo()">Contact Information</p>
 
 </body>
 
 <script type ="text/javascript"> 
+function contactInfo(){
+	alert('Contact us at arcliltelab\u0040gmail.com');
+}
 
 function checkIfEmpty()
 {
@@ -99,16 +167,7 @@ function checkIfEmpty()
 	
 	else if (document.getElementById("words_to_translate").value != "")
 	{
-		// var security_key_to_check = document.getElementById("security_key");
-		//  if(document.getElementById("security_key_to_check".length < 32))
-		//  {
-		//  	alert("You have no security key!\nPlease provide one, and press submit again.")
-		//  }
-
-		// else
-		// {
 		Lookup();
-		//}
 	}
 }
 

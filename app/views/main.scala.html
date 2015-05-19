@@ -3,13 +3,48 @@
 <!DOCTYPE html>
 
 <html>
+
     <head>
         <title>@title</title>
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("assets/stylesheets/main.css")">
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
-        <script src="@routes.Assets.at("javascripts/jquery-1.7.1.min.js")" type="text/javascript"></script>
+
+          <link rel="stylesheet" media="screen" href="/assets/stylesheets/main.css">
+        <link rel="shortcut icon" type="image/png" href="/assets/images/favicon.png">
+
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
     </head>
     <body>
         @content
+                <style type="text/css">
+	
+
+	p1 {font-weight:bold;
+	   font-size: 45px;
+	   }
+
+	p2	{font-style:italic;
+		 font-size: 20px} 
+
+	#headline1 {background-image : http://sites.lib.byu.edu/byuhistory/wp-					content/uploads/sites/36/2011/03/HonorCode.gif;
+				background-repeat: no-repeat; 
+				background-position: left top; 
+				padding-top:68px; 
+					margin-bottom:50px; 
+}
+
+
+
+	div{font-weight: lighter;}
+
+	body{
+		img src = "http://sites.lib.byu.edu/byuhistory/wp-content/uploads/sites/36/2011/03/HonorCode.gif">;
+		background-color: #BEE9E4;
+		font-family:"Times New Roman";}  */
+
+	</style>
     </body>
 </html>

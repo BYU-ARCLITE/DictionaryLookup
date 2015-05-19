@@ -43,14 +43,14 @@ object LookupGlosbe extends Translator {
   for { tuc <- json } yield {
     val word = (tuc\"phrase"\"text").asOpt[String]
 
-    val meanings = (tuc\"meanings").asOpt[Seq[JsObject]]
+    val meanings = (tuc\ "meanings").asOpt[Seq[JsObject]]
     val defs : Seq[String] = if (meanings == None) Seq("")
       else
         for {
           text <- meanings.get
         } yield {
-          val result = (text\"text").asOpt[String]
-          result getOrElse ""
+          val result = (text\ "text").asOpt[String]
+          result getOrElse " "
         }
         
         if (defs.distinct == Seq("")) ""
@@ -75,7 +75,7 @@ object LookupGlosbe extends Translator {
     if(result.status != 200) None
     else {
 
-        val tuc = (json\"tuc").asOpt[Seq[JsObject]]
+        val tuc = (json\ "tuc").asOpt[Seq[JsObject]]
         if (tuc == None) None
         else {
             val trans : String = grabTranslations(tuc.get,text).filterNot(w=>w=="").mkString(", ")
