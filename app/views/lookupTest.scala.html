@@ -8,18 +8,9 @@
 
 	<style type="text/css">
 
-	p1 {font-weight:bold;
-	   font-size: 45px;}
-
-	p2	{font-style:italic;
-		 font-size: 20px;
-		 background-color: #373737;}   
-
 	div{font-weight: lighter;}
 
-	body{}  
-
-.header{ height				: 102px;
+/*.header{ height				: 102px;
 		 background-color	: #104E8B;
 		 border             : 1px solid #CCC;
 		 width				: 100%;
@@ -30,34 +21,10 @@
 		 font-position		: center;
 		 font-color			: #E1E8FA;
 		 font-left-padding
-		}
-
-/*.headerBar {
-
-    font-family: 'Source Sans Pro', sans-serif;
-
-    color: white;
-    min-height: 40px;
-    border-bottom: 1px solid #242424;
-
-    -webkit-box-shadow: 0 0 25px rgba(0,0,0,0.1);
-       -moz-box-shadow: 0 0 25px rgba(0,0,0,0.1);
-            box-shadow: 0 0 25px rgba(0,0,0,0.1);
-
-    background-color: #575757;
-    *background-color: #575757;
-    background-image: -moz-linear-gradient(top, #646464, #494949);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#646464), to(#494949));
-    background-image: -webkit-linear-gradient(top, #646464, #494949);
-    background-image: -o-linear-gradient(top, #646464, #494949);
-    background-image: linear-gradient(to bottom, #646464, #494949);
-    background-repeat: repeat-x;
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#646464', endColorstr='#494949', GradientType=0);
-    filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
-}
+		}*/
 
 .headerBar .logo {
-    background: url("..images/logo-small-light.png") top left no-repeat;
+    background: url("../../public/images/logo-small-light.png") top left no-repeat;
     width: 137px;
     height: 37px;
     margin-top: 2px;
@@ -73,87 +40,137 @@
     color: white;
     font-size: 16px;
     position: relative;
-}*/
-
+}
 	</style>
 </head>
 
 <body>
-	<div class ="header">
-		WORDS
-<!-- 	<a href ="http://home.byu.edu/home/" target ="_blank"><img style = "position: fixed;  height:99px; padding-left: 1px;"  src ="http://upload.wikimedia.org/wikipedia/en/4/4b/BYU_Logo_1969-1998.png"; ></a>
-	THINGS -->
+	<div class ="headerBar">
+		<img src="/assets/images/logo-small-light.png">
+	Beadle (BYU Electronic Aggregating Dictionary for Languages Experiences )
 	</div>
 
-	<div id ="wrap">
-		<div id ='headline1'>SOME TEXT,...</div>
-    <h1>Look Up Test</h1>
+<!--<div id ="wrap">
 
-    <form action="javascript:checkIfEmpty();"> <!--"@{routes.Lookup.authlookup}"-->
-        <label>Words to Translate: <input type="text" id="words_to_translate" /></label><br><br>
+ <div style=" margin: left; width: 400px; min-height: 100px; background-color:orange; position:bottom left;"> Words </div>
 
-         <label> Native Language: </label>
-         <select id = "nativelanguageselection">
-        <option value = "en">English</option>
-        <option value = "es">Spanish</option>
-        <option value = "fr">French</option>
-        <option value = "de">German</option>
-        <option value = "ja">Japanese</option> 
-        <option value = "it">Italian</option> 
-        <option value = "zh">Chinese</option> 
-        <option value = "pt">Portuguese</option>
-        <option value = "ru">Russian</option>
-        <option value = "ko">Korean</option>
-        <option value = "nl">Dutch</option>  
-        </select>
-        <!-- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -->
-        <!-- <tab align=right> -->
-        <br>
-        <label> Second Language: </label>
-        <select id = "secondlanguageselection">
-        <option value = "en">English</option>
-        <option value = "es">Spanish</option>
-        <option value = "fr">French</option>
-        <option value = "de">German</option> 
-        <option value = "ja">Japanese</option> 
-        <option value = "it">Italian</option> 
-        <option value = "zh">Chinese</option> 
-        <option value = "pt">Portuguese</option>
-        <option value = "ru">Russian</option>
-        <option value = "ko">Korean</option> 
-        <option value = "nl">Dutch</option> 
-        </select>
-        <br>
-		<br>
-		<label>Security Key: <input type="text" id ="security_key" /></label>
-		<br>
-		<input type="submit" id = "submitButton" />
-		<br>
-    </form>
+    <div style="margin: auto; width:400px; height:100px; background-color:black; border-color: red; border-size:12px;"> WORDS 2 </div>
+ 
+</div> -->
+ 
+ <!-- <div style="position: absolute; top 10px; width 200px; height: 50px; background-color:teal; margin:  auto;">BYU DICTIONARY SERVICE (BEADLE)</div> -->
 
-<br>
-<p1 id ='myField1'>Original Word</p1> 
-<br><br>
-<p2 id = "Def"> </p2> 
+<div style="width:400px; height: 100px border: solid black 1px; margin: 0 auto; background:rgba(255,255,255,0.5); "><p1><center>Welcome to the BYU Dictionary Service</center></p1> </div> 
 
-<p id = 'final_translation'>Translations</p>
-<br>
+<!-- <div style="width: 50%; float:left;">
+<div style="position: absolute; top: 200px; left: 10px; width: 32%; height: 600px; background-color: pink; overall width 248px including 2*3px padding and 2*1px border; padding: 10px; margin: 5px;  margin-left: auto; margin-right: auto;">  /  
 
-<br><br><br>
-<p id = 'myField3'>Dictionary Service</p>
-<div id = 'myField3'> </div>
+</div>/
+</div> -->
 
+
+
+ <!-- <div style=" top: 200px; margin-left: auto; margin-right: auto; width: 70%; min-height: 600px; background-color: pink; overall width 248px including 2*3px padding and 2*1px border; padding: 10px; margin: 5px; margin-left: auto; margin-right: auto; ">  -->
+	
+<div class="container"> 
+
+	
+
+   <div style="width: 40%; height: 550px; float:left; "> 
+   		<div style=" margin: 5px; background-color: #fff; height: 250px;">	
+   			<div style="text-align: center;">
+		<h1>Look Up Test</h1>
+
+			    <form action="javascript:checkIfEmpty();"> 
+			    	<!--"@{routes.Lookup.authlookup}"-->
+			        <label>Words to Translate: <input type="text" id="words_to_translate" />
+			        </label>
+			        <br><br>
+
+			         	<label> Native Language: </label>
+				         	<select id = "nativelanguageselection">
+				        	<option value = "en">English</option>
+				        	<option value = "es">Spanish</option>
+				        	<option value = "fr">French</option>
+				        	<option value = "de">German</option>
+				        	<option value = "ja">Japanese</option> 
+				        	<option value = "it">Italian</option> 
+				        	<option value = "zh">Chinese</option> 
+				        	<option value = "pt">Portuguese</option>
+				        	<option value = "ru">Russian</option>
+				        	<option value = "ko">Korean</option>
+				        	<option value = "nl">Dutch</option>  
+			        	</select>
+
+				        <br>
+				        <label> Second Language: </label>
+				        <select id = "secondlanguageselection">
+					        <option value = "en">English</option>
+					        <option value = "es">Spanish</option>
+					        <option value = "fr">French</option>
+					        <option value = "de">German</option> 
+					        <option value = "ja">Japanese</option> 
+					        <option value = "it">Italian</option> 
+					        <option value = "zh">Chinese</option> 
+					        <option value = "pt">Portuguese</option>
+					        <option value = "ru">Russian</option>
+					        <option value = "ko">Korean</option> 
+					        <option value = "nl">Dutch</option> 
+			        	</select>
+			        	<br><br>
+
+					<label>Security Key: <input type="text" id ="security_key" />		
+					</label>	
+
+				<br>
+
+				<input type="submit" id = "submitButton" />
+				<br>
+    		</form>
+			</div>
+		</div>
+	</div>
+
+
+
+    <div style="width: 60%; float:left;">
+    	<div style=" margin: 5px; background-color: #fff; min-height: 250px;">
+    		<div style="text-align: center;">
+				<h1>Lookup Results</h1>
+					<p1 id ='myField1'></p1> 
+					<br><br>
+					<p2 id = "Def"> </p2> 
+
+					<p id = 'final_translation'></p>
+					<br><br><br>
+					<div id = 'myField3'> </div>
+			</div>
+		</div>
+	</div>
+
+<div class="footer" onclick ="contactInfo()" > 
+		Contact Information
+	</div>
+
+</div>
+
+
+<!-- 
+    <div style="width: 25%; float:left;"><div style=" margin: 5px; background-color: blue;">D</div></div> -->
+<!-- </div> -->
+
+<!-- <p>
 <a href="#" id="example-show" class="showLink" onclick="showHide('example');return true;">See THINGS more.</a></p>
       <div id="example" class="more">
          <p>Congratulations! You've found the magic hidden text! Clicking the link below will hide this content again.</p>
-         <p><a href="#" id="example-hide" class="hideLink" onclick="showHide('example');return false;">Hide this content.</a></p>
-      </div>
+         <p><a href="#" id="example-hide" class="hideLink" onclick="showHide('example');return false;">Hide this content.</a></p> 
+</p> -->
 
-<p id ="contact" onclick ="contactInfo()">Contact Information</p>
+
 
 </body>
-
 <script type ="text/javascript"> 
+
 function contactInfo(){
 	alert('Contact us at arcliltelab\u0040gmail.com');
 }
