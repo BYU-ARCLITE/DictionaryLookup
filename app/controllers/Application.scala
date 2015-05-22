@@ -22,10 +22,10 @@ def lookupTest = Action {
   }
 
   def aboutDict = Action {
-    implicit request =>
- //   implicit user =>
-   // play.Logger.debug("DAGAN")
-      Ok(views.html.aboutDict())
+    //implicit request =>
+    implicit user =>
+    play.Logger.debug("DAGAN")
+     Ok(views.html.aboutDict())
   }
 
 }

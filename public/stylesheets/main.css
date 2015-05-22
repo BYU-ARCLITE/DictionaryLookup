@@ -1,0 +1,40 @@
+          <link rel="stylesheet" media="screen" href="/assets/stylesheets/main.css">
+        <link rel="shortcut icon" type="image/png" href="/assets/images/favicon.png">
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+
+
+
+  <style type="text/css">
+	
+
+	   p1 {font-weight:bold;
+	   font-size: 45px}
+
+	   p2	{font-style:italic;
+		 font-size: 20px}   
+
+	   div{font-weight: lighter;}
+
+	body{background-color: black}  
+
+	.more {
+      display: none;
+      border-top: 1px solid #666;
+      border-bottom: 1px solid #666; }
+
+   a.showLink, a.hideLink {
+      text-decoration: none;
+      color: #36f;
+      padding-left: 8px;
+      background: transparent url(down.gif) no-repeat left; }
+
+   a.hideLink {
+      background: transparent url(up.gif) no-repeat left; }
+
+   a.showLink:hover, a.hideLink:hover {
+      border-bottom: 1px dotted #36f; }
+
+	</style>
