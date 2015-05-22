@@ -8,13 +8,13 @@ GET     /                           controllers.Application.index
 POST    /api/lookup                 controllers.Lookup.authlookup
 OPTIONS /api/lookup                 controllers.Lookup.preflight
 
-GET     /api/register               controllers.Application.register
+GET     /register                   controllers.Application.register
 POST    /api/register               controllers.UserManager.register
 POST    /api/user/{name}/newkey     controllers.UserManager.resetKey(name)
 POST    /api/user/{name}/newpass    controllers.UserManager.resetPass(name)
 POST    /api/user/{name}/services   controllers.UserManager.resetServiceList(name)
-GET 	/api/lookupTest				controllers.Application.lookupTest
-GET 	/api/aboutDict				controllers.Application.aboutDict
+GET 	/lookupTest				    controllers.Application.lookupTest
+GET 	/aboutDict				    controllers.Application.aboutDict
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
