@@ -8,6 +8,8 @@
 
 	<style type="text/css">
 
+body{background-color: #373737}
+
 	div{font-weight: lighter;}
 
 /*.header{ height				: 102px;
@@ -77,50 +79,87 @@
 	
 
    <div style="width: 40%; height: 550px; float:left; "> 
-   		<div style=" margin: 5px; background-color: #fff; height: 250px;">	
+   		<div style=" margin: 5px; background-color: #fff; height: 300px;">	
    			<div style="text-align: center;">
 		<h1>Look Up Test</h1>
 
 			    <form action="javascript:checkIfEmpty();"> 
-			    	<!--"@{routes.Lookup.authlookup}"-->
+
 			        <label>Words to Translate: <input type="text" id="words_to_translate" />
 			        </label>
 			        <br><br>
 
-			         	<label> Native Language: </label>
+			         	<label> Source Language: </label>
 				         	<select id = "nativelanguageselection">
+				         	<option value = "en">English</option>
+				         	<option value = "sq">Albanian</option>
+				         	<option value = "ar">Arabic</option> 
+				         	<option value = "hy">Armenian</option>
+				         	<option value = "be">Belarusian</option>
+				         	<option value = "bn">Bengali</option> 
+				         	<option value = "zh">Chinese</option>   
+				         	<option value = "cs">Czech</option> 
+				         	<option value = "nl">Dutch</option> 
 				        	<option value = "en">English</option>
-				        	<option value = "es">Spanish</option>
 				        	<option value = "fr">French</option>
 				        	<option value = "de">German</option>
-				        	<option value = "ja">Japanese</option> 
-				        	<option value = "it">Italian</option> 
-				        	<option value = "zh">Chinese</option> 
-				        	<option value = "pt">Portuguese</option>
-				        	<option value = "ru">Russian</option>
+				        	<option value = "he">Hebrew</option>
+				        	<option value = "hi">Hindi</option>  
+				        	<option value = "it">Italian</option>
+				        	<option value = "ja">Japanese</option>
+				        	<option value = "jv">Javanese</option>
 				        	<option value = "ko">Korean</option>
-				        	<option value = "nl">Dutch</option>  
+				        	<option value = "lv">Latvian</option>
+				        	<option value = "pl">Polishe</option>
+				        	<option value = "pt">Portuguese</option> 
+				        	<option value = "ro">Romanian</option>
+				        	<option value = "ru">Russian</option>
+				        	<option value = "sm">Samoan</option>
+				        	<option value = "es">Spanish</option>
+				        	<option value = "te">Telugu</option>
+				        	<option value = "tr">Turkish</option> 
+				        	<option value = "uk">Ukrainian</option>
+				        	<option value = "vi">Vietnamese</option>  
 			        	</select>
 
 				        <br>
-				        <label> Second Language: </label>
+				        <label> Target Language: </label>
 				        <select id = "secondlanguageselection">
-					        <option value = "en">English</option>
-					        <option value = "es">Spanish</option>
-					        <option value = "fr">French</option>
-					        <option value = "de">German</option> 
-					        <option value = "ja">Japanese</option> 
-					        <option value = "it">Italian</option> 
-					        <option value = "zh">Chinese</option> 
-					        <option value = "pt">Portuguese</option>
-					        <option value = "ru">Russian</option>
-					        <option value = "ko">Korean</option> 
-					        <option value = "nl">Dutch</option> 
+				        	<option value = "en">English</option>
+				         	<option value = "sq">Albanian</option>
+				         	<option value = "ar">Arabic</option> 
+				         	<option value = "hy">Armenian</option>
+				         	<option value = "be">Belarusian</option>
+				         	<option value = "bn">Bengali</option> 
+				         	<option value = "zh">Chinese</option>   
+				         	<option value = "cs">Czech</option> 
+				         	<option value = "nl">Dutch</option> 
+				        	<option value = "en">English</option>
+				        	<option value = "fr">French</option>
+				        	<option value = "de">German</option>
+				        	<option value = "he">Hebrew</option>
+				        	<option value = "hi">Hindi</option>  
+				        	<option value = "it">Italian</option>
+				        	<option value = "ja">Japanese</option>
+				        	<option value = "jv">Javanese</option>
+				        	<option value = "ko">Korean</option>
+				        	<option value = "lv">Latvian</option>
+				        	<option value = "pl">Polishe</option>
+				        	<option value = "pt">Portuguese</option> 
+				        	<option value = "ro">Romanian</option>
+				        	<option value = "ru">Russian</option>
+				        	<option value = "sm">Samoan</option>
+				        	<option value = "es">Spanish</option>
+				        	<option value = "te">Telugu</option>
+				        	<option value = "tr">Turkish</option> 
+				        	<option value = "uk">Ukrainian</option>
+				        	<option value = "vi">Vietnamese</option>   
 			        	</select>
 			        	<br><br>
 
-					<label>Security Key: <input type="text" id ="security_key" />		
-					</label>	
+					<label>Security Key <br> <input type="password" id ="security_key" />		
+					</label>
+
 
 				<br>
 
@@ -134,11 +173,12 @@
 
 
     <div style="width: 60%; float:left;">
-    	<div style=" margin: 5px; background-color: #fff; min-height: 250px;">
+    	<div style=" margin: 5px; background-color: #fff; min-height: 300px;">
     		<div style="text-align: center;">
 				<h1>Lookup Results</h1>
-					<p1 id ='myField1'></p1> 
-					<br><br>
+					<!-- <p id ='partOfSpeech'> </p> -->
+					<!-- <p1 id ='wordSearched'></p1>  -->
+					<br>
 					<p2 id = "Def"> </p2> 
 
 					<p id = 'final_translation'></p>
@@ -169,6 +209,8 @@
 
 <script type ="text/javascript"> 
 
+
+
 function contactInfo(){
 	alert('Contact us at arcliltelab\u0040gmail.com');
 }
@@ -188,11 +230,13 @@ function checkIfEmpty()
 
 function Lookup(){
 var security_key_to_check = document.getElementById("security_key");
+var number_of_entries;
+var final_translation = "";
+var dictionaryUsed;
 var e = document.getElementById("nativelanguageselection");
 var f = document.getElementById("secondlanguageselection");
-var number_of_entries;
-var size_of_word;
-var final_translation = "";
+var lookupWord = document.getElementById("words_to_translate");
+var theWebsite;
 
 //commented out this line because with the words_to_translate checker, it was taking two clicks to get response
 //document.getElementById("submitButton").addEventListener("click",function(){
@@ -235,50 +279,63 @@ document.addEventListener("translation", function(data){
 	console.log(data.detail);
 	var length_of_myField2 = (data.detail.translations[1]);
 	var final_translation = '';
-
-	//document.getElementById('testing').innerHTML = 
-
-	document.getElementById('myField1').innerHTML = data.detail.text.toUpperCase();
-	//document.getElementById('myField2').innerHTML = data.detail.translations;
-	document.getElementById('myField3').innerHTML = "Brought to you by " + data.detail.engine;
+	
 	document.getElementById('Def').innerHTML = "Definition for: " + data.detail.text.toUpperCase();
 
 number_of_entries = data.detail.translations.length;
-//word = data.detail.text;
-size_of_word = data.detail.text.length;
+dictionaryUsed = data.detail.engine;
 
-var i = 0;
 
 var entry;
 var result;
 
+var i = 0;
+// this funciton makes the entier themselves look prettier
 for (i ; i < number_of_entries; i++)
-{	console.log("final_translation is " + final_translation);
+{	
 	entry = data.detail.translations[i];
 
 		result = entry.replace("(" + data.detail.text + "):", i + ": ");
-		//result = entry.split("(" + data.detail.text + "):");
-		// mystring = mystring.replace('/r','/')
-		// result = result.replace(',','')
-		console.log("result is " + result);
-
+		
 if (i == number_of_entries - 1 /*|| i == 0*/ ){final_translation += result;}
 
-else if ( i == 0) {final_translation += result + "<br> <br>";}
-
+else if ( i == 0) {final_translation += result + "<br>";}
 
 	else{final_translation += (result + "<br> <br>");}
-	//console.log(final_translation);
 }
 
 document.getElementById('final_translation').innerHTML = final_translation;
-document.getElementById('security_key_we_put_in').innerHTML = security_key_to_check.value;
+
+
+
+if (dictionaryUsed === "Merriam-Webster Inc."){
+	if(e.value === "en" && f.value ==="en"){
+
+ theWebsite="Brought to you by Merriam-Webster Inc. <a target =_blank href=http://www.merriam-webster.com/dictionary/"+lookupWord.value + ">Link to Dictionary Page</a>";
+	}
+}
+
+else if(dictionaryUsed === "WordReference")
+{
+	 theWebsite="Brought to you by WordReference<a target =_blank href=http://www.wordreference.com/"+lookupWord.value + ">Link to Dictionary Page</a>";
+	
+}
+
+else
+{
+	theWebsite = " Brought to you by " + dictionaryUsed;
+}
+
+console.log(theWebsite);
+
+document.getElementById('myField3').innerHTML = theWebsite;
 
 });
+
+
 }
 
 </script>
-
 
 @*
  document.addEventListener("translation", function(data){
@@ -328,3 +385,38 @@ document.getElementById('security_key_we_put_in').innerHTML = security_key_to_ch
 <p> Testing Space final_translation </p>
 <div id = 'final_translation'> </div>
  -->
+
+<!-- 
+
+    function engineToHTML(detail){
+            var logoURL,
+                engine = detail.engine,
+                src = Ayamel.utils.downgradeLangCode(detail.srcLang),
+                dest = Ayamel.utils.downgradeLangCode(detail.destLang);
+            if(engine === "WordReference"){
+                return '<a href="http://www.wordreference.com/' +
+                    src +
+                    dest +
+                    '/' + detail.text + '" target="wordreference">' +
+                    detail.text + ' at WordReference.com</a> © WordReference.com';
+            }
+            if(engine === "Merriam-Webster Inc."){
+                logoURL="http://www.dictionaryapi.com/images/info/branding-guidelines/mw-logo-light-background-50x50.png";
+                if((src==="es") || (dest==="es")){
+                    return '<a href="http://www.spanishcentral.com/translate/' + detail.text + '" target="Merriam-Webster">'
+                        + detail.text +' at SpanishCentral.com </a>'
+                        + '<br/>Merriam-Webster\'s Spanish-English Dictionary '
+                        + '<div class="merriamLogo"><a href="http://www.spanishcentral.com/translate/'
+                        + detail.text + '" target="Merriam-Webster"> <img src="' + logoURL + '"></img></a></div>';
+                }
+                if((src==="en") && (dest==="en")){
+                    return '<a href="http://www.merriam-webster.com/dictionary/' + detail.text + '" target="Merriam-Webster">'
+                        + detail.text +' at Merriam-Webster.com </a>'
+                        + '<br/> Merriam-Webster\'s Collegiate® Dictionary <br/>'
+                        + '<div class="merriamLogo"><a href="http://www.merriam-webster.com/dictionary/'
+                        + detail.text + '" target="Merriam-Webster"><img src="' + logoURL + '"></img></a></div>';
+                }
+            }
+            return engine;
+        }
+        - -->
