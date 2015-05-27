@@ -48,8 +48,8 @@ body{background-color: #373737}
 
 <body>
 	<div class ="headerBar">
-		<img src="/assets/images/logo-small-light.png">
-	Beadle (BYU Electronic Aggregating Dictionary for Languages Experiences )
+		<img src="/assets/images/logo-new.png">
+	Beadle (BYU Electronic Aggregating Dictionary for Language Experiences )
 	</div>
 
 <!--<div id ="wrap">
@@ -62,7 +62,8 @@ body{background-color: #373737}
  
  <!-- <div style="position: absolute; top 10px; width 200px; height: 50px; background-color:teal; margin:  auto;">BYU DICTIONARY SERVICE (BEADLE)</div> -->
 
-<div style="width:400px; height: 100px border: solid black 1px; margin: 0 auto; background:rgba(255,255,255,0.5); "><p1><center>Welcome to the BYU Dictionary Service</center></p1> </div> 
+<!-- here is a bar between the header and body that we could use if we want -->
+<!-- <div style="width:400px; height: 100px border: solid black 1px; margin: 0 auto; background:rgba(255,255,255,0.5); "><p1><center>Welcome to the BYU Dictionary Service   </div>  -->
 
 <!-- <div style="width: 50%; float:left;">
 <div style="position: absolute; top: 200px; left: 10px; width: 32%; height: 600px; background-color: pink; overall width 248px including 2*3px padding and 2*1px border; padding: 10px; margin: 5px;  margin-left: auto; margin-right: auto;">  /  
@@ -76,8 +77,6 @@ body{background-color: #373737}
 	
 <div class="container"> 
 
-	
-
    <div style="width: 40%; height: 550px; float:left; "> 
    		<div style=" margin: 5px; background-color: #fff; height: 300px;">	
    			<div style="text-align: center;">
@@ -85,10 +84,11 @@ body{background-color: #373737}
 
 			    <form action="javascript:checkIfEmpty();"> 
 
-			        <label>Words to Translate: <input type="text" id="words_to_translate" />
+			        <label>Word or Phrase to be Translated: <input type="text" id="words_to_translate"  />
+			    <!--     	<label>Word or Phrase to be Translated: <input type="text" id="words_to_translate" onblur="words_to_translate.value=removeSpaces(words_to_translate.value);"  /> -->
+			        	
 			        </label>
 			        <br><br>
-
 			         	<label> Source Language: </label>
 				         	<select id = "nativelanguageselection">
 				         	<option value = "en">English</option>
@@ -96,7 +96,8 @@ body{background-color: #373737}
 				         	<option value = "ar">Arabic</option> 
 				         	<option value = "hy">Armenian</option>
 				         	<option value = "be">Belarusian</option>
-				         	<option value = "bn">Bengali</option> 
+				         	<option value = "bn">Bengali</option>
+				         	<option value = "ca">Catalan</option>
 				         	<option value = "zh">Chinese</option>   
 				         	<option value = "cs">Czech</option> 
 				         	<option value = "nl">Dutch</option> 
@@ -121,7 +122,6 @@ body{background-color: #373737}
 				        	<option value = "uk">Ukrainian</option>
 				        	<option value = "vi">Vietnamese</option>  
 			        	</select>
-
 				        <br>
 				        <label> Target Language: </label>
 				        <select id = "secondlanguageselection">
@@ -130,7 +130,8 @@ body{background-color: #373737}
 				         	<option value = "ar">Arabic</option> 
 				         	<option value = "hy">Armenian</option>
 				         	<option value = "be">Belarusian</option>
-				         	<option value = "bn">Bengali</option> 
+				         	<option value = "bn">Bengali</option>
+				         	<option value = "ca">Catalan</option> 
 				         	<option value = "zh">Chinese</option>   
 				         	<option value = "cs">Czech</option> 
 				         	<option value = "nl">Dutch</option> 
@@ -159,7 +160,6 @@ body{background-color: #373737}
 
 					<label>Security Key <br> <input type="password" id ="security_key" />		
 					</label>
-
 
 				<br>
 
@@ -209,6 +209,10 @@ body{background-color: #373737}
 
 <script type ="text/javascript"> 
 
+// function removeSpaces(string) {
+//  return string.split(' ').join('');
+// }
+
 
 
 function contactInfo(){
@@ -224,6 +228,7 @@ function checkIfEmpty()
 	
 	else if (document.getElementById("words_to_translate").value != "")
 	{
+
 		Lookup();
 	}
 }
@@ -235,8 +240,35 @@ var final_translation = "";
 var dictionaryUsed;
 var e = document.getElementById("nativelanguageselection");
 var f = document.getElementById("secondlanguageselection");
-var lookupWord = document.getElementById("words_to_translate");
 var theWebsite;
+
+
+var lookupWord = document.getElementById("words_to_translate");
+
+
+    // lookupWord = lookupWord1.replace(/^\s+|\s+$/gm,'');
+
+
+// for(a; a < lookupWordSize2; a++)
+// {
+// 	console.log("The word is " + lookupWordSize1 );
+// 	console.log("The length word is " + lookupWordSize2);
+
+// 	if(lookupWord.value[a]===" ")
+// 	{
+// 		// var lookupWord1 = lookupWord.replace(" ", "T");
+// 		// console.log(lookupWord + " this is console log at top of page");
+// 		count++;
+// 	}
+// 	else
+// 	{
+// 		console.log(" The count is " + count);
+// 	}
+
+// }
+
+// lookupWord = lookupWord$.trim();
+console.log("The word is " + lookupWord );
 
 //commented out this line because with the words_to_translate checker, it was taking two clicks to get response
 //document.getElementById("submitButton").addEventListener("click",function(){
@@ -276,7 +308,7 @@ xhr.addEventListener('load',function(){
 //});
 
 document.addEventListener("translation", function(data){
-	console.log(data.detail);
+	// console.log(data.detail);
 	var length_of_myField2 = (data.detail.translations[1]);
 	var final_translation = '';
 	
@@ -304,29 +336,89 @@ else if ( i == 0) {final_translation += result + "<br>";}
 	else{final_translation += (result + "<br> <br>");}
 }
 
+
+
+
 document.getElementById('final_translation').innerHTML = final_translation;
 
 
 
-if (dictionaryUsed === "Merriam-Webster Inc."){
-	if(e.value === "en" && f.value ==="en"){
-
- theWebsite="Brought to you by Merriam-Webster Inc. <a target =_blank href=http://www.merriam-webster.com/dictionary/"+lookupWord.value + ">Link to Dictionary Page</a>";
+if (dictionaryUsed === "Merriam-Webster Inc.")
+{
+	if(e.value === "en" && f.value ==="en")
+	{
+ 		theWebsite="Translation by Merriam-Webster Inc. <a target =_blank href=http://www.merriam-webster.com/dictionary/"+lookupWord.value + "><br>Link to dictionary entry for \""  + lookupWord.value + "\" </a>";
 	}
 }
 
 else if(dictionaryUsed === "WordReference")
 {
-	 theWebsite="Brought to you by WordReference<a target =_blank href=http://www.wordreference.com/"+lookupWord.value + ">Link to Dictionary Page</a>";
-	
+	if(e.value === f.value)
+	{ 
+		var keywordDefinition;Link
+		if (e === "en"){keywordDefinition = "definition";}
+		else if (e.value === "es"){keywordDefinition = "definicion";}
+		else if (e.value === "es"){keywordDefinition = "definicion";}
+		else if (e.value === "it"){keywordDefinition = "definizione";}
+		else if (e.value === "es"){keywordDefinition = "definicion";}
+		else if (e.value === "as"){keywordDefinition = "definicio";}
+
+	 theWebsite="Translation by WordReference <a target =_blank href=http://www.wordreference.com/" + keywordDefinition +"/"+lookupWord.value + "> <br> Link to dictionary entry for \""  + lookupWord.value + "\" </a>";
+	}
+
+}
+
+else if(dictionaryUsed === "Glosbe")
+{
+	theWebsite = " We have the website available the source and target language, would you like the: <br><a target =_blank href=https://" + e.value + ".glosbe.com/" + e.value + "/" + f.value + "/" + lookupWord.value + ">Source Language</a><br><a target =_blank href=https://" + f.value + ".glosbe.com/" + e.value + "/" + f.value + "/" + lookupWord.value + ">Target Language</a>";
+
+}
+
+else if(dictionaryUsed === "Glosbe")
+{
+	theWebsite = " We have the website available the source and target language, would you like the: <br><a target =_blank href=https://" + e.value + ".glosbe.com/" + e.value + "/" + f.value + "/" + lookupWord.value + ">Source Language</a><br><a target =_blank href=https://" + f.value + ".glosbe.com/" + e.value + "/" + f.value + "/" + lookupWord.value + ">Target Language</a>";
+
+}
+
+else if (dictionaryUsed === "SealLang")
+{
+	theWebsite = " Brought to you by SeaLang";
+}
+
+else if (dictionaryUsed === "WWWJDIC")
+{
+	theWebsite = " Brought to you by WWWJDIC";
 }
 
 else
 {
-	theWebsite = " Brought to you by " + dictionaryUsed;
+	theWebsite = "Translation by " + dictionaryUsed;
 }
 
-console.log(theWebsite);
+
+
+
+// console.log(dictionaryUsed);
+
+// else if(dictionaryUsed === "Glosbe")
+// {
+// 	if (e.value === f.value)
+// 	{
+// 		theWebsite = "Brought to you by Glosbe <a target =_blank href=http://" + e.value + "/www.glosbe.com/" + e.value + "/" + e.value +"/"+lookupWord.value + ">Link to Dictionary Page</a>";
+// 	}
+
+// 	else {
+// 		theWebsite = "Brought to you by Glosbe, and we have two version of the website you can look at 
+// 		<br> 
+// 		Would you like Source Language: <a target =_blank href=http://" + e.value + "/www.glosbe.com/" + e.value + "/" + f.value +"/" + lookupWord.value + ">Link to Dictionary Page</a>";
+// 	}
+// }
+
+
+// else
+// {
+// 	theWebsite = " Brought to you by " + dictionaryUsed;
+// }
 
 document.getElementById('myField3').innerHTML = theWebsite;
 
@@ -339,7 +431,7 @@ document.getElementById('myField3').innerHTML = theWebsite;
 
 @*
  document.addEventListener("translation", function(data){
-	console.log(data.detail); 
+	<!-- console.log(data.detail);  -->
 
 			xhr.addEventListener('load',function(){
 				var resp = JSON.parse(xhr.responseText),
@@ -420,3 +512,8 @@ document.getElementById('myField3').innerHTML = theWebsite;
             return engine;
         }
         - -->
+
+
+
+       <!--  <br> 
+		Target Language : <a target =_blank href=http://" + f.value + "/www.glosbe.com/" + e.value + "/" + f.value +"/"+lookupWord.value + ">Link to Dictionary Page</a>" -->
