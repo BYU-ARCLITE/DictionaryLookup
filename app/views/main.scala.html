@@ -1,100 +1,27 @@
-@(title: String)(content: Html)
+@(title: String)(content: Html)(implicit request: RequestHeader)
 
 <!DOCTYPE html>
 
 <html>
-
     <head>
         <title>@title</title>
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("assets/stylesheets/main.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
-
-          <link rel="stylesheet" media="screen" href="/assets/stylesheets/main.css">
-        <link rel="shortcut icon" type="image/png" href="/assets/images/favicon.png">
 
         <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
         <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
     </head>
-
     <body>
+	<div class ="headerBar">
+		<img src="/assets/images/logo-new.png">
+		Beadle (BYU Electronic Aggregating Dictionary for Language Experiences)
+		<a href="@{routes.Application.index().absoluteURL()}">Home</a> |
+		<a href="@{routes.Application.aboutDict().absoluteURL()}">About</a> |
+		<a href="@{routes.Application.register().absoluteURL()}">Request API Key</a> |
+		<a href="@{routes.Application.lookupTest().absoluteURL()}">Test Lookup</a>
+	</div>
         @content
-    <style type="text/css">
-	
-	
-
-.headerBar {
-    font-family: 'Source Sans Pro', sans-serif;
-    font-size: 25px;
-    color: white;
-
-    min-height: 40px;
-    border-bottom: 1px solid #242424;
-
-    -webkit-box-shadow: 0 0 25px rgba(0,0,0,0.1);
-       -moz-box-shadow: 0 0 25px rgba(0,0,0,0.1);
-            box-shadow: 0 0 25px rgba(0,0,0,0.1);
-
-    background-color: #575757;
-    background-image: -moz-linear-gradient(top, #646464, #494949);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#646464), to(#494949));
-    background-image: -webkit-linear-gradient(top, #646464, #494949);
-    background-image: -o-linear-gradient(top, #646464, #494949);
-    background-image: linear-gradient(to bottom, #646464, #494949);
-    background-repeat: repeat-x;
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#646464', endColorstr='#494949', GradientType=0);
-    filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
-}
-
-.container {
-	position           				: relative;
-	 /*top               			: 10px; */
-	 width             				: 70%; 
-	 min-height       				: 600px; 
-	 background-color  				: grey;
-	 padding          				: 10px; 
-	 /*margin          			    : 5px; */
-	 margin-left       				: auto; 
-	 margin-right      				: auto;
-	 border-bottom-right-radius     : 10px;
-	 border-bottom-left-radius     	: 10px;
-}
-
-.container > div {
-	display			   				: inline-block;
-	 
-}
-
-.container > div > div{
-	border             				: 1px solid black;
-	box-shadow         				: 0 0 15px rgba(0,0,0,0.1);
-	border-radius      				: 10px;
-}
-
-.footer{
-	position           				: relative;
-	bottom: 		    			:0px;
-	text-align         				: center;
-	width              				: 100%; 
-	height             				: 80px; 
-	background-color   				: #DDDDDD; 
-	border-radius      				: 10px;
-
-}
-	</style>
     </body>
 </html>
-
-<!-- 
-.inner{
-	width: 70%;
-	margin: 0 auto;
-} -->
-
-
-<!-- .answer_box {
-    margin-top: 20px;
-    clear:both;
-    overflow: hidden;
-} -->

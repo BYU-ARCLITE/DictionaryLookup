@@ -17,15 +17,12 @@ object Application extends Controller {
 
 def lookupTest = Action {
     implicit request =>
-    play.Logger.debug("DAGAN")
       Ok(views.html.lookupTest())
   }
 
   def aboutDict = Action {
-    //implicit request =>
-    implicit user =>
-    play.Logger.debug("DAGAN")
-     Ok(views.html.aboutDict())
+    implicit request =>
+      Ok(views.html.aboutDict())
   }
 
 }

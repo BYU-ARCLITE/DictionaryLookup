@@ -1,35 +1,156 @@
 @()(implicit request: RequestHeader)
 
-@main("Ayamel - About BYU Dictionary Service"){
+@main("About the BYU Dictionary Service"){
     <div class="padded">
-        <h1>About Dictionary Service</h1>
-
-       <!--  <p>
-            Ayamel is a web-based system for streaming video and audio content especially as it applies to learning a
-            foreign language. Additional aids are available to be used in conjuction with the media, such as captions
-            and annotations. A key feature of the site enables learners to directly interact with subtitle tracks to
-            quickly access translations for foreign words and phrases and view relevant annotations. The translations
-            are taken from our own dictionary web service, WordReference.com translation API, Merriam-Webster Dictionary/Translation APIs,
-            and the Google Translate API. Teachers or course designers are able to aggregate media into a single location
-            and set up specific conditions in order to optimize the learning experience.
-        </p> -->
-        
+        <h1>About the Dictionary Service</h1>
         <p>
-            The BYU Dictionary Service is an independent dictionary search system built to enhance the language learning capabilities of Ayamel, bringing the most comprehesive and complete lookup available. Words for which a definition or translation is requested run through several diffrent electronic dictionarys, (listed below), to find the best possible translation, and then display that information in easy to read and understandable format. More dictionaries are being added all the time, further building and improving the language learning process.
+            The BYU Dictionary Service is a multilingual dictionary search system built to enhance language learning by making available the most comprehesive and complete dictionary information possible. Words and phrases are checked against a number of different backing electronic dictionary services to find the best possible translation. The Dictionary Service is implemented as an HTTP Web Service, intended to be consumed by client applications which provide their own user interface. More dictionaries are being added all the time, further building and improving the language learning process.
         </p>
-    </div>
-
-    <div>
-        Dictionary Reference: <br>
-        <a href="">BYU Dictionary</a> <br>
-        <a href="https://en.glosbe.com/">Glosbe</a> <br>
-        <a href="http://www.merriam-webster.com/">Merriam Webster</a> <br>
-        <a href="http://www.sealang.net/">Seal Language</a> <br>
-        <a href="http://www.wordreference.com/">Word Reference</a> <br>
-        <a href="http://www.csse.monash.edu.au/~jwb/cgi-bin/wwwjdic.cgi?1C">WWWJDIC</a> <br>
-        <a href="https://translate.google.com/">Google Translate</a> 
-        
-        <!--  -->
-
+		<h2>Backing Services & Supported Languages</h2>
+		<ul>
+			<li>
+				<a href="">BYU Dictionary</a>
+				<ul>
+					<li>Chinese</li>
+					<li>Japanese</li>
+					<li>Dutch</li>
+					<li>Korean</li>
+					<li>English</li>
+					<li>Portuguese</li>
+					<li>French</li>
+					<li>Russian</li>
+					<li>German</li>
+					<li>Spanish</li>
+					<li>Hebrew</li>
+					<li>Swedish</li>
+					<li>Italian</li>
+				</ul>
+			</li><li>
+				<a href="https://en.glosbe.com/">Glosbe</a>
+				<ul>
+					<li>Most Languages</li>
+				</ul>
+			</li><li>
+				<a href="http://www.merriam-webster.com/">Merriam Webster</a>
+				<ul>
+					<li>English</li>
+					<li>Spanish</li>
+				</ul>
+			</li><li>
+				<a href="http://www.sealang.net/">Sea Lang</a>
+				<ul>
+					<li>English</li>
+					<li>Russian</li>
+				</ul>
+			</li><li>
+				<a href="http://www.wordreference.com/">Word Reference</a>
+				<ul>
+					<li>Arabic</li>
+					<li>Chinese</li>
+					<li>Czech</li>
+					<li>English</li>
+					<li>French</li>
+					<li>Greek</li>
+					<li>Italian</li>
+					<li>Japanese</li>
+					<li>Korean</li>
+					<li>Polish</li>
+					<li>Portuguese</li>
+					<li>Romanian</li>
+					<li>Spanish</li>
+					<li>Turkish</li>
+				</ul>
+			</li><li>
+				<a href="http://www.csse.monash.edu.au/~jwb/cgi-bin/wwwjdic.cgi?1C">WWWJDIC</a>
+				<ul>
+					<li>English</li>
+					<li>Japanese</li>
+				</ul>
+			</li><li>
+				<a href="https://translate.google.com/">Google Translate</a>
+				<ul>
+					<li>Afrikaans</li>
+					<li>Dutch</li>
+					<li>Hmong</li>
+					<li>Macedonian</li>
+					<li>Slovenian</li>
+					<li>Albanian</li>
+					<li>English</li>
+					<li>Hungarian</li>
+					<li>Malay</li>
+					<li>Somali</li>
+					<li>Arabic</li>
+					<li>Esperanto</li>
+					<li>Icelandic</li>
+					<li>Maltese</li>
+					<li>Spanish</li>
+					<li>Armenian</li>
+					<li>Estonian</li>
+					<li>Igbo</li>
+					<li>Maori</li>
+					<li>Swahili</li>
+					<li>Azerbaijani</li>
+					<li>Filipino</li>
+					<li>Indonesian</li>
+					<li>Marathi</li>
+					<li>Swedish</li>
+					<li>Basque</li>
+					<li>Finnish</li>
+					<li>Irish</li>
+					<li>Mongolian</li>
+					<li>Tamil</li>
+					<li>Belarusian</li>
+					<li>French</li>
+					<li>Italian</li>
+					<li>Nepali</li>
+					<li>Telugu</li>
+					<li>Bengali</li>
+					<li>Galician</li>
+					<li>Japanese</li>
+					<li>Norwegian</li>
+					<li>Thai</li>
+					<li>Bosnian</li>
+					<li>Georgian</li>
+					<li>Javanese</li>
+					<li>Persian</li>
+					<li>Turkish</li>
+					<li>Bulgarian</li>
+					<li>German</li>
+					<li>Kannada</li>
+					<li>Polish</li>
+					<li>Ukrainian</li>
+					<li>Catalan</li>
+					<li>Greek</li>
+					<li>Khmer</li>
+					<li>Portuguese</li>
+					<li>Urdu</li>
+					<li>Cebuano</li>
+					<li>Gujarati</li>
+					<li>Korean</li>
+					<li>Punjabi</li>
+					<li>Vietnamese</li>
+					<li>Chinese</li>
+					<li>Haitian Creole</li>
+					<li>Lao</li>
+					<li>Romanian</li>
+					<li>Welsh</li>
+					<li>Croatian</li>
+					<li>Hausa</li>
+					<li>Latin</li>
+					<li>Russian</li>
+					<li>Yiddish</li>
+					<li>Czech</li>
+					<li>Hebrew</li>
+					<li>Latvian</li>
+					<li>Serbian</li>
+					<li>Yoruba</li>
+					<li>Danish</li>
+					<li>Hindi</li>
+					<li>Lithuanian</li>
+					<li>Slovak</li>
+					<li>Zulu</li>
+				</ul>
+			</li>
+		</ul>
     </div>
 }

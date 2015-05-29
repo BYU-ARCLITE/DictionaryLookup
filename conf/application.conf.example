@@ -11,6 +11,8 @@ application.secret="fX0W;2]Se_3ed/wVc5Bw=IydQU2o@3NJyjBvkI`?9?GH9;RvU1`V?4Kgia@X
 # ~~~~~
 application.langs="en"
 
+contact_address = "test@test.com"
+
 # Service configuration
 
 # WordReference
