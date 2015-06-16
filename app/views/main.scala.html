@@ -1,7 +1,8 @@
 @(title: String)(content: Html)(implicit request: RequestHeader)
+@import play.api.Play
+@import play.api.Play.current
 
 <!DOCTYPE html>
-
 <html>
     <head>
         <title>@title</title>
@@ -14,14 +15,16 @@
 
     </head>
     <body>
-	<div class ="headerBar">
-		<img src="/assets/images/logo-new.png">
-		Y-Lex
-		<a href="@{routes.Application.index().absoluteURL()}">Home</a> |
-		<a href="@{routes.Application.aboutDict().absoluteURL()}">About</a> |
-		<a href="@{routes.Application.register().absoluteURL()}">Request API Key</a> |
-		<a href="@{routes.Application.lookupTest().absoluteURL()}">Test Lookup</a>
-	</div>
+    <div class ="headerBar">
+        <img src="/assets/images/logo-new.png">
+        Y-Lex
+        @defining(Play.configuration.getBoolean("HTTPS").getOrElse(false)) { isHTTPS =>
+        <a href="@{routes.Application.index().absoluteURL(isHTTPS)}">Home</a> |
+        <a href="@{routes.Application.aboutDict().absoluteURL(isHTTPS)}">About</a> |
+        <a href="@{routes.Application.register().absoluteURL(isHTTPS)}">Request API Key</a> |
+        <a href="@{routes.Application.lookupTest().absoluteURL(isHTTPS)}">Test Lookup</a>
+        }
+    </div>
         @content
     </body>
 </html>

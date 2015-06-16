@@ -13,6 +13,8 @@ application.langs="en"
 
 contact_address = "test@test.com"
 
+HTTPS=false
+
 # Service configuration
 
 # WordReference
