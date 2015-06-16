@@ -99,9 +99,11 @@
         </div>
     </div>
 
-    <div class="footer"> 
+    @if(configuration.getString("contact_address").isDefined){
+    <div class="footer">
         Contact us at <a href="mailto:@{configuration.getString("contact_address").get}">@{configuration.getString("contact_address").get}</a>
     <div>
+    }
 
 </div>
 
