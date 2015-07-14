@@ -9,16 +9,16 @@
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
 
-        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-        <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
     </head>
     <body>
     <div class ="headerBar">
         <img src="/assets/images/logo-new.png">
         Y-Lex
-        @defining(Play.configuration.getBoolean("HTTPS").getOrElse(false)) { isHTTPS =>
+        @defining(Play.configuration.getBoolean("https").getOrElse(false)) { isHTTPS =>
         <a href="@{routes.Application.index().absoluteURL(isHTTPS)}">Home</a> |
         <a href="@{routes.Application.aboutDict().absoluteURL(isHTTPS)}">About</a> |
         <a href="@{routes.Application.register().absoluteURL(isHTTPS)}">Request API Key</a> |
