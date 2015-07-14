@@ -2,6 +2,10 @@
 @import play.api.Play.{current, configuration};
 
 @main("ARCLITE Dictionary Lookup Service") {
+
+<head>
+    <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/main.css")">
+</head>
 <div class="container"> 
 
    <div style="width: 40%; height: 550px; float:left; "> 
@@ -94,7 +98,7 @@
             <br>
             <p id="Def"></p> 
             <p id="final_translation"></p>
-            <br><br><br>
+            <br><br>
             <div id="attribution"></div>
         </div>
     </div>
@@ -152,7 +156,7 @@ function Lookup(){
         console.dir(e);
     },false ); 
 
-    xhr.open("POST", "@{routes.Lookup.authlookup().absoluteURL()}",true);
+    xhr.open("POST", "@{routes.Lookup.authlookup().absoluteURL(current.configuration.getBoolean("https").getOrElse(false))}",true);
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhr.setRequestHeader("Authorization", security_key_to_check);
     xhr.send(   "srcLang="+encodeURIComponent(srclang)+
@@ -171,22 +175,22 @@ function displayResult(data){
     document.getElementById('final_translation').innerHTML = 
         data.translations.map(function(entry, i){
             return entry.replace("(" + data.text + "):", i + ": ");
-        }).join('<br/><br/>');
+        }).join('<br/>'); // can turn it to '<br/><br/>'
 
     switch(data.engine){
     case "Merriam-Webster Inc.":
-        theWebsite = 'Translation by Merriam-Webster Inc. <a target =_blank href=http://www.merriam-webster.com/dictionary/'
-            + data.text + '><br>Link to dictionary entry for "' + data.text + '"</a>';
+        theWebsite = 'Results Provided by Merriam-Webster Inc. <a target =_blank href=http://www.merriam-webster.com/dictionary/'
+            + data.text + '>Link to dictionary entry for "' + data.text + '"</a>';
         break;
     case "WordReference":
-        theWebsite = 'Translation by WordReference <a target =_blank href=http://www.wordreference.com/'
+        theWebsite = 'Results Provided WordReference <a target =_blank href=http://www.wordreference.com/'
             + {
                 en: "definition",
                 es: "definicion",
                 it: "definizione",
                 as: "definicio"
             }[data.srcLang] + '/'
-            + lookupWord + '> <br> Link to dictionary entry for "'
+            + lookupWord + '> Link to dictionary entry for "'
             + lookupWord + '" </a>';
         break;
     case "Glosbe":
@@ -200,7 +204,7 @@ function displayResult(data){
             + 'Definition for ' + data.text + ' in the Target Language</a>';
         break;
     default:
-        theWebsite = "Translation by " + data.engine;
+        theWebsite = "Results Provided by " + data.engine;
     }
 
     document.getElementById('attribution').innerHTML = theWebsite;

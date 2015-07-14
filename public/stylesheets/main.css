@@ -1,6 +1,9 @@
-body{ background-color: #373737; }
+/*body{ background-color: #373737; }*/
+body{ background-color: #303030; }
 
 div{ font-weight: lighter; }
+
+/*ul{list-style-type: none;}*/
 
 .headerBar {
     font-family: 'Source Sans Pro', sans-serif;
@@ -60,7 +63,6 @@ div{ font-weight: lighter; }
 
 .container > div {
 	display			   				: inline-block;
-	 
 }
 
 .container > div > div{
