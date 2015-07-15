@@ -180,7 +180,7 @@ function displayResult(data){
     switch(data.engine){
     case "Merriam-Webster Inc.":
         theWebsite = 'Results Provided by Merriam-Webster Inc. <a target =_blank href=http://www.merriam-webster.com/dictionary/'
-            + data.text + '>Link to dictionary entry for "' + data.text + '"</a>';
+            + data.text + '>' + data.text + " at Merriam-Webster.com" + '</a>';
         break;
     case "WordReference":
         theWebsite = 'Results Provided WordReference <a target =_blank href=http://www.wordreference.com/'
@@ -194,14 +194,14 @@ function displayResult(data){
             + lookupWord + '" </a>';
         break;
     case "Glosbe":
-        theWebsite = '<a target =_blank href=https://'
+        theWebsite ='Results Provided by Glosbe. <br> <a target =_blank href=https://'
             + data.srcLang + '.glosbe.com/' + data.srcLang
-            + '/' + data.dstLang + '/' + data.text + '>'
-            + 'Definition for ' + data.text + ' in the Source Language</a><br>'
+            + '/' + data.destLang + '/' + data.text + '>'
+            + ' "' + data.text + '" at Glosbe in ' + data.srcLang + '</a><br>'
             + '<a target =_blank href=https://'
             + data.dstLang + '.glosbe.com/' + data.srcLang
-            + '/' + data.dstLang + '/' + data.text + '>'
-            + 'Definition for ' + data.text + ' in the Target Language</a>';
+            + '/' + data.destLang + '/' + data.text + '>'
+            + ' "' + data.text + '" at Glosbe in ' + data.destLang + '</a>';
         break;
     default:
         theWebsite = "Results Provided by " + data.engine;
