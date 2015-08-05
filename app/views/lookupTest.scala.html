@@ -9,7 +9,7 @@
 <div class="container"> 
 
    <div style="width: 40%; height: 550px; float:left; "> 
-        <div style="margin: 5px; background-color: #fff; height: 300px; text-align: center;">
+        <div style="margin: 5px; background-color: #fff; height: 300px; text-align: left; padding: 5px 0px 0px 5px;">
             <h1>Look Up Test</h1>
             <form action="javascript:checkIfEmpty();"> 
                 <label>Word or Phrase to be Translated: <input type="text" id="words_to_translate" /></label>
@@ -91,7 +91,7 @@
         </div>
     </div>
     <div style="width: 60%; float:left;">
-        <div style="margin: 5px; background-color: #fff; min-height: 300px; text-align: center;">
+        <div style="margin: 5px; background-color: #fff; min-height: 300px; text-align: left; padding: 5px 0px 0px 5px;">
             <h1>Lookup Results</h1>
             <!-- <p id ='partOfSpeech'> </p> -->
             <!-- <p1 id ='wordSearched'></p1>  -->
@@ -169,7 +169,7 @@ function displayResult(data){
     var theWebsite;
 
     document.getElementById('Def').innerHTML = "Definition for: "
-        + data.text.toUpperCase();
+        + data.text;
 
     // this makes the entries themselves look prettier
     document.getElementById('final_translation').innerHTML = 
@@ -179,8 +179,25 @@ function displayResult(data){
 
     switch(data.engine){
     case "Merriam-Webster Inc.":
-        theWebsite = 'Results Provided by Merriam-Webster Inc. <a target =_blank href=http://www.merriam-webster.com/dictionary/'
+/*    
+        tehWebsite = 'Results Provided by Merriam-Webster Inc. <a target =_blank href=http://www.merriam-webster.com/dictionary/'
             + data.text + '>' + data.text + " at Merriam-Webster.com" + '</a>';
+*/
+                var logoURL="http://www.dictionaryapi.com/images/info/branding-guidelines/mw-logo-light-background-50x50.png";
+                if((data.srcLang==="es") || (data.destLang==="es")){
+                    theWebsite = '<a href="http://www.spanishcentral.com/translate/' + data.text + '" target="Merriam-Webster">'
+                        + data.text +' at SpanishCentral.com </a>'
+                        + '<br/>Merriam-Webster\'s Spanish-English Dictionary '
+                        + '<div class="merriamLogo"><a href="http://www.spanishcentral.com/translate/'
+                        + data.text + '" target="Merriam-Webster"> <img src="' + logoURL + '"></img></a></div>';
+                }
+                if((data.srcLang==="en") && (data.destLang==="en")){
+                    theWebsite = '<a href="http://www.merriam-webster.com/dictionary/' + data.text + '" target="Merriam-Webster">'
+                        + data.text +' at Merriam-Webster.com </a>'
+                        + '<br/> Merriam-Webster\'s Collegiate® Dictionary <br/>'
+                        + '<div class="merriamLogo"><a href="http://www.merriam-webster.com/dictionary/'
+                        + data.text + '" target="Merriam-Webster"><img src="' + logoURL + '"></img></a></div>';
+                }
         break;
     case "WordReference":
         theWebsite = 'Results Provided WordReference <a target =_blank href=http://www.wordreference.com/'

@@ -30,7 +30,7 @@ object LookupGlosbe extends Translator {
   /* Grabs all the direct Translations */
   def grabTranslations(json:Seq[JsObject], text:String) : Seq[String] = {
     for { tuc <- json } yield {
-      val word = (tuc\"phrase"\"text").asOpt[String]
+      val word = (tuc\ "phrase" \ "text").asOpt[String]
       word.getOrElse("")
     }
   }

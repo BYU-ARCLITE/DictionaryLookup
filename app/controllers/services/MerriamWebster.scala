@@ -29,7 +29,7 @@ object LookupMerriamWebster extends Translator {
 
     val defList : Seq[String] = for {
       entry <- response \\ "entry"
-      pos <- entry \\ "fl"
+      //pos <- entry \\ "fl"
       defins <- entry \\ "dt"
       } yield {   
         val word = (entry \\ headWordTag).text
@@ -38,12 +38,21 @@ object LookupMerriamWebster extends Translator {
         "(" + word + ")" + defns 
     }
 
-    val partSpeech : Seq[String] = for {
+    val partOfSpeechList : Seq[String] = for {
       pos <- response \\ "fl"
-      } yield{
-        val ps = pos.text
+      } 
+      yield{
+        val ps = pos.text 
         ps
       }
+
+    val ipaList : Seq[String] = for {
+      ipa <- response \\ "pr"
+    }
+    yield {
+      val ipA = ipa.text  
+      ipA
+    }
 
     def isNum(item:String) : Boolean = {
         val bool = if ((item == '0')||(item == '1')||(item == '2')||(item == '3')||(item == '4')||(item == '5')||(item == '6')||(item == '7')||(item == '8')||(item == '9'))
@@ -75,8 +84,10 @@ object LookupMerriamWebster extends Translator {
             val defin : Seq[String] = Seq[String](defList(0), defList(1), defList(2), defList(3), defList(4))
             defin
         } else {defList}
-    val partOfSpeech : Seq[String] = Seq[String](partSpeech(0))
-    exampleSound ++ definitions 
+    val partOfSpeech : Seq[String] = Seq[String](partOfSpeechList(0))
+    val ipa : Seq[String] = Seq[String](ipaList(0))
+
+    ipa ++ partOfSpeech ++ exampleSound ++ definitions
     
     /*val exampleSound : Seq[String] = if(sound.length > 0)
         {"<br/>Audio Examples:" +: sound} else {sound}
