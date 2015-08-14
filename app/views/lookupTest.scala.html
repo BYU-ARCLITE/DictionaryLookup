@@ -36,7 +36,7 @@
                         <option value = "jv">Javanese</option>
                         <option value = "ko">Korean</option>
                         <option value = "lv">Latvian</option>
-                        <option value = "pl">Polishe</option>
+                        <option value = "pl">Polish</option>
                         <option value = "pt">Portuguese</option> 
                         <option value = "ro">Romanian</option>
                         <option value = "ru">Russian</option>
@@ -71,7 +71,7 @@
                         <option value = "jv">Javanese</option>
                         <option value = "ko">Korean</option>
                         <option value = "lv">Latvian</option>
-                        <option value = "pl">Polishe</option>
+                        <option value = "pl">Polish</option>
                         <option value = "pt">Portuguese</option> 
                         <option value = "ro">Romanian</option>
                         <option value = "ru">Russian</option>
@@ -133,6 +133,7 @@ function Lookup(){
         var resp;
         if(xhr.status >= 400){
             alert("Error, you have incorrect key");
+           // alert(xhr.responseText);
             console.log(xhr.responseText);
             return;
         }
@@ -184,19 +185,21 @@ function displayResult(data){
             + data.text + '>' + data.text + " at Merriam-Webster.com" + '</a>';
 */
                 var logoURL="http://www.dictionaryapi.com/images/info/branding-guidelines/mw-logo-light-background-50x50.png";
+
                 if((data.srcLang==="es") || (data.destLang==="es")){
-                    theWebsite = '<a href="http://www.spanishcentral.com/translate/' + data.text + '" target="Merriam-Webster">'
+                    theWebsite = '<img src="' + logoURL + '" align = "left"></img></a></div>' '<a href="http://www.spanishcentral.com/translate/' + data.text + '" target="Merriam-Webster">'
                         + data.text +' at SpanishCentral.com </a>'
                         + '<br/>Merriam-Webster\'s Spanish-English Dictionary '
                         + '<div class="merriamLogo"><a href="http://www.spanishcentral.com/translate/'
-                        + data.text + '" target="Merriam-Webster"> <img src="' + logoURL + '"></img></a></div>';
+                        + data.text + '" target="Merriam-Webster">"';
                 }
                 if((data.srcLang==="en") && (data.destLang==="en")){
-                    theWebsite = '<a href="http://www.merriam-webster.com/dictionary/' + data.text + '" target="Merriam-Webster">'
+                    theWebsite = '<img src="' + logoURL + '" align = "left"></img></a></div>' + '<a href="http://www.merriam-webster.com/dictionary/' + data.text + '" target="Merriam-Webster">'
                         + data.text +' at Merriam-Webster.com </a>'
                         + '<br/> Merriam-Webster\'s Collegiate® Dictionary <br/>'
                         + '<div class="merriamLogo"><a href="http://www.merriam-webster.com/dictionary/'
-                        + data.text + '" target="Merriam-Webster"><img src="' + logoURL + '"></img></a></div>';
+                        + data.text + '" target="Merriam-Webster">"'
+                        ;
                 }
         break;
     case "WordReference":
