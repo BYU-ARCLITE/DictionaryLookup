@@ -4,12 +4,12 @@
 @main("ARCLITE Dictionary Lookup Service") {
 
 <head>
-    <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/main.css")">
+    <link rel="stylesheet" type="text/css" href="/assets/stylesheets/main.css">
 </head>
 <div class="container"> 
 
    <div style="width: 40%; height: 550px; float:left; "> 
-        <div style="margin: 5px; background-color: #fff; height: 300px; text-align: left; padding: 5px 0px 0px 5px;">
+        <div style="margin: 5px; background-color: #fff; height: 300px; text-align: center;">
             <h1>Look Up Test</h1>
             <form action="javascript:checkIfEmpty();"> 
                 <label>Word or Phrase to be Translated: <input type="text" id="words_to_translate" /></label>
@@ -36,7 +36,7 @@
                         <option value = "jv">Javanese</option>
                         <option value = "ko">Korean</option>
                         <option value = "lv">Latvian</option>
-                        <option value = "pl">Polish</option>
+                        <option value = "pl">Polishe</option>
                         <option value = "pt">Portuguese</option> 
                         <option value = "ro">Romanian</option>
                         <option value = "ru">Russian</option>
@@ -71,7 +71,7 @@
                         <option value = "jv">Javanese</option>
                         <option value = "ko">Korean</option>
                         <option value = "lv">Latvian</option>
-                        <option value = "pl">Polish</option>
+                        <option value = "pl">Polishe</option>
                         <option value = "pt">Portuguese</option> 
                         <option value = "ro">Romanian</option>
                         <option value = "ru">Russian</option>
@@ -91,7 +91,7 @@
         </div>
     </div>
     <div style="width: 60%; float:left;">
-        <div style="margin: 5px; background-color: #fff; min-height: 300px; text-align: left; padding: 5px 0px 0px 5px;">
+        <div style="margin: 5px; background-color: #fff; min-height: 300px; text-align: center;">
             <h1>Lookup Results</h1>
             <!-- <p id ='partOfSpeech'> </p> -->
             <!-- <p1 id ='wordSearched'></p1>  -->
@@ -103,11 +103,11 @@
         </div>
     </div>
 
-    @if(configuration.getString("contact_address").isDefined){
+    
     <div class="footer">
-        Contact us at <a href="mailto:@{configuration.getString("contact_address").get}">@{configuration.getString("contact_address").get}</a>
+        Contact us at <a href="mailto:arclitelab@@gmail.com">arclitelab@@gmail.com</a>
     <div>
-    }
+    
 
 </div>
 
@@ -133,7 +133,6 @@ function Lookup(){
         var resp;
         if(xhr.status >= 400){
             alert("Error, you have incorrect key");
-           // alert(xhr.responseText);
             console.log(xhr.responseText);
             return;
         }
@@ -157,7 +156,7 @@ function Lookup(){
         console.dir(e);
     },false ); 
 
-    xhr.open("POST", "@{routes.Lookup.authlookup().absoluteURL(current.configuration.getBoolean("https").getOrElse(false))}",true);
+    xhr.open("POST", "@{routes.Lookup.authlookup().absoluteURL()}",true);
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhr.setRequestHeader("Authorization", security_key_to_check);
     xhr.send(   "srcLang="+encodeURIComponent(srclang)+
@@ -170,7 +169,7 @@ function displayResult(data){
     var theWebsite;
 
     document.getElementById('Def').innerHTML = "Definition for: "
-        + data.text;
+        + data.text.toUpperCase();
 
     // this makes the entries themselves look prettier
     document.getElementById('final_translation').innerHTML = 
@@ -180,27 +179,8 @@ function displayResult(data){
 
     switch(data.engine){
     case "Merriam-Webster Inc.":
-/*    
-        tehWebsite = 'Results Provided by Merriam-Webster Inc. <a target =_blank href=http://www.merriam-webster.com/dictionary/'
-            + data.text + '>' + data.text + " at Merriam-Webster.com" + '</a>';
-*/
-                var logoURL="http://www.dictionaryapi.com/images/info/branding-guidelines/mw-logo-light-background-50x50.png";
-
-                if((data.srcLang==="es") || (data.destLang==="es")){
-                    theWebsite = '<img src="' + logoURL + '" align = "left"></img></a></div>' '<a href="http://www.spanishcentral.com/translate/' + data.text + '" target="Merriam-Webster">'
-                        + data.text +' at SpanishCentral.com </a>'
-                        + '<br/>Merriam-Webster\'s Spanish-English Dictionary '
-                        + '<div class="merriamLogo"><a href="http://www.spanishcentral.com/translate/'
-                        + data.text + '" target="Merriam-Webster">"';
-                }
-                if((data.srcLang==="en") && (data.destLang==="en")){
-                    theWebsite = '<img src="' + logoURL + '" align = "left"></img></a></div>' + '<a href="http://www.merriam-webster.com/dictionary/' + data.text + '" target="Merriam-Webster">'
-                        + data.text +' at Merriam-Webster.com </a>'
-                        + '<br/> Merriam-Webster\'s Collegiate® Dictionary <br/>'
-                        + '<div class="merriamLogo"><a href="http://www.merriam-webster.com/dictionary/'
-                        + data.text + '" target="Merriam-Webster">"'
-                        ;
-                }
+        theWebsite = 'Results Provided by Merriam-Webster Inc. <a target =_blank href=http://www.merriam-webster.com/dictionary/'
+            + data.text + '>Link to dictionary entry for "' + data.text + '"</a>';
         break;
     case "WordReference":
         theWebsite = 'Results Provided WordReference <a target =_blank href=http://www.wordreference.com/'
@@ -214,14 +194,14 @@ function displayResult(data){
             + lookupWord + '" </a>';
         break;
     case "Glosbe":
-        theWebsite ='Results Provided by Glosbe. <br> <a target =_blank href=https://'
+        theWebsite = '<a target =_blank href=https://'
             + data.srcLang + '.glosbe.com/' + data.srcLang
-            + '/' + data.destLang + '/' + data.text + '>'
-            + ' "' + data.text + '" at Glosbe in ' + data.srcLang + '</a><br>'
+            + '/' + data.dstLang + '/' + data.text + '>'
+            + 'Definition for ' + data.text + ' in the Source Language</a><br>'
             + '<a target =_blank href=https://'
             + data.dstLang + '.glosbe.com/' + data.srcLang
-            + '/' + data.destLang + '/' + data.text + '>'
-            + ' "' + data.text + '" at Glosbe in ' + data.destLang + '</a>';
+            + '/' + data.dstLang + '/' + data.text + '>'
+            + 'Definition for ' + data.text + ' in the Target Language</a>';
         break;
     default:
         theWebsite = "Results Provided by " + data.engine;
@@ -231,4 +211,7 @@ function displayResult(data){
 }
 
 </script>
+
+    </body>
+</html>
 }
