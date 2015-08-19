@@ -23,17 +23,22 @@ object Lookup extends Controller {
   def getFirst(user: User, srcLang: String, destLang: String, text: String): Option[TResult] = {
     for(name <- user.getServices; t <- serviceMap.get(name)) try {
       Logger.info("Checking "+name)
+      play.Logger.debug(srcLang+ destLang+ text) 
       t.translate(srcLang, destLang, text) match {
         case Some(res) =>
+          play.Logger.debug("first")
           ServiceLog.record(user, srcLang, destLang, text, name, true)
+          play.Logger.debug("first")
           return Some((t.name,t.expiration,res))
-        case None =>
+        case None =>{
+        play.Logger.debug("first")
           ServiceLog.record(user, srcLang, destLang, text, name, false)
+        }
       }
     } catch {
       case e: ControlThrowable => throw e
       case e: Throwable => {
-        Logger.debug(e.getMessage)
+        Logger.debug(e.getMessage + " SAntiagoasdgnlk")
         e.printStackTrace()
       }
     }

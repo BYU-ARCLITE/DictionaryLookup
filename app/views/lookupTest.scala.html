@@ -19,6 +19,8 @@
                         <option value = "en">English</option>
                         <option value = "sq">Albanian</option>
                         <option value = "ar">Arabic</option> 
+                        <option value = "ag">Arabic Egyptian</option> 
+                        <option value = "al">Arabic North Levantine</option> 
                         <option value = "hy">Armenian</option>
                         <option value = "be">Belarusian</option>
                         <option value = "bn">Bengali</option>
@@ -36,7 +38,7 @@
                         <option value = "jv">Javanese</option>
                         <option value = "ko">Korean</option>
                         <option value = "lv">Latvian</option>
-                        <option value = "pl">Polishe</option>
+                        <option value = "pl">Polish</option>
                         <option value = "pt">Portuguese</option> 
                         <option value = "ro">Romanian</option>
                         <option value = "ru">Russian</option>
@@ -53,7 +55,8 @@
                     <select id = "secondlanguageselection">
                         <option value = "en">English</option>
                         <option value = "sq">Albanian</option>
-                        <option value = "ar">Arabic</option> 
+                        <option value = "ar">Arabic Egyptian</option> 
+                        <option value = "ar">Arabic Syrian</option> 
                         <option value = "hy">Armenian</option>
                         <option value = "be">Belarusian</option>
                         <option value = "bn">Bengali</option>
@@ -71,7 +74,7 @@
                         <option value = "jv">Javanese</option>
                         <option value = "ko">Korean</option>
                         <option value = "lv">Latvian</option>
-                        <option value = "pl">Polishe</option>
+                        <option value = "pl">Polish</option>
                         <option value = "pt">Portuguese</option> 
                         <option value = "ro">Romanian</option>
                         <option value = "ru">Russian</option>
@@ -91,19 +94,19 @@
         </div>
     </div>
     <div style="width: 60%; float:left;">
-        <div style="margin: 5px; background-color: #fff; min-height: 300px; text-align: center;">
+        <div style="margin: 5px; background-color: #fff; min-height: 300px; text-align: left; padding: 10px;"> 
+        <!--<div style="margin: 5px; background-color: #cc33ff; min-height: 300px; text-align: center;">  -->  
             <h1>Lookup Results</h1>
             <!-- <p id ='partOfSpeech'> </p> -->
             <!-- <p1 id ='wordSearched'></p1>  -->
             <br>
             <p id="Def"></p> 
             <p id="final_translation"></p>
-            <br><br>
-            <div id="attribution"></div>
+            <br>
+            <div id="attribution";  style = "background-color: #FF99E6; height: 50px; align:left; vertical-align:center;"></div>
         </div>
     </div>
 
-    
     <div class="footer">
         Contact us at <a href="mailto:arclitelab@@gmail.com">arclitelab@@gmail.com</a>
     <div>
@@ -128,6 +131,11 @@ function Lookup(){
         srclang = document.getElementById("nativelanguageselection").value,
         dstlang = document.getElementById("secondlanguageselection").value,
         lookupWord = document.getElementById("words_to_translate").value;
+
+//if(data.srclang == "Arabic Egyptian" || data.srclang.text == "Arabic Syrian")
+//{
+alert("Arabic " + srclang + "  ");
+//}
 
     xhr.addEventListener('load',function(){
         var resp;
@@ -179,8 +187,22 @@ function displayResult(data){
 
     switch(data.engine){
     case "Merriam-Webster Inc.":
-        theWebsite = 'Results Provided by Merriam-Webster Inc. <a target =_blank href=http://www.merriam-webster.com/dictionary/'
-            + data.text + '>Link to dictionary entry for "' + data.text + '"</a>';
+        //theWebsite = 'Results Provided by Merriam-Webster Inc. <a target =_blank href=http://www.merriam-webster.com/dictionary/'
+            //+ data.text + '>Link to dictionary entry for "' + data.text + '"</a>';
+
+                var  logoURL = "http://www.dictionaryapi.com/images/info/branding-guidelines/mw-logo-light-background-50x50.png";
+
+               if((data.srcLang==="en") || (data.destLang==="en")){
+                   theWebsite =    '<img src="' + logoURL + '" style="float:left; margin-right:25px"> </img> <p style="vertical-align: middle; height:50px;">Results Provided by Merriam-Webster Inc.<br><a href="http://www.google.com"> Link to dictionary entry for  </a> </p>';
+                 //   //theWebsite = '<a href="http://www.spanishcentral.com/translate/' + data.text + '" target="Merriam-Webster">'
+                  //  theWebsite = '<img src="' + logoURL + '" align = "left"></img>'</a></div>' '<a href="http://www.spanishcentral.com/translate/' + data.text + '" target="Merriam-Webster">'
+                   //     + data.text +' at SpanishCentral.com </a>';
+                        //+ '<br/>Merriam-Webster\'s Spanish-English Dictionary '
+                        //+ '<div class="merriamLogo"><a href="http://www.spanishcentral.com/translate/'
+                        //+ data.text + '" target="Merriam-Webster"> <img src="' + logoURL + '"></img></a></div>';
+                        //+ data.text + '" target="Merriam-Webster">"';
+                }
+
         break;
     case "WordReference":
         theWebsite = 'Results Provided WordReference <a target =_blank href=http://www.wordreference.com/'
@@ -215,3 +237,26 @@ function displayResult(data){
     </body>
 </html>
 }
+
+<!--
+ if((data.srcLang==="es") || (data.destLang==="es")){
+                    theWebsite = '<a href="http://www.spanishcentral.com/translate/' + data.text + '" target="Merriam-Webster">'
+                    theWebsite = '<img src="' + logoURL + '" align = "left"></img></a></div>' '<a href="http://www.spanishcentral.com/translate/' + data.text + '" target="Merriam-Webster">'
+                        + data.text +' at SpanishCentral.com </a>'
+                        + '<br/>Merriam-Webster\'s Spanish-English Dictionary '
+                        + '<div class="merriamLogo"><a href="http://www.spanishcentral.com/translate/'
+                        + data.text + '" target="Merriam-Webster"> <img src="' + logoURL + '"></img></a></div>';
+                        + data.text + '" target="Merriam-Webster">"';
+                }
+                if((data.srcLang==="en") && (data.destLang==="en")){
+                    theWebsite = '<a href="http://www.merriam-webster.com/dictionary/' + data.text + '" target="Merriam-Webster">'
+                    theWebsite = '<img src="' + logoURL + '" align = "left"></img></a></div>' + '<a href="http://www.merriam-webster.com/dictionary/' + data.text + '" target="Merriam-Webster">'
+                        + data.text +' at Merriam-Webster.com </a>'
+                        + '<br/> Merriam-Webster\'s Collegiate® Dictionary <br/>'
+                        + '<div class="merriamLogo"><a href="http://www.merriam-webster.com/dictionary/'
+                        + data.text + '" target="Merriam-Webster"><img src="' + logoURL + '"></img></a></div>';
+                        + data.text + '" target="Merriam-Webster">"'
+                        ;
+                }
+
+-->
