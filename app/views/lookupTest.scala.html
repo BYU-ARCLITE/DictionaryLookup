@@ -12,7 +12,7 @@
         <div style="margin: 5px; background-color: #fff; height: 325px; text-align: left; padding: 10px;">
             <h1>Look Up Test</h1>
             <form action="javascript:checkIfEmpty();"> 
-                <label>Word or Phrase to be Translated: <input type="text" id="words_to_translate" /></label>
+                <label>Word or Phrase to be Translated: <input type="text" id="words_to_translate"/></label>
                 <br><br>
                 <label> Source Language:
                     <select id = "nativelanguageselection">
@@ -192,7 +192,7 @@ function displayResult(data){
                 var  logoURL = "http://www.dictionaryapi.com/images/info/branding-guidelines/mw-logo-light-background-50x50.png";
 
                if((data.srcLang==="en") || (data.destLang==="en")){
-                   theWebsite =    '<img src="' + logoURL + '" style="float:left; margin-right:25px"> </img> <p style="vertical-align: middle; height:50px;">Results Provided by Merriam-Webster Inc.<br><a href="http://www.google.com"> Link to dictionary entry for' + data.text + '</a> </p>';
+                   theWebsite =    '<img src="' + logoURL + '" style="float:left; margin-right:25px"> </img> <p style="vertical-align: middle; height:50px;">Results Provided by Merriam-Webster Inc.<br><a href=http://www.merriam-webster.com/dictionary/' + data.text + ' target = _blank> Link to dictionary entry for ' + data.text + '</a> </p>';
                }
                  //   //theWebsite = '<a href="http://www.spanishcentral.com/translate/' + data.text + '" target="Merriam-Webster">'
                   //  theWebsite = '<img src="' + logoURL + '" align = "left"></img>'</a></div>' '<a href="http://www.spanishcentral.com/translate/' + data.text + '" target="Merriam-Webster">'
@@ -202,8 +202,8 @@ function displayResult(data){
                         //+ data.text + '" target="Merriam-Webster"> <img src="' + logoURL + '"></img></a></div>';
                         //+ data.text + '" target="Merriam-Webster">"';
 
-                else if((data.srcLang==="es") || (data.destLang==="es"))
-                {}
+                else if((data.srcLang==="es") || (data.destLang==="es")){
+                    theWebsite =    '<img src="' + logoURL + '" style="float:left; margin-right:25px"> </img> <p style="vertical-align: middle; height:50px;">Results Provided by Merriam-Webster Inc.<br><a href=http://www.spanishcentral.com/translate/' + data.text + ' target = _blank> Link to dictionary entry for ' + data.text + '</a> </p>';}
 
         break;
     case "WordReference":
