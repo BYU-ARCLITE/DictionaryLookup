@@ -99,6 +99,7 @@ object LookupGlosbe extends Translator {
 
     if (upgrdSrc != None && upgrdDest != None)
         requestEntries(upgrdSrc.get, upgrdDest.get, text)
-    else None
+    else {play.Logger.debug("Nothing found from Glosbe") 
+    None} 
   }
 }

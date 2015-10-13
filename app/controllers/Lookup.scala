@@ -16,9 +16,12 @@ object Lookup extends Controller {
                         "WWWJDIC" -> LookupWWWJDIC,
                         "WordReference" -> LookupWordReference,
                         "MerriamWebster" -> LookupMerriamWebster,
+                        //"Collins" -> LookupCollins,
                         "Glosbe" -> LookupGlosbe,
                         "SeaLang" -> LookupSeaLang,
-                        "GoogleTranslate" -> LookupGoogle )
+                        "GoogleTranslate" -> LookupGoogle 
+                        //"Madamira" -> LookupMadamira  
+                        )
 
   def getFirst(user: User, srcLang: String, destLang: String, text: String): Option[TResult] = {
     for(name <- user.getServices; t <- serviceMap.get(name)) try {
@@ -46,6 +49,7 @@ object Lookup extends Controller {
   }
 
   def lookup(opts: Map[String, Seq[String]], user: User) = (try {
+    play.Logger.debug(opts.toString)
     val srcLang = opts("srcLang")(0)
     val destLang = opts("destLang")(0)
     val text = opts("word")(0)

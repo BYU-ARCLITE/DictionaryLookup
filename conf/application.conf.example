@@ -42,6 +42,9 @@ dictionary.expiration = 10 minutes
 # User defaults
 user.servicelist = ["BYUDictionaries","WordReference","MerriamWebster","Glosbe","WWWJDIC","SeaLang","GoogleTranslate"]
 
+# Madamira Service
+services.madamira = http://localhost:8223
+
 # Database configuration
 # ~~~~~ 
 # You can declare as many datasources as you want.
