@@ -1,5 +1,6 @@
 package controllers
 
+import models.{User, ServiceLog}
 import java.net.URLEncoder
 import scala.concurrent.{ExecutionContext, Future, Await}
 import scala.concurrent.duration._
@@ -93,7 +94,7 @@ object LookupGlosbe extends Translator {
   /**
    * Endpoint for translating via Glosbe
    */
-  def translate(src: String, dest: String, text: String) = {
+  def translate(user: User, src: String, dest: String, text: String) = {
     val upgrdSrc = upgradeLangCode(src)
     val upgrdDest = upgradeLangCode(dest)
 

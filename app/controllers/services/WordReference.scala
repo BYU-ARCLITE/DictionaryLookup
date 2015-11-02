@@ -1,5 +1,6 @@
 package controllers
 
+import models.{User, ServiceLog}
 import java.net.URLEncoder
 import scala.concurrent.{ExecutionContext, Future, Await}
 import scala.concurrent.duration._
@@ -72,7 +73,7 @@ object LookupWordReference extends Translator {
   /**
    * Endpoint for translating via WordReference
    */
-  def translate(src: String, dest: String, text: String) = {
+  def translate(user: User, src: String, dest: String, text: String) = {
     if(whitespace.findFirstIn(text).isDefined) None
     else for {
       key <- wordReferenceKey

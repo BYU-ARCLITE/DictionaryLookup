@@ -19,15 +19,15 @@ object Lookup extends Controller {
                         //"Collins" -> LookupCollins,
                         "Glosbe" -> LookupGlosbe,
                         "SeaLang" -> LookupSeaLang,
-                        "GoogleTranslate" -> LookupGoogle 
-                        //"Madamira" -> LookupMadamira  
+                        "GoogleTranslate" -> LookupGoogle, 
+                        "Madamira" -> LookupMadamira  
                         )
 
-  def getFirst(user: User, srcLang: String, destLang: String, text: String): Option[TResult] = {
-    for(name <- user.getServices; t <- serviceMap.get(name)) try {
+  def getFirst(user: User, srcLang: String, destLang: String, text: String, exclusions: Set[String] = Set() ): Option[TResult] = {
+    for(name <- user.getServices if !exclusions.contains(name); t <- serviceMap.get(name) ) try {
       Logger.info("Checking "+name)
       play.Logger.debug(srcLang+ destLang+ text) 
-      t.translate(srcLang, destLang, text) match {
+      t.translate(user, srcLang, destLang, text) match {
         case Some(res) =>
           play.Logger.debug("first")
           ServiceLog.record(user, srcLang, destLang, text, name, true)
@@ -41,7 +41,7 @@ object Lookup extends Controller {
     } catch {
       case e: ControlThrowable => throw e
       case e: Throwable => {
-        Logger.debug(e.getMessage + " SAntiagoasdgnlk")
+        Logger.debug(e.getMessage)
         e.printStackTrace()
       }
     }

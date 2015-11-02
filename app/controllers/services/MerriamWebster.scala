@@ -1,5 +1,6 @@
 package controllers
 
+import models.{User, ServiceLog}
 import scala.concurrent.{ExecutionContext, Future, Await}
 import scala.concurrent.duration._
 import play.api.libs.json._
@@ -28,14 +29,20 @@ object LookupMerriamWebster extends Translator {
     val response = (XMLDoc \\ "entry_list") 
 
     val defList : Seq[String] = for {
+      //entry <- response \\ "entry"
       entry <- response \\ "entry"
       //pos <- entry \\ "fl"
-      defins <- entry \\ "dt"
+     defins <- entry \\ "def"
       } yield {   
         val word = (entry \\ headWordTag).text
-        val wav = (entry \\ "wav").text
+        //val wav = (entry \\ "wav").text
+
         val defns = defins.text
-        "(" + word + ")" + defns 
+        //val dog = defns.replace("th century", "th century <br>")
+        //dog
+        val dog = defns.replace("<br>", "")
+        dog        
+        //defns
     }
 
     val partOfSpeechList : Seq[String] = for {
@@ -43,7 +50,8 @@ object LookupMerriamWebster extends Translator {
       } 
       yield{
         val ps = pos.text 
-        ps
+        //"PART OF SPEECH  " + ps
+        ""
       }
 
     val ipaList : Seq[String] = for {
@@ -51,7 +59,8 @@ object LookupMerriamWebster extends Translator {
     }
     yield {
       val ipA = ipa.text  
-      ipA
+      //"IPA!!!!!!  " + ipA
+      ""
     }
 
     def isNum(item:String) : Boolean = {
@@ -87,7 +96,7 @@ object LookupMerriamWebster extends Translator {
     val partOfSpeech : Seq[String] = Seq[String](partOfSpeechList(0))
     val ipa : Seq[String] = Seq[String](ipaList(0))
 
-    ipa ++ partOfSpeech ++ exampleSound ++ definitions
+    /*ipa ++ partOfSpeech*/exampleSound ++ definitions
     
     /*val exampleSound : Seq[String] = if(sound.length > 0)
         {"<br/>Audio Examples:" +: sound} else {sound}
@@ -98,7 +107,7 @@ object LookupMerriamWebster extends Translator {
   /**
    * Endpoint for translating via merriamWebster
    */
-  def translate(src: String, dest: String, text: String) = {
+  def translate(user: User, src: String, dest: String, text: String) = {
     if((src == "es" && dest == "en") || (src == "en" && dest == "es")){
       merriamWebsterSpanishKey.flatMap { key => 
         val url = "http://www.dictionaryapi.com/api/v1/references/spanish/xml/" + text.replaceAll("[^\\p{L}\\p{Nd}]+", "%20").trim +"?key="+key
