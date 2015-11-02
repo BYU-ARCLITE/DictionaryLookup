@@ -1,5 +1,6 @@
 package controllers
 
+import models.{User, ServiceLog}
 import scala.concurrent.{ExecutionContext, Future, Await}
 import scala.concurrent.duration._
 import play.api.libs.json._
@@ -15,7 +16,7 @@ object LookupGoogle extends Translator {
   /**
    * Endpoint for translating via Google
    */
-  def translate(src: String, dest: String, text: String) = {
+  def translate(user: User, src: String, dest: String, text: String) = {
     googleKey.flatMap { key =>
       val query = WS.url("https://www.googleapis.com/language/translate/v2")
         .withQueryString("source" -> src, "target" -> dest, "q" -> text, "key" -> key).get()

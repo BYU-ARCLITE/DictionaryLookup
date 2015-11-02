@@ -1,5 +1,6 @@
 package controllers
 
+import models.{User, ServiceLog}
 import java.net.URLEncoder
 import scala.concurrent.{ExecutionContext, Future, Await}
 import scala.concurrent.duration._
@@ -37,7 +38,7 @@ object LookupSeaLang extends Translator {
    * Tried to Implement English to Russian Translations, but the api returns a horrid response that is inconsistent
    * This function is here in case the api ever gets updated
    */
-  def englishToRussian(src: String, dest: String, text: String) = {
+  def englishToRussian(user: User, src: String, dest: String, text: String) = {
     None
   }
 
@@ -46,7 +47,7 @@ object LookupSeaLang extends Translator {
   * TODO: After evaluation by users, possibly remove if it is too cumbersome to view.
   *       Similar problem to function englishToRussian(src: String, dest: String, text: String)
   */
-  def russianToEnglish(src: String, dest: String, text: String):Option[Seq[String]] = {
+  def russianToEnglish(user: User, src: String, dest: String, text: String):Option[Seq[String]] = {
     val query = WS.url("http://www.sealang.net/russtest/api.pl")
     .withQueryString("service" -> "dictionary", "query" -> text, "format" -> "json", "phrase" -> text,
                      "number" -> "5", "fold" -> "yes", "resource" -> "l1l2","encode" -> "unicode").get()
@@ -61,6 +62,7 @@ object LookupSeaLang extends Translator {
       else {
         val definitions = grabTranslations(entries)
 
+
         val source = src
         val destination = dest
         val dagan = List()
@@ -69,11 +71,13 @@ object LookupSeaLang extends Translator {
           if( defini.contains("см. также") )
             {
               defini.replace("см. также", "")
-              dagan :+ russianToEnglish(source, destination, defini)
+              //dagan :+ russianToEnglish(source, destination, defini)
+              Lookup.getFirst(user, src, dest, defini)
             }
-            else{dagan :+ defini}
+            else{defini}
         }
-        
+
+
         if (definitions.size != 0) {
           val temp = for { defin <- dagan } yield {
             "<b>" + text + ":</b><br/>" + defin
@@ -90,7 +94,7 @@ object LookupSeaLang extends Translator {
   /**
    * Specifically Handles Russian Definitions
    */
-  def russianToRussian(src: String, dest: String, text: String) = {
+  def russianToRussian(user: User, src: String, dest: String, text: String) = {
     val query = WS.url("http://www.sealang.net/russtest/api.pl")
     .withQueryString("service" -> "dictionary", "query" -> text, "format" -> "json", "phrase" -> text,
                      "number" -> "5", "fold" -> "yes", "encode" -> "unicode").get()
@@ -122,16 +126,16 @@ object LookupSeaLang extends Translator {
   /**
    * Endpoint for translating via SeaLang
    */
-  def translate(src: String, dest: String, text: String) = {
+  def translate(user: User, src: String, dest: String, text: String) = {
     val langVal = Map( "en" -> 1, "ru" -> 2).withDefaultValue(0)
 
     if(langVal(src) + langVal(dest) < 3) None
     else if (langVal(src) == 1) {          // English to Russian Translation
-      englishToRussian(src, dest, text)
+      englishToRussian(user, src, dest, text)
     } else if (langVal(dest) == 1){        // Russian to English Translation
-      russianToEnglish(src, dest, text)
+      russianToEnglish(user, src, dest, text)
     } else {                               // Russian To Russian
-      russianToRussian(src, dest, text)
+      russianToRussian(user, src, dest, text)
     }
   }
 }
