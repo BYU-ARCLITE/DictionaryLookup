@@ -50,8 +50,7 @@ object LookupMerriamWebster extends Translator {
       } 
       yield{
         val ps = pos.text 
-        //"PART OF SPEECH  " + ps
-        ""
+        "PART OF SPEECH  " + ps
       }
 
     val ipaList : Seq[String] = for {
@@ -59,8 +58,7 @@ object LookupMerriamWebster extends Translator {
     }
     yield {
       val ipA = ipa.text  
-      //"IPA!!!!!!  " + ipA
-      ""
+      "IPA!!!!!!  " + ipA
     }
 
     def isNum(item:String) : Boolean = {
@@ -96,7 +94,7 @@ object LookupMerriamWebster extends Translator {
     val partOfSpeech : Seq[String] = Seq[String](partOfSpeechList(0))
     val ipa : Seq[String] = Seq[String](ipaList(0))
 
-    /*ipa ++ partOfSpeech*/exampleSound ++ definitions
+    /*ipa ++ partOfSpeech ++*/  exampleSound ++ definitions
     
     /*val exampleSound : Seq[String] = if(sound.length > 0)
         {"<br/>Audio Examples:" +: sound} else {sound}
