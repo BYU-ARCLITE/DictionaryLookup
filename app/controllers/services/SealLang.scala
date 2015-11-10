@@ -48,6 +48,7 @@ object LookupSeaLang extends Translator {
   *       Similar problem to function englishToRussian(src: String, dest: String, text: String)
   */
   def russianToEnglish(user: User, src: String, dest: String, text: String):Option[Seq[String]] = {
+    play.Logger.debug("SANTI IS RIGHT")
     val query = WS.url("http://www.sealang.net/russtest/api.pl")
     .withQueryString("service" -> "dictionary", "query" -> text, "format" -> "json", "phrase" -> text,
                      "number" -> "5", "fold" -> "yes", "resource" -> "l1l2","encode" -> "unicode").get()
@@ -60,26 +61,35 @@ object LookupSeaLang extends Translator {
 
       if (entries.size == 0) None
       else {
-        val definitions = grabTranslations(entries)
+        var definitions = grabTranslations(entries)
 
 
         val source = src
         val destination = dest
-        val dagan = List()
+        //var result = Option[(String, Int, Seq[String])]()
+        var result = Seq[String]()
+
         definitions.foreach {
           defini =>
           if( defini.contains("см. также") )
             {
-              defini.replace("см. также", "")
+              var definit = ""
+              if (defini.contains("v см. также"))
+              {
+                definit = defini.replace("v см. также", "") 
+              }
+              else
+              {
+                definit = defini.replace("см. также", "")
+              }
               //dagan :+ russianToEnglish(source, destination, defini)
-              Lookup.getFirst(user, src, dest, defini)
+              result ++ Lookup.getFirst(user, src, dest, definit).get._3
             }
-            else{defini}
+            else{result ++ definitions}
         }
-
-
-        if (definitions.size != 0) {
-          val temp = for { defin <- dagan } yield {
+      
+        if (result.size != 0) {
+          val temp = for { defin <- definitions } yield {
             "<b>" + text + ":</b><br/>" + defin
           }
           // Limit the translation to five definitions so that it does not get overbearing
