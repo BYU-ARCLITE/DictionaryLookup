@@ -48,7 +48,6 @@ object LookupSeaLang extends Translator {
   *       Similar problem to function englishToRussian(src: String, dest: String, text: String)
   */
   def russianToEnglish(user: User, src: String, dest: String, text: String):Option[Seq[String]] = {
-    play.Logger.debug("SANTI IS RIGHT")
     val query = WS.url("http://www.sealang.net/russtest/api.pl")
     .withQueryString("service" -> "dictionary", "query" -> text, "format" -> "json", "phrase" -> text,
                      "number" -> "5", "fold" -> "yes", "resource" -> "l1l2","encode" -> "unicode").get()
@@ -83,7 +82,8 @@ object LookupSeaLang extends Translator {
                 definit = defini.replace("см. также", "")
               }
               //dagan :+ russianToEnglish(source, destination, defini)
-              result ++ Lookup.getFirst(user, src, dest, definit).get._3
+              //result = Lookup.getFirst(user, src, dest, definit).get._3 ++ result
+              result = result
             }
             else{result ++ definitions}
         }
