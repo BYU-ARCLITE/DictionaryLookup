@@ -131,12 +131,22 @@ function Lookup(){
 
     xhr.addEventListener('load',function(){
         var resp;
-        if(xhr.status >= 400){
+        /*if(xhr.status >= 400){
             alert("Error, you have incorrect key");
             console.log(xhr.responseText);
             return;
         }
-
+        */
+        if(xhr.status == 401){
+            alert("Error, you have incorrect key");
+            console.log(xhr.responseText);
+            return;
+        }
+        else if (xhr.status == 404) {
+            alert("Error, Requested from a resource that does not exist");
+            console.log(xhr.responseText);
+            return
+        }    
         resp = JSON.parse(xhr.responseText);
         if(resp.entries === void 0){  // Make sure we actually received translations
             alert("No data recieved"); 
