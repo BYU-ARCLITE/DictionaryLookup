@@ -1,12 +1,13 @@
 package controllers
 
-import models.{User, ServiceLog}
+import models.User
 import edu.byu.arclite.dictionary.DictionaryCache
 
 object LookupBYU extends Translator {
 
   val name = "BYU Dictionaries"
   val expiration = Utils.getExpiration("byu")
+  val codeFormat = 'iso639_1
 
   /**
    * Endpoint for translating via BYU Dictionaries

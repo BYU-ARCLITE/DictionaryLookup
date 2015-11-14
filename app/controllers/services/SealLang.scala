@@ -1,6 +1,6 @@
 package controllers
 
-import models.{User, ServiceLog}
+import models.User
 import java.net.URLEncoder
 import scala.concurrent.{ExecutionContext, Future, Await}
 import scala.concurrent.duration._
@@ -25,6 +25,7 @@ object LookupSeaLang extends Translator {
 
   val name = "SeaLang"
   val expiration = Utils.getExpiration("seaLang")
+  val codeFormat = 'iso639_3
 
   /* Grabs all the direct Translations */
   def grabTranslations(json:Seq[JsValue]) : Seq[String] = {
@@ -137,15 +138,12 @@ object LookupSeaLang extends Translator {
    * Endpoint for translating via SeaLang
    */
   def translate(user: User, src: String, dest: String, text: String) = {
-    val langVal = Map( "en" -> 1, "ru" -> 2).withDefaultValue(0)
-
-    if(langVal(src) + langVal(dest) < 3) None
-    else if (langVal(src) == 1) {          // English to Russian Translation
+    if (src == "eng" && dest == "rus") {         // English to Russian Translation
       englishToRussian(user, src, dest, text)
-    } else if (langVal(dest) == 1){        // Russian to English Translation
+    } else if (src == "rus" && dest == "eng"){   // Russian to English Translation
       russianToEnglish(user, src, dest, text)
-    } else {                               // Russian To Russian
+    } else if (src == "rus" && dest == "rus"){   // Russian To Russian
       russianToRussian(user, src, dest, text)
-    }
+    } else None
   }
 }

@@ -11,14 +11,18 @@ import ExecutionContext.Implicits.global
 object LookupMadamira extends Translator {
   val name = "Madamira"
   val expiration = Utils.getExpiration("Madamira")
+  val codeFormat = 'iso639_3
+
   val madamiraURL = configuration.getString("services.madamira")
+  val dialects = Map("ara" -> "MSA",
+					 "arz" -> "EGY")
+
   /**
    * Endpoint for translating via Madamira
    */
 
   def translate(user: User, src: String, dest: String, text: String) = {
-      val dialect = if (src == "arz") "EGY"
-      else "MSA"
+      val dialect = if (src == "arz") "EGY" else "MSA"
 
       val inputXmlData = 
        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"  + 

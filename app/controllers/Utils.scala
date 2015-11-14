@@ -6,6 +6,7 @@ import play.api.Play.{current, configuration}
 trait Translator {
   val name: String
   val expiration: Int
+  val codeFormat: Symbol
 
   /**
    * Endpoint for translating
