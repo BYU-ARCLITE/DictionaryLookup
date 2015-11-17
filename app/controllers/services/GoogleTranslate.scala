@@ -11,7 +11,7 @@ import ExecutionContext.Implicits.global
 object LookupGoogle extends Translator {
   val name = "Google Translate"
   val expiration = Utils.getExpiration("google")
-  val codeFormat = 'iso639_1
+  val codeFormat = 'googleCodes
   val googleKey = configuration.getString("google.key")
 
   /**
