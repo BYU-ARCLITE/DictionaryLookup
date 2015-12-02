@@ -26,7 +26,7 @@ object Lookup extends Controller {
   def getFirst(user: User, srcLang: String, destLang: String, text: String, exclusions: Set[String] = Set() ): Option[TResult] = {
     for(name <- user.getServices if !exclusions.contains(name); t <- serviceMap.get(name) ) try {
       Logger.info("Checking "+name)
-      play.Logger.debug(srcLang+ destLang+ text) 
+      //play.Logger.debug(srcLang+ destLang+ text) 
       t.translate(user, srcLang, destLang, text) match {
         case Some(res) =>
           play.Logger.debug("first "+name)
