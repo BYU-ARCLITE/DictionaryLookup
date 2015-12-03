@@ -29,9 +29,7 @@ object Lookup extends Controller {
       //play.Logger.debug(srcLang+ destLang+ text) 
       t.translate(user, srcLang, destLang, text) match {
         case Some(res) =>
-          play.Logger.debug("first "+name)
           ServiceLog.record(user, srcLang, destLang, text, name, true)
-          play.Logger.debug("second "+name)
           return Some((t.name,t.expiration,res))
         case None =>{
         play.Logger.debug("third "+name)
