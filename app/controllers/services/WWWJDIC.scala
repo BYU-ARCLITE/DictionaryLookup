@@ -1,6 +1,6 @@
 package controllers
 
-import models.{User, ServiceLog}
+import models.User
 import java.net.URLEncoder
 import scala.concurrent.{ExecutionContext, Future, Await}
 import scala.concurrent.duration._
@@ -25,6 +25,8 @@ object LookupWWWJDIC extends Translator {
 
   val name = "WWWJDIC"
   val expiration = Utils.getExpiration("WWWJDIC")
+  val codeFormat = 'iso639_1
+
   /** Maps the languages to the dictionary letter **/
   val dictionaries = Map("en" -> "1",
                          "de" -> "G",
@@ -35,7 +37,7 @@ object LookupWWWJDIC extends Translator {
                          "es" -> "L",
                          "nl" -> "M",
                          "sl" -> "N",
-                         "it" -> "O").withDefaultValue("None")
+                         "it" -> "O")
   /**
    *  Translate To and From Japanese for all of the languages in the list above.
    *  Uses the xml.Elem and XML class
@@ -73,15 +75,13 @@ object LookupWWWJDIC extends Translator {
 
   def translate(user: User, src: String, dest: String, text: String) = {
     if (src == "ja") {
-      if (dictionaries(dest) != "None") {
-        getTranslations(text, dictionaries(dest))
-      } else None
-    }
-    else if (dest == "ja") {
-      if (dictionaries(src) != "None") {
-        getTranslations(text, dictionaries(src))
-      } else None
-    }
-    else None
+      dictionaries.get(dest).flatMap { dcode =>
+        getTranslations(text, dcode)
+      }
+    } else if (dest == "ja") {
+      dictionaries.get(src).flatMap { dcode =>
+        getTranslations(text, dcode)
+      }
+    } else None
   }
 }

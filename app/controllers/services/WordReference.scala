@@ -1,6 +1,6 @@
 package controllers
 
-import models.{User, ServiceLog}
+import models.User
 import java.net.URLEncoder
 import scala.concurrent.{ExecutionContext, Future, Await}
 import scala.concurrent.duration._
@@ -13,10 +13,13 @@ object LookupWordReference extends Translator {
   //See http://www.wordreference.com/docs/api.aspx
   val name = "WordReference"
   val expiration = Utils.getExpiration("wordReference")
+  val codeFormat = 'iso639_1
+
   val wordReferenceKey = configuration.getString("wordReference.key")
   val TranslationList = List("FirstTranslation", "SecondTranslation", "ThirdTranslations", "FourthTranslation")
   val PartsList = List("Entries","PrincipalTranslations","AdditionalTranslations")
   val whitespace = "\\s".r
+
   val codeMap = Map(
     "ar" -> "ar", //Arabic
     "zh" -> "zh", //Chinese

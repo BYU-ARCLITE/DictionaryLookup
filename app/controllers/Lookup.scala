@@ -23,11 +23,21 @@ object Lookup extends Controller {
                         "Madamira" -> LookupMadamira  
                         )
 
-  def getFirst(user: User, srcLang: String, destLang: String, text: String, exclusions: Set[String] = Set() ): Option[TResult] = {
-    for(name <- user.getServices if !exclusions.contains(name); t <- serviceMap.get(name) ) try {
+  def getFirst(
+    user: User, format: Symbol,
+    srcLang: String, destLang: String,
+	text: String, exclusions: Set[String] = Set()
+  ): Option[TResult] = {
+    for {
+	  name <- user.getServices if !exclusions.contains(name)
+	  t <- serviceMap.get(name)
+	  tsrc <- LangCodes.convert(format, t.codeFormat, srcLang)
+	  tdst <- LangCodes.convert(format, t.codeFormat, destLang)
+	} try {
       Logger.info("Checking "+name)
-      //play.Logger.debug(srcLang+ destLang+ text) 
-      t.translate(user, srcLang, destLang, text) match {
+      play.Logger.debug(srcLang+ destLang+ text)
+
+      t.translate(user, tsrc, tdst, text) match {
         case Some(res) =>
           ServiceLog.record(user, srcLang, destLang, text, name, true)
           return Some((t.name,t.expiration,res))
@@ -47,13 +57,13 @@ object Lookup extends Controller {
   }
 
   def lookup(opts: Map[String, Seq[String]], user: User) = (try {
-    play.Logger.debug(opts.toString)
     val srcLang = opts("srcLang")(0)
     val destLang = opts("destLang")(0)
+	val format = 'iso639_3
     val text = opts("word")(0)
     val key = s"$srcLang-$destLang:$text"
     Cache.getAs[JsObject](key).map(json => Ok(json)).getOrElse {
-      getFirst(user, srcLang, destLang, text) match {
+      getFirst(user, format, srcLang, destLang, text) match {
         case Some((name,exp,tseq)) => {
           val response = Json.obj(
             "success" -> true,

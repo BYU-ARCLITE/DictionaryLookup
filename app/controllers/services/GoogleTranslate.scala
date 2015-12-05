@@ -1,6 +1,6 @@
 package controllers
 
-import models.{User, ServiceLog}
+import models.User
 import scala.concurrent.{ExecutionContext, Future, Await}
 import scala.concurrent.duration._
 import play.api.libs.json._
@@ -11,6 +11,7 @@ import ExecutionContext.Implicits.global
 object LookupGoogle extends Translator {
   val name = "Google Translate"
   val expiration = Utils.getExpiration("google")
+  val codeFormat = 'googleCodes
   val googleKey = configuration.getString("google.key")
 
   /**

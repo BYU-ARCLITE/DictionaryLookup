@@ -15,6 +15,8 @@ import java.net.URL;
 object LookupMerriamWebster extends Translator {
   val name = "Merriam-Webster Inc."
   val expiration = Utils.getExpiration("merriamWebster")
+  val codeFormat = 'iso639_3
+
   val merriamWebsterSpanishKey = configuration.getString("merriamWebster.spanishKey")
   val merriamWebsterCollegiateKey = configuration.getString("merriamWebster.collegiateKey")
 
@@ -106,7 +108,7 @@ object LookupMerriamWebster extends Translator {
    * Endpoint for translating via merriamWebster
    */
   def translate(user: User, src: String, dest: String, text: String) = {
-    if((src == "es" && dest == "en") || (src == "en" && dest == "es")){
+    if((src == "spa" && dest == "eng") || (src == "eng" && dest == "spa")){
       merriamWebsterSpanishKey.flatMap { key => 
         val url = "http://www.dictionaryapi.com/api/v1/references/spanish/xml/" + text.replaceAll("[^\\p{L}\\p{Nd}]+", "%20").trim +"?key="+key
         val result = Await.result(WS.url(url).get(), Duration.Inf)
@@ -121,7 +123,7 @@ object LookupMerriamWebster extends Translator {
           }
       }
     }
-    else if(src == "en" && dest == "en"){
+    else if(src == "eng" && dest == "eng"){
       merriamWebsterCollegiateKey.flatMap { key => 
         val url =  "http://www.dictionaryapi.com/api/v1/references/collegiate/xml/" + text.replaceAll("[^\\p{L}\\p{Nd}]+", "%20").trim +"?key="+key
         val result = Await.result(WS.url(url).get(), Duration.Inf)

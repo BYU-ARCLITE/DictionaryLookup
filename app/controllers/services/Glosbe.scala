@@ -1,6 +1,6 @@
 package controllers
 
-import models.{User, ServiceLog}
+import models.User
 import java.net.URLEncoder
 import scala.concurrent.{ExecutionContext, Future, Await}
 import scala.concurrent.duration._
@@ -14,7 +14,7 @@ object LookupGlosbe extends Translator {
   /**
    * Glosbe Terms of Service
    *     API is free to use, regarding indicated data source license. There is a limit of calls
-   *     that may be done from one IP in fixed period of time, to prevent from abuse. 
+   *     that may be done from one IP in fixed period of time, to prevent from abuse.
    *     The limit is not strict, there is heuristics that guesses whether queries comes from robot or human.
    *     If there are too many queries or they look non-human – IP gets blocked.
    *     If you are a developer and such case happens: please contact us.
@@ -27,6 +27,7 @@ object LookupGlosbe extends Translator {
 
   val name = "Glosbe"
   val expiration = Utils.getExpiration("glosbe")
+  val codeFormat = 'iso639_3
 
   /* Grabs all the direct Translations */
   def grabTranslations(json:Seq[JsObject], text:String) : Seq[String] = {
@@ -38,7 +39,7 @@ object LookupGlosbe extends Translator {
 
   /**
    * Grabs all the definitions with the direct translations
-   * Limits to 5 definitions, otherwise it is cumbersome to read 
+   * Limits to 5 definitions, otherwise it is cumbersome to read
    */
   def grabPhrase(json:Seq[JsObject], text:String) : Seq[String] = {
   for { tuc <- json } yield {
@@ -53,23 +54,22 @@ object LookupGlosbe extends Translator {
           val result = (text\ "text").asOpt[String]
           result getOrElse " "
         }
-        
+
         if (defs.distinct == Seq("")) ""
         else ("<b>(" + word.getOrElse(text + "</b> - original text<b>") + ")</b><br>" + defs.distinct.slice(0,2).mkString("<br>"))
     }
   }
 
   /**
-   * Makes request to Glosbe Api, then creates a Seq[String] from a valid response
+   * Endpoint for translating via Glosbe
    */
-  def requestEntries(scode: String, dcode: String, text: String) = {
-
+  def translate(user: User, src: String, dest: String, text: String) = {
     val query = WS.url("http://glosbe.com/gapi/translate")
-        .withQueryString("from" -> scode, "dest" -> dcode, "format" -> "json", "phrase" -> text).get()
+        .withQueryString("from" -> src, "dest" -> dest, "format" -> "json", "phrase" -> text).get()
     val result = Await.result(query, Duration.Inf)
     val json = result.json.as[JsObject]
 
-    /* Glosbe gives own status, but at this point in time, it seems glitchy
+    /* Glosbe gives own status, but it seems glitchy.
      * When it gets better, it may be beneficial to use it. See Below:
      *  println("Result -> " + (json\"result").as[String])
      */
@@ -79,28 +79,18 @@ object LookupGlosbe extends Translator {
         val tuc = (json\ "tuc").asOpt[Seq[JsObject]]
         if (tuc == None) None
         else {
-            val trans : String = grabTranslations(tuc.get,text).filterNot(w=>w=="").mkString(", ")
-            val defs : Seq[String]= grabPhrase(tuc.get, text).filterNot(w => w=="")
+            val trans : String = grabTranslations(tuc.get, text).filterNot(_ == "").mkString(", ")
+            val defs : Seq[String]= grabPhrase(tuc.get, text).filterNot(_ == "")
 
-            val addTransTitle = if (trans.length > 0) ("<b><i>Translations:</i></b><br>"+trans+"<br><br>") else ""
-
-            if (defs.isEmpty && (addTransTitle == "")) None
-            else if (defs.isEmpty) Some(Seq(addTransTitle))
-            else Some((defs.updated(0, addTransTitle + "<b><i>Definitions:</i></b><br>" + defs(0))).filterNot(w=>w=="").slice(0,5))
+            if (trans.length == 0) {
+              if (defs.isEmpty) None
+              else Some((defs.updated(0, "<b><i>Definitions:</i></b><br>" + defs(0))).filterNot(_ == "").slice(0,5))
+            } else {
+              val addTransTitle = "<b><i>Translations:</i></b><br>"+trans+"<br><br>"
+              if (defs.isEmpty) Some(Seq(addTransTitle))
+              else Some((defs.updated(0, addTransTitle + "<b><i>Definitions:</i></b><br>" + defs(0))).filterNot(_ == "").slice(0,5))
+            }
         }
     }
-  }
-
-  /**
-   * Endpoint for translating via Glosbe
-   */
-  def translate(user: User, src: String, dest: String, text: String) = {
-    val upgrdSrc = upgradeLangCode(src)
-    val upgrdDest = upgradeLangCode(dest)
-
-    if (upgrdSrc != None && upgrdDest != None)
-        requestEntries(upgrdSrc.get, upgrdDest.get, text)
-    else {play.Logger.debug("Nothing found from Glosbe") 
-    None} 
   }
 }
