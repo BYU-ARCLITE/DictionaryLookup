@@ -1,278 +1,223 @@
- @()(implicit request: RequestHeader)
+@()(implicit request: RequestHeader)
 @import play.api.Play.{current, configuration};
 
 @main("ARCLITE Dictionary Lookup Service") {
-
-<head>
     <link rel="stylesheet" type="text/css" href="/assets/stylesheets/main.css">
-</head>
-<div class="container"> 
 
-   <div style="width: 40%; height: 550px; float:left; "> 
-        <div style="margin: 5px; background-color: #fff; height: 325px; text-align: left; padding: 10px;">
-            <h1>Look Up Test</h1>
-            <form action="javascript:checkIfEmpty();"> 
-                <label>Word or Phrase to be Translated: <input type="text" id="words_to_translate"/></label>
-                <br><br>
-                <label> Source Language:
-                    <select id = "nativelanguageselection">
-                        <option value = "en">English</option>
-                        <option value = "sq">Albanian</option>
-                        <option value = "ag">Arabic Egyptian</option> 
-                        <option value = "ar">Arabic</option> 
-                        <option value = "hy">Armenian</option>
-                        <option value = "be">Belarusian</option>
-                        <option value = "bn">Bengali</option>
-                        <option value = "ca">Catalan</option>
-                        <option value = "zh">Chinese</option>   
-                        <option value = "cs">Czech</option> 
-                        <option value = "nl">Dutch</option> 
-                        <option value = "en">English</option>
-                        <option value = "fr">French</option>
-                        <option value = "de">German</option>
-                        <option value = "he">Hebrew</option>
-                        <option value = "hi">Hindi</option>  
-                        <option value = "it">Italian</option>
-                        <option value = "ja">Japanese</option>
-                        <option value = "jv">Javanese</option>
-                        <option value = "ko">Korean</option>
-                        <option value = "lv">Latvian</option>
-                        <option value = "pl">Polish</option>
-                        <option value = "pt">Portuguese</option> 
-                        <option value = "ro">Romanian</option>
-                        <option value = "ru">Russian</option>
-                        <option value = "sm">Samoan</option>
-                        <option value = "es">Spanish</option>
-                        <option value = "te">Telugu</option>
-                        <option value = "tr">Turkish</option> 
-                        <option value = "uk">Ukrainian</option>
-                        <option value = "vi">Vietnamese</option>  
-                </select>
-                </label>
-                <br>
-                <label> Target Language:
-                    <select id = "secondlanguageselection">
-                        <option value = "en">English</option>
-                        <option value = "sq">Albanian</option>
-                        <option value = "ag">Arabic Egyptian</option> 
-                        <option value = "ar">Arabic</option> 
-                        <option value = "hy">Armenian</option>
-                        <option value = "be">Belarusian</option>
-                        <option value = "bn">Bengali</option>
-                        <option value = "ca">Catalan</option> 
-                        <option value = "zh">Chinese</option>   
-                        <option value = "cs">Czech</option> 
-                        <option value = "nl">Dutch</option> 
-                        <option value = "en">English</option>
-                        <option value = "fr">French</option>
-                        <option value = "de">German</option>
-                        <option value = "he">Hebrew</option>
-                        <option value = "hi">Hindi</option>  
-                        <option value = "it">Italian</option>
-                        <option value = "ja">Japanese</option>
-                        <option value = "jv">Javanese</option>
-                        <option value = "ko">Korean</option>
-                        <option value = "lv">Latvian</option>
-                        <option value = "pl">Polish</option>
-                        <option value = "pt">Portuguese</option> 
-                        <option value = "ro">Romanian</option>
-                        <option value = "ru">Russian</option>
-                        <option value = "sm">Samoan</option>
-                        <option value = "es">Spanish</option>
-                        <option value = "te">Telugu</option>
-                        <option value = "tr">Turkish</option> 
-                        <option value = "uk">Ukrainian</option>
-                        <option value = "vi">Vietnamese</option>   
+    <div class="container">
+       <div style="width: 40%; height: 550px; float:left; ">
+            <div style="margin: 5px; background-color: #fff; height: 325px; text-align: left; padding: 10px;">
+                <h1>Look Up Test</h1>
+                <form action="javascript:checkIfEmpty();">
+                    <label>Word or Phrase to be Translated: <input type="text" id="words_to_translate"/></label>
+                    <br><br>
+                    <label> Source Language:
+                        <select id = "nativelanguageselection">
+                            <option value = "en">English</option>
+                            <option value = "sq">Albanian</option>
+                            <option value = "ag">Arabic Egyptian</option>
+                            <option value = "ar">Arabic</option>
+                            <option value = "hy">Armenian</option>
+                            <option value = "be">Belarusian</option>
+                            <option value = "bn">Bengali</option>
+                            <option value = "ca">Catalan</option>
+                            <option value = "zh">Chinese</option>
+                            <option value = "cs">Czech</option>
+                            <option value = "nl">Dutch</option>
+                            <option value = "en">English</option>
+                            <option value = "fr">French</option>
+                            <option value = "de">German</option>
+                            <option value = "he">Hebrew</option>
+                            <option value = "hi">Hindi</option>
+                            <option value = "it">Italian</option>
+                            <option value = "ja">Japanese</option>
+                            <option value = "jv">Javanese</option>
+                            <option value = "ko">Korean</option>
+                            <option value = "lv">Latvian</option>
+                            <option value = "pl">Polish</option>
+                            <option value = "pt">Portuguese</option>
+                            <option value = "ro">Romanian</option>
+                            <option value = "ru">Russian</option>
+                            <option value = "sm">Samoan</option>
+                            <option value = "es">Spanish</option>
+                            <option value = "te">Telugu</option>
+                            <option value = "tr">Turkish</option>
+                            <option value = "uk">Ukrainian</option>
+                            <option value = "vi">Vietnamese</option>
                     </select>
-                </label>
-                <br><br>
-                <label>Security Key <br> <input type="password" id ="security_key" /></label>
+                    </label>
+                    <br>
+                    <label> Target Language:
+                        <select id = "secondlanguageselection">
+                            <option value = "en">English</option>
+                            <option value = "sq">Albanian</option>
+                            <option value = "ag">Arabic Egyptian</option>
+                            <option value = "ar">Arabic</option>
+                            <option value = "hy">Armenian</option>
+                            <option value = "be">Belarusian</option>
+                            <option value = "bn">Bengali</option>
+                            <option value = "ca">Catalan</option>
+                            <option value = "zh">Chinese</option>
+                            <option value = "cs">Czech</option>
+                            <option value = "nl">Dutch</option>
+                            <option value = "en">English</option>
+                            <option value = "fr">French</option>
+                            <option value = "de">German</option>
+                            <option value = "he">Hebrew</option>
+                            <option value = "hi">Hindi</option>
+                            <option value = "it">Italian</option>
+                            <option value = "ja">Japanese</option>
+                            <option value = "jv">Javanese</option>
+                            <option value = "ko">Korean</option>
+                            <option value = "lv">Latvian</option>
+                            <option value = "pl">Polish</option>
+                            <option value = "pt">Portuguese</option>
+                            <option value = "ro">Romanian</option>
+                            <option value = "ru">Russian</option>
+                            <option value = "sm">Samoan</option>
+                            <option value = "es">Spanish</option>
+                            <option value = "te">Telugu</option>
+                            <option value = "tr">Turkish</option>
+                            <option value = "uk">Ukrainian</option>
+                            <option value = "vi">Vietnamese</option>
+                        </select>
+                    </label>
+                    <br><br>
+                    <label>Security Key <br> <input type="password" id ="security_key" /></label>
+                    <br>
+                    <input type="submit" id="submitButton" />
+                </form>
+            </div>
+        </div>
+        <div style="width: 60%; float:left;">
+            <div style="margin: 5px; background-color: #fff; min-height: 325px; text-align: left; padding: 10px;">
+                <h1>Lookup Results</h1>
+                <!-- <p id ='partOfSpeech'> </p> -->
+                <!-- <p1 id ='wordSearched'></p1>  -->
                 <br>
-                <input type="submit" id="submitButton" />
-            </form>
+                <p id="Def"></p> 
+                <p id="final_translation"></p>
+                <br>
+                <div id="attribution";  style = "background-color: #FFF; height: 50px; align:left; vertical-align:center;"></div>
+            </div>
         </div>
-    </div>
-    <div style="width: 60%; float:left;">
-        <div style="margin: 5px; background-color: #fff; min-height: 325px; text-align: left; padding: 10px;"> 
-        <!--<div style="margin: 5px; background-color: #cc33ff; min-height: 300px; text-align: center;">  -->  
-            <h1>Lookup Results</h1>
-            <!-- <p id ='partOfSpeech'> </p> -->
-            <!-- <p1 id ='wordSearched'></p1>  -->
-            <br>
-            <p id="Def"></p> 
-            <p id="final_translation"></p>
-            <br>
-            <div id="attribution";  style = "background-color: #FFF; height: 50px; align:left; vertical-align:center;"></div>
-        </div>
+
+        <div class="footer">
+            Contact us at <a href="mailto:arclitelab@@gmail.com">arclitelab@@gmail.com</a>
+        <div>
     </div>
 
-    <div class="footer">
-        Contact us at <a href="mailto:arclitelab@@gmail.com">arclitelab@@gmail.com</a>
-    <div>
-</div>
+    <script type ="text/javascript">
 
-<script type ="text/javascript">
-
-function checkIfEmpty(){
-    var word = document.getElementById("words_to_translate").value;
-    if(word === ""){
-        alert("You have nothing in the submit box\nPlease input something to translate.");
-    }else if(word !== ""){
-        Lookup();
-    }
-}
-
-function Lookup(){
-    var xhr = new XMLHttpRequest(),
-        security_key_to_check = document.getElementById("security_key").value,
-        srclang = document.getElementById("nativelanguageselection").value,
-        dstlang = document.getElementById("secondlanguageselection").value,
-        lookupWord = document.getElementById("words_to_translate").value;
-
-    xhr.addEventListener('load',function(){
-        var resp;
-        /*if(xhr.status >= 400){
-            alert("Error, you have incorrect key");
-            console.log(xhr.responseText);
-            return;
+        function checkIfEmpty(){
+            var word = document.getElementById("words_to_translate").value;
+            if(word === ""){
+                alert("You have nothing in the submit box\nPlease input something to translate.");
+            }else if(word !== ""){
+                Lookup();
+            }
         }
-        */
-        if(xhr.status == 401){
-            alert("Error, you have incorrect key");
-            console.log(xhr.responseText);
-            return;
+
+        function Lookup(){
+            var xhr = new XMLHttpRequest(),
+                security_key_to_check = document.getElementById("security_key").value,
+                srclang = document.getElementById("nativelanguageselection").value,
+                dstlang = document.getElementById("secondlanguageselection").value,
+                lookupWord = document.getElementById("words_to_translate").value;
+
+            xhr.addEventListener('load',function(){
+                var resp;
+                if(xhr.status == 401){
+                    alert("Error, you have incorrect key");
+                    console.log(xhr.responseText);
+                    return;
+                }
+                else if (xhr.status == 404) {
+                    alert("Error, Requested from a resource that does not exist");
+                    console.log(xhr.responseText);
+                    return;
+                }
+                resp = JSON.parse(xhr.responseText);
+                if(resp.entries === void 0){  // Make sure we actually received translations
+                    alert("No data recieved");
+                }else{
+                    displayResult({
+                        text: lookupWord,
+                        translations: resp.entries,
+                        engine: resp.source,
+                        srcLang: srclang,
+                        destLang: dstlang
+                    });
+                }
+            },false);
+
+            xhr.addEventListener("error",function(e){
+                alert("An Error Occurred in Lookup");
+                console.dir(e);
+            },false );
+
+            xhr.open("POST", "@{routes.Lookup.authlookup().absoluteURL(configuration.getBoolean("HTTPS").getOrElse(false))}",true);
+            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhr.setRequestHeader("Authorization", security_key_to_check);
+            xhr.send("srcLang="+encodeURIComponent(srclang)+
+                     "&destLang="+encodeURIComponent(dstlang)+
+                     "&word="+encodeURIComponent(lookupWord));
         }
-        else if (xhr.status == 404) {
-            alert("Error, Requested from a resource that does not exist");
-            console.log(xhr.responseText);
-            return
-        }    
-        resp = JSON.parse(xhr.responseText);
-        if(resp.entries === void 0){  // Make sure we actually received translations
-            alert("No data recieved"); 
-        }else{
-            displayResult({
-                text: lookupWord,
-                translations: resp.entries,
-                engine: resp.source,
-                srcLang: srclang,
-                destLang: dstlang
-            });
+
+        function displayResult(data){
+            var theWebsite;
+            document.getElementById('Def').innerHTML = "Definition for: "
+                + data.text.toUpperCase();
+            switch(data.engine){
+                case "Merriam-Webster Inc.":
+                    document.getElementById('final_translation').innerHTML =
+                    data.translations.map(function(entry, i){
+                        return entry
+                    }).join('<br/>');
+
+                    var  logoURL = "http://www.dictionaryapi.com/images/info/branding-guidelines/mw-logo-light-background-50x50.png";
+
+                    if((data.srcLang==="en") || (data.destLang==="en")){
+                        theWebsite = '<img src="' + logoURL + 
+                        '" style="float:left; margin-right:25px"> </img> <p style="vertical-align: middle; height:50px;">Results Provided by Merriam-Webster Inc.<br><a href=http://www.merriam-webster.com/dictionary/' +
+                        data.text + ' target = _blank> Link to dictionary entry for ' + data.text + '</a> </p>';
+                    } 
+                    else if((data.srcLang==="es") || (data.destLang==="es")){
+                        theWebsite = '<img src="' + logoURL +
+                        '" style="float:left; margin-right:25px"> </img> <p style="vertical-align: middle; height:50px;">Results Provided by Merriam-Webster Inc.<br><a href=http://www.spanishcentral.com/translate/'+
+                        data.text + ' target = _blank> Link to dictionary entry for ' + data.text + '</a> </p>';
+                    }
+
+                    break;
+                case "WordReference":
+                        document.getElementById('final_translation').innerHTML =
+                    data.translations.map(function(entry, i){
+                        return entry.replace("", i+1 + ": ");
+                         }).join('<br/>');
+                    theWebsite = 'Results Provided WordReference <a target =_blank href=http://www.wordreference.com/'
+                    +[data.srcLang] + '/' + [data.destLang] + '/translation.asp?spen='
+                        + data.text + '> Link to dictionary entry for "'
+                        + data.text + '" </a>';
+                    break;
+
+                case "Glosbe":
+                    document.getElementById('final_translation').innerHTML =
+                    data.translations.map(function(entry, i){
+                        return entry.replace("", i+1 + ": ");
+                         }).join('<br/>');
+
+                    theWebsite = '<img src=' + "'@routes.Assets.at( file = "images/GlosbeLogo.png")'" +
+                    '" style="float:left; margin-right:25px height= "50px" width= "50px"> </img> <p style="vertical-align: middle; height:50px;">Results Provided by Glosbe.<br><a href=https://en.glosbe.com/' + data.srcLang + '/' + data.destLang + '/' + data.text
+                    + ' target = _blank> Link to dictionary entry for ' + data.text + '</a> </p>';
+                    break;
+                default:
+                    document.getElementById('final_translation').innerHTML =
+                    data.translations.map(function(entry, i){
+                        return entry.replace("", i+1 + ": ");
+                    }).join('<br/>');
+                    theWebsite = "Results Provided by " + data.engine;
+            }
+            document.getElementById('attribution').innerHTML = theWebsite;
         }
-    },false);
-
-    xhr.addEventListener("error",function(e){
-        alert("An Error Occurred in Lookup");
-        console.dir(e);
-    },false ); 
-
-    xhr.open("POST", "@{routes.Lookup.authlookup().absoluteURL()}",true);
-    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    xhr.setRequestHeader("Authorization", security_key_to_check);
-    xhr.send(   "srcLang="+encodeURIComponent(srclang)+
-                "&destLang="+encodeURIComponent(dstlang)+
-                "&word="+encodeURIComponent(lookupWord)
-    );
+    </script>
 }
-
-function displayResult(data){
-    var theWebsite;
-
-
-    document.getElementById('Def').innerHTML = "Definition for: "
-        + data.text.toUpperCase();
-
-
-
-    switch(data.engine){
-    case "Merriam-Webster Inc.":
-
-                document.getElementById('final_translation').innerHTML = 
-                data.translations.map(function(entry, i){
- 
-                return entry
-                }).join('<br/>');                
-
-                var  logoURL = "http://www.dictionaryapi.com/images/info/branding-guidelines/mw-logo-light-background-50x50.png";
-
-               if((data.srcLang==="en") || (data.destLang==="en")){
-                   theWebsite =    '<img src="' + logoURL + '" style="float:left; margin-right:25px"> </img> <p style="vertical-align: middle; height:50px;">Results Provided by Merriam-Webster Inc.<br><a href=http://www.merriam-webster.com/dictionary/' + data.text + ' target = _blank> Link to dictionary entry for ' + data.text + '</a> </p>';
-               }
-
-                else if((data.srcLang==="es") || (data.destLang==="es")){
-                    theWebsite =    '<img src="' + logoURL + '" style="float:left; margin-right:25px"> </img> <p style="vertical-align: middle; height:50px;">Results Provided by Merriam-Webster Inc.<br><a href=http://www.spanishcentral.com/translate/' + data.text + ' target = _blank> Link to dictionary entry for ' + data.text + '</a> </p>';
-                }
-
-        break;
-    case "WordReference":
-            document.getElementById('final_translation').innerHTML = 
-        data.translations.map(function(entry, i){
-            return entry.replace("", i+1 + ": ");
-             }).join('<br/>');  
-           // http://www.wordreference.com/es/en/translation.asp?spen=perro
-           // http://www.wordreference.com/en/es/translation.asp?spen=perro
-        theWebsite = 'Results Provided WordReference <a target =_blank href=http://www.wordreference.com/'
-        +[data.srcLang] + '/' + [data.destLang] + '/translation.asp?spen='
-            + data.text + '> Link to dictionary entry for "'
-            + data.text + '" </a>';
-            console.log()
-        break;        
-           // + {
-                //"definition",
-                //en: "definition",
-                //es: "definicion",
-                //it: "definizione",
-                //as: "definicio"}
-            
-    case "Glosbe":
-        document.getElementById('final_translation').innerHTML = 
-        data.translations.map(function(entry, i){
-            return entry.replace("", i+1 + ": ");
-             }).join('<br/>');  
-        
--->       
-        theWebsite = '<img src=' + "'@routes.Assets.at( file = "images/GlosbeLogo.png")'" + //l
-    '" style="float:left; margin-right:25px height= "50px" width= "50px"> </img> <p style="vertical-align: middle; height:50px;">Results Provided by Glosbe.<br><a href=https://en.glosbe.com/' + data.srcLang + '/' + data.destLang + '/' + data.text
-    + ' target = _blank> Link to dictionary entry for ' + data.text + '</a> </p>';           
-
-        break;
-    default:
-
-            document.getElementById('final_translation').innerHTML = 
-        data.translations.map(function(entry, i){
-            return entry.replace("", i+1 + ": ");
-             }).join('<br/>');  
-        theWebsite = "Results Provided by " + data.engine;
-    }
-
-    document.getElementById('attribution').innerHTML = theWebsite;
-}
-
-</script>
-
-    </body>
-</html>
-}
-
-<!--
- if((data.srcLang==="es") || (data.destLang==="es")){
-                    theWebsite = '<a href="http://www.spanishcentral.com/translate/' + data.text + '" target="Merriam-Webster">'
-                    theWebsite = '<img src="' + logoURL + '" align = "left"></img></a></div>' '<a href="http://www.spanishcentral.com/translate/' + data.text + '" target="Merriam-Webster">'
-                        + data.text +' at SpanishCentral.com </a>'
-                        + '<br/>Merriam-Webster\'s Spanish-English Dictionary '
-                        + '<div class="merriamLogo"><a href="http://www.spanishcentral.com/translate/'
-                        + data.text + '" target="Merriam-Webster"> <img src="' + logoURL + '"></img></a></div>';
-                        + data.text + '" target="Merriam-Webster">"';
-                }
-                if((data.srcLang==="en") && (data.destLang==="en")){
-                    theWebsite = '<a href="http://www.merriam-webster.com/dictionary/' + data.text + '" target="Merriam-Webster">'
-                    theWebsite = '<img src="' + logoURL + '" align = "left"></img></a></div>' + '<a href="http://www.merriam-webster.com/dictionary/' + data.text + '" target="Merriam-Webster">'
-                        + data.text +' at Merriam-Webster.com </a>'
-                        + '<br/> Merriam-Webster\'s Collegiate® Dictionary <br/>'
-                        + '<div class="merriamLogo"><a href="http://www.merriam-webster.com/dictionary/'
-                        + data.text + '" target="Merriam-Webster"><img src="' + logoURL + '"></img></a></div>';
-                        + data.text + '" target="Merriam-Webster">"'
-                        ;
-                }
-
--->
