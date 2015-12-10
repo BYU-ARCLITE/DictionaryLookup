@@ -21,7 +21,47 @@ object LookupMadamira extends Translator {
 
   val madamiraURL = configuration.getString("services.madamira")
 
-  val dialects = Map("ara" -> "MSA", "arz" -> "EGY")
+  val dialects = Map(
+    "ara" -> "MSA", // Arabic
+    "aao" -> "EGY", // Algerian Saharan
+    "abh" -> "MSA", // Tajiki
+    "abv" -> "MSA", // Baharna
+    "acm" -> "MSA", // Mesopotamian
+    "acq" -> "MSA", // Ta'izzi-Adeni
+    "acw" -> "MSA", // Hijazi
+    "acx" -> "MSA", // Omani
+    "acy" -> "MSA", // Cypriot
+    "adf" -> "MSA", // Dhofari
+    "aeb" -> "MSA", // Tunisian
+    "aec" -> "MSA", // Saidi
+    "afb" -> "MSA", // Gulf Arabic
+    "ajp" -> "MSA", // South Levantine
+    "ajt" -> "MSA", // Judeo-Tunisian
+    "aju" -> "MSA", // Judeo-Moroccan
+    "apc" -> "MSA", // North Levantine
+    "apd" -> "MSA", // Sudanese
+    "arb" -> "MSA", // Modern Standard
+    "arq" -> "MSA", // Algerian
+    "ars" -> "MSA", // Najdi
+    "ary" -> "MSA", // Moroccan
+    "arz" -> "EGY", // Egyptian
+    "auz" -> "MSA", // Uzbeki
+    "avl" -> "EGY", // Eastern Egyptian Bedawi
+    "ayh" -> "MSA", // Hadrami
+    "ayl" -> "MSA", // Libyan
+    "ayn" -> "MSA", // Sanaani
+    "ayp" -> "MSA", // North Mesopotamian
+    "bbz" -> "MSA", // Babalia Creole
+    "jrb" -> "MSA", // Judeo-Arabic
+    "jye" -> "MSA", // Judeo-Yemeni
+    "pga" -> "MSA", // Sudanese Creole
+    "shu" -> "MSA", // Chadian
+    "sqr" -> "MSA", // Siculo
+    "ssh" -> "MSA", // Shihhi
+    "xaa" -> "MSA", // Andalusian
+    "yhd" -> "MSA", // Judeo-Iraqi
+    "yud" -> "MSA"  // Judeo-Tripolitanian
+  )
 
   def parseXml(text: String): List[String] = {
     val XMLdoc = XML.loadString(text)
@@ -47,13 +87,16 @@ object LookupMadamira extends Translator {
 
   def translate(user: User, src: String, dest: String, text: String): Option[Seq[String]] = {
     play.Logger.debug("In the madamira lookup")
-    val dialect = if (src == "arz") "EGY" else "MSA"
+    if (!dialects.contains(src)) {
+      return None
+    }
 
+    val dialect = dialects.get(src)
     val inputXmlData = raw"""<?xml version="1.0" encoding="UTF-8"?>
     <madamira_input xmlns="urn:edu.columbia.ccls.madamira.configuration:0.1">
       <madamira_configuration>
           <preprocessing sentence_ids="false" separate_punct="true" input_encoding="UTF8"/>
-          <overall_vars output_encoding="UTF8" dialect="MSA" output_analyses="TOP" morph_backoff="ADD_ALL" analyze_only="false"/>
+          <overall_vars output_encoding="UTF8" dialect="$dialect" output_analyses="TOP" morph_backoff="ADD_ALL" analyze_only="false"/>
           <requested_output>
               <req_variable name="PREPROCESSED" value="true" />
               <req_variable name="STEM" value="true" />
