@@ -35,14 +35,11 @@ object Lookup extends Controller {
 	  tdst <- LangCodes.convert(format, t.codeFormat, destLang)
 	} try {
       Logger.info("Checking "+name)
-      play.Logger.debug(srcLang+ destLang+ text)
-
       t.translate(user, tsrc, tdst, text) match {
         case Some(res) =>
           ServiceLog.record(user, srcLang, destLang, text, name, true)
           return Some((t.name,t.expiration,res))
         case None =>{
-        play.Logger.debug("third "+name)
           ServiceLog.record(user, srcLang, destLang, text, name, false)
         }
       }
@@ -59,7 +56,7 @@ object Lookup extends Controller {
   def lookup(opts: Map[String, Seq[String]], user: User) = (try {
     val srcLang = opts("srcLang")(0)
     val destLang = opts("destLang")(0)
-	val format = 'iso639_3
+    val format = 'iso639_3
     val text = opts("word")(0)
     val key = s"$srcLang-$destLang:$text"
     Cache.getAs[JsObject](key).map(json => Ok(json)).getOrElse {
