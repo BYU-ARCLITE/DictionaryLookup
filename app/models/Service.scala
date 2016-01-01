@@ -13,10 +13,10 @@ object Service {
       val arglist = services.zipWithIndex.map { case (name, i) =>
         List[NamedParameter]('id -> user.id, 'priority -> i, 'name -> name)
       }
-      BatchSql(
-	    s"insert into $tableName (userId, priority, name) values ({id}, {priority}, {name})",
-		arglist
-	  ).execute()
+      if(!arglist.isEmpty) BatchSql(
+        s"insert into $tableName (userId, priority, name) values ({id}, {priority}, {name})",
+        arglist.head, arglist.tail:_*
+      ).execute()
   }
 
   /**
@@ -26,8 +26,9 @@ object Service {
    */
   def listByUser(user: User): List[String] = DB.withConnection {
     implicit connection =>
-      val query = SQL"select name from $tableName where userId = ${user.id} order by priority"
-      query().map(row => row[String]("name")).toList
+      SQL"select name from $tableName where userId = ${user.id} order by priority"
+      .fold(List[String]()) { (l, row) => row[String]("name") :: l }
+      .fold(_ => List[String](), l => l)
   }
 
 }
