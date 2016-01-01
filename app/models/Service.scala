@@ -14,7 +14,7 @@ object Service {
         List[NamedParameter]('id -> user.id, 'priority -> i, 'name -> name)
       }
       BatchSql(
-	    SQL(s"insert into $tableName (userId, priority, name) values ({id}, {priority}, {name})"),
+	    s"insert into $tableName (userId, priority, name) values ({id}, {priority}, {name})",
 		arglist
 	  ).execute()
   }

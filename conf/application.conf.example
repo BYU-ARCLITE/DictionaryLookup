@@ -5,11 +5,11 @@
 # ~~~~~
 # The secret key is used to secure cryptographics functions.
 # If you deploy your application to several instances be sure to use the same key!
-application.secret="fX0W;2]Se_3ed/wVc5Bw=IydQU2o@3NJyjBvkI`?9?GH9;RvU1`V?4Kgia@X6XNX"
+play.crypto.secret="fX0W;2]Se_3ed/wVc5Bw=IydQU2o@3NJyjBvkI`?9?GH9;RvU1`V?4Kgia@X6XNX"
 
 # The application languages
 # ~~~~~
-application.langs="en"
+play.i18n.langs="en"
 
 contact_address = "test@test.com"
 
