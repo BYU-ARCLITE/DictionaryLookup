@@ -1,6 +1,6 @@
 package models
 
-import anorm.{Id, NotAssigned, ~, Pk, SQL, ParameterValue}
+import anorm._
 import anorm.SqlParser._
 import play.api.db.DB
 import play.api.Play.{current, configuration}
@@ -12,27 +12,28 @@ import java.security.SecureRandom
 /**
  * User
  */
-case class User(id: Pk[Long], username: String, passHash: String, email: String, authKey: String) {
+case class User(id: Option[Long], username: String, passHash: String, email: String, authKey: String) {
 
-  def insert(tablename: String, fields: (Symbol, ParameterValue[_]) *): Pk[Long] = {
+  def insert(tablename: String, fields: (Symbol, ParameterValue) *): Option[Long] = {
     val fieldNames = fields.map(_._1.name).mkString(", ")
     val fieldValues = fields.map("{" + _._1.name + "}").mkString(", ")
 
     DB.withConnection {
       implicit connection =>
-        val id: Option[Long] = SQL("insert into "+tablename+" ("+fieldNames+") values ("+fieldValues+")")
-          .on(fields: _*).executeInsert()
-        Id(id.get)
+        SQL"insert into $tablename ($fieldNames) values ($fieldValues)"
+          .on(fields.map(t => NamedParameter.symbol(t)): _*).executeInsert()
     }
   }
 
-  def update(tablename: String, fields: (Symbol, ParameterValue[_]) *) {
+  def update(tablename: String, fields: (Symbol, ParameterValue) *) {
     assert(fields.map(_._1.name).contains("id"))
-    val fieldEntries = fields.map(_._1.name).filterNot(_ == "id").map(n => n + " = {" + n + "}").mkString(", ")
+    val fieldEntries = fields.map(_._1.name).filterNot(_ == "id")
+      .map(n => s"$n = {$n}").mkString(", ")
 
     DB.withConnection {
       implicit connection =>
-        SQL("update "+tablename+" set "+fieldEntries+" where id = {id}").on(fields: _*).executeUpdate()
+        SQL"update $tablename set $fieldEntries where id = {id}"
+          .on(fields.map(t => NamedParameter.symbol(t)): _*).executeUpdate()
     }
   }
 
@@ -55,7 +56,7 @@ case class User(id: Pk[Long], username: String, passHash: String, email: String,
    */
   def delete = DB.withConnection {
     implicit connection =>
-      SQL("delete from " + User.tableName + " where id = {id}").on('id -> id).execute()
+      SQL"delete from ${User.tableName} where id = $id".execute()
   }
 
   def checkpw(plain: String) = BCrypt.checkpw(plain, passHash)
@@ -111,7 +112,7 @@ object User {
     .getOrElse(List("BYUDictionaries", "WordReference", "GoogleTranslate"))
 
   val simple = {
-    get[Pk[Long]](tableName + ".id") ~
+    get[Option[Long]](tableName + ".id") ~
       get[String](tableName + ".username") ~
       get[String](tableName + ".passHash") ~
       get[String](tableName + ".email") ~
@@ -129,8 +130,8 @@ object User {
    */
   def findById(id: Long): Option[User] = DB.withConnection {
     implicit connection =>
-      anorm.SQL("select * from " + tableName + " where id = {id}")
-        .on('id -> id).as(simple.singleOpt)
+      SQL"select * from $tableName where id = $id"
+        .as(simple.singleOpt)
   }
 
   /**
@@ -140,8 +141,8 @@ object User {
    */
   def findByKey(authKey: String): Option[User] = DB.withConnection {
     implicit connection =>
-      anorm.SQL("select * from userAccount where authKey = {authKey}")
-        .on('authKey -> authKey).as(simple.singleOpt)
+      SQL"select * from userAccount where authKey = $authKey"
+        .as(simple.singleOpt)
   }
 
   /**
@@ -151,7 +152,7 @@ object User {
    */
   def findByUsername(username: String): Option[User] = DB.withConnection {
     implicit connection =>
-      anorm.SQL("select * from userAccount where username = {username}")
+      SQL("select * from userAccount where username = {username}")
         .on('username -> username).as(simple.singleOpt)
   }
 
@@ -168,7 +169,7 @@ object User {
     if(findByUsername(username).isDefined) None
     else {
       val hash = BCrypt.hashpw(password, BCrypt.gensalt(12))
-      val user = User(NotAssigned, username, hash, email, uniqueKey).save
+      val user = User(None, username, hash, email, uniqueKey).save
       user.setServices(defaultServices)
       Some(user)
     }
@@ -180,6 +181,6 @@ object User {
    */
   def list: List[User] = DB.withConnection {
     implicit connection =>
-      anorm.SQL("select * from " + tableName).as(simple *)
+      SQL(s"select * from $tableName").as(simple *)
   }
 }

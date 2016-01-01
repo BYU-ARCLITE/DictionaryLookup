@@ -1,6 +1,6 @@
 package models
 
-import anorm.{SQL, toParameterValue}
+import anorm._
 import play.api.db.DB
 import play.api.Play.current
 
@@ -9,14 +9,14 @@ object Service {
 
   def setByUser(user: User, services: List[String]) = DB.withConnection {
     implicit connection =>
-      anorm.SQL("delete from " + tableName + " where userId = {id}").on('id -> user.id).execute()
+      SQL"delete from $tableName where userId = ${user.id}".execute()
       val arglist = services.zipWithIndex.map { case (name, i) =>
-        List( "id" -> toParameterValue(user.id),
-              "priority" -> toParameterValue(i),
-              "name" -> toParameterValue(name) )
+        List[NamedParameter]('id -> user.id, 'priority -> i, 'name -> name)
       }
-      val query = anorm.SQL("insert into " + tableName + "(userId, priority, name) values ({id}, {priority}, {name})")
-      query.asBatch.addBatchList(arglist).execute()
+      BatchSql(
+	    SQL(s"insert into $tableName (userId, priority, name) values ({id}, {priority}, {name})"),
+		arglist
+	  ).execute()
   }
 
   /**
@@ -26,8 +26,7 @@ object Service {
    */
   def listByUser(user: User): List[String] = DB.withConnection {
     implicit connection =>
-      val query = anorm.SQL("select name from " + tableName + " where userId = {id} order by priority")
-        .on('id -> user.id)
+      val query = SQL"select name from $tableName where userId = ${user.id} order by priority"
       query().map(row => row[String]("name")).toList
   }
 
