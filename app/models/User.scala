@@ -20,7 +20,7 @@ case class User(id: Option[Long], username: String, passHash: String, email: Str
 
     DB.withConnection {
       implicit connection =>
-        SQL"insert into $tablename ($fieldNames) values ($fieldValues)"
+        SQL(s"insert into $tablename ($fieldNames) values ($fieldValues)")
           .on(fields.map(t => NamedParameter.symbol(t)): _*).executeInsert()
     }
   }
@@ -46,7 +46,7 @@ case class User(id: Option[Long], username: String, passHash: String, email: Str
       'passHash -> passHash, 'email -> email, 'authKey -> authKey)
     this
   } else {
-    val nid = insert(User.tableName, 'id -> id, 'username -> username,
+    val nid = insert(User.tableName, 'username -> username,
       'passHash -> passHash, 'email -> email, 'authKey -> authKey)
     this.copy(nid)
   }
@@ -56,7 +56,7 @@ case class User(id: Option[Long], username: String, passHash: String, email: Str
    */
   def delete = DB.withConnection {
     implicit connection =>
-      SQL"delete from ${User.tableName} where id = $id".execute()
+      SQL(s"delete from ${User.tableName} where id = $id").execute()
   }
 
   def checkpw(plain: String) = BCrypt.checkpw(plain, passHash)
@@ -130,7 +130,7 @@ object User {
    */
   def findById(id: Long): Option[User] = DB.withConnection {
     implicit connection =>
-      SQL"select * from $tableName where id = $id"
+      SQL(s"select * from $tableName where id = $id")
         .as(simple.singleOpt)
   }
 
