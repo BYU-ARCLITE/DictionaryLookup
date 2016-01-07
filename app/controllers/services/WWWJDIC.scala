@@ -53,7 +53,7 @@ object LookupWWWJDIC extends Translator {
    *    TODO: Create a way to toggle between the amount of results returned
    */
   def getTranslations(text: String, dictCode: String) = {
-    val query = WS.url("http://www.csse.monash.edu.au/~jwb/cgi-bin/wwwjdic.cgi?" + dictCode + "ZUQ" + text).get()
+    val query = WS.url("http://nihongo.monash.edu/cgi-bin/wwwjdic?" + dictCode + "ZUQ" + text).get()
     
     // Get Results, remove newlines for ease of use with re
     val response = Await.result(query, Duration.Inf)
