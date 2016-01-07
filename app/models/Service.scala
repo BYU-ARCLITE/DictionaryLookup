@@ -28,7 +28,7 @@ object Service {
     implicit connection =>
     if (!user.id.isEmpty) {
       SQL(s"select name from $tableName where userId = ${user.id.get} order by priority")
-      .fold(List[String]()) { (l, row) => row[String]("name") :: l }
+      .fold(List[String]()) { (l, row) => l :+ row[String]("name") }
       .fold(_ => List[String](), l => l)
     } else Nil
   }
