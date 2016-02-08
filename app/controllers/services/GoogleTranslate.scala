@@ -13,6 +13,7 @@ object LookupGoogle extends Translator {
   val expiration = Utils.getExpiration("google")
   val codeFormat = 'googleCodes
   val googleKey = configuration.getString("google.key")
+  val quoteExpr = """^\s*"\s*|\s*"\s*$""".r
 
   /**
    * Endpoint for translating via Google
@@ -24,7 +25,8 @@ object LookupGoogle extends Translator {
       val result = Await.result(query, Duration.Inf)
       if(result.status != 200) None
       else {
-        val translations = (result.json \ "data" \ "translations" \\ "translatedText").map(_.toString)
+        val translations = (result.json \ "data" \ "translations" \\ "translatedText")
+		    .map { jsstr => quoteExpr.replaceAllIn(Utils.unescape(jsstr.toString), "") }
         if(translations.length > 0) Some(translations)
         else None
       }
