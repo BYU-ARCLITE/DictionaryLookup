@@ -17,7 +17,7 @@ trait Translator {
    * @param dest The destination language
    * @param text The text to translate
    */
-  def translate(user: User, src: String, dest: String, text: String): Option[JsObject]
+  def translate(user: User, src: String, dest: String, text: String): Option[(Set[String], JsObject)]
 }
 
 object Utils {

@@ -17,67 +17,51 @@ object LookupMerriamWebster extends Translator {
   val expiration = Utils.getExpiration("merriamWebster")
   val codeFormat = 'iso639_3
 
-  val merriamWebsterSpanishKey = configuration.getString("merriamWebster.spanishKey")
-  val merriamWebsterCollegiateKey = configuration.getString("merriamWebster.collegiateKey")
+  val spanishKey = configuration.getString("merriamWebster.spanishKey")
+  val collegiateKey = configuration.getString("merriamWebster.collegiateKey")
 
-  def parseXMLResponse(URL:String, headWordTag:String) : Seq[String] = {
-    val (true, body) = try {
-      val url = new URL(URL)
-      val body = url.openStream
-      (true, body)
-    } catch { case ex:Exception => (false, null) }
-
+  def parseXMLResponse(URL:String, headWordTag:String) : Seq[JsObject] = {
+    val url = new URL(URL)
+    val body = url.openStream
     val XMLDoc = XML.load(body)
-    val response = (XMLDoc \\ "entry_list") 
+    val response = (XMLDoc \\ "entry_list")
 
-    val defList : Seq[String] = for {
-      //entry <- response \\ "entry"
+    val defList = for {
       entry <- response \\ "entry"
-      //pos <- entry \\ "fl"
-     defins <- entry \\ "def"
-      } yield {   
-        val word = (entry \\ headWordTag).text
-        //val wav = (entry \\ "wav").text
+      pos <- entry \\ "fl"
+      // ipa <- entry \\ "pr"
+      defins <- entry \\ "def"
+    } yield {
 
-        val defns = defins.text
-        //val dog = defns.replace("th century", "th century <br>")
-        //dog
-        val dog = defns.replace("<br>", "")
-        dog        
-        //defns
+      //val wav = (entry \\ "wav").text
+
+      Json.obj(
+        "representations" -> Json.arr("English Alphabet"),
+        "pos" -> pos.text,
+        "lemmaForm" -> "lemma",
+        "forms" -> Json.obj(
+          "lemma" -> Json.obj(
+            "English Alphabet" -> (entry \\ headWordTag).text
+          )
+        ),
+        "senses" -> Json.arr(
+          Json.obj(
+            "definition" -> defins.text.replace("<br>", "")
+          )
+        )
+      )
     }
 
-    val partOfSpeechList : Seq[String] = for {
-      pos <- response \\ "fl"
-      } 
-      yield{
-        val ps = pos.text 
-        "PART OF SPEECH  " + ps
-      }
-
-    val ipaList : Seq[String] = for {
-      ipa <- response \\ "pr"
-    }
-    yield {
-      val ipA = ipa.text  
-      "IPA!!!!!!  " + ipA
-    }
-
-    def isNum(item:String) : Boolean = {
-        val bool = if ((item == '0')||(item == '1')||(item == '2')||(item == '3')||(item == '4')||(item == '5')||(item == '6')||(item == '7')||(item == '8')||(item == '9'))
-          true
-        false
-    }
-
+    /*
     val sound : Seq[String] = for {
       entry <- XMLDoc \\ "wav"
-      } yield {   
+      } yield {
         val file = entry.text
         val dir = if(file.substring(0,3) == "bix" )
               "bix"
             else if (file.substring(0,2) == "gg")
               "gg"
-            else if (isNum(file.substring(0,1)))
+            else if (file.substring(0,1).matches("""\d"""))
               "number"
             else
               file.substring(0,1)
@@ -85,59 +69,45 @@ object LookupMerriamWebster extends Translator {
         html
     }
 
-    /* If you want to reduce the amount of definitions or audio files, uncomment below*/ 
-    val exampleSound : Seq[String] = if(sound.length > 0)
-        {val snd : Seq[String] = Seq[String](sound(0)); snd} else {sound}
-    val definitions : Seq[String] = if(defList.length > 5)
-        {
-            val defin : Seq[String] = Seq[String](defList(0), defList(1), defList(2), defList(3), defList(4))
-            defin
-        } else {defList}
-    val partOfSpeech : Seq[String] = Seq[String](partOfSpeechList(0))
+    val exampleSound = sound.take(1)
+    val partOfSpeech = partOfSpeechList.take(1)
     val ipa : Seq[String] = Seq[String](ipaList(0))
 
-    /*ipa ++ partOfSpeech ++*/  exampleSound ++ definitions
-    
-    /*val exampleSound : Seq[String] = if(sound.length > 0)
-        {"<br/>Audio Examples:" +: sound} else {sound}
-    defList ++ exampleSound.distinct*/
-    
+    exampleSound ++ ipa ++ partOfSpeech ++ defList
+    */
+
+    defList
   }
 
   /**
    * Endpoint for translating via merriamWebster
    */
-  def translate(user: User, src: String, dest: String, text: String) = {
-    if((src == "spa" && dest == "eng") || (src == "eng" && dest == "spa")){
-      merriamWebsterSpanishKey.flatMap { key => 
+  def translate(user: User, src: String, dst: String, text: String) = {
+    val lemmas: Seq[JsObject] =
+      if (((src == "spa" && dst == "eng") || (src == "eng" && dst == "spa")) && spanishKey.isDefined) {
+        val key = spanishKey.get
         val url = "http://www.dictionaryapi.com/api/v1/references/spanish/xml/" + text.replaceAll("[^\\p{L}\\p{Nd}]+", "%20").trim +"?key="+key
-        val result = Await.result(WS.url(url).get(), Duration.Inf)
+        parseXMLResponse(url, "hw")
+      } else if(src == "eng" && dst == "eng" && collegiateKey.isDefined){
+        val key = collegiateKey.get
+        val url = "http://www.dictionaryapi.com/api/v1/references/collegiate/xml/" + text.replaceAll("[^\\p{L}\\p{Nd}]+", "%20").trim +"?key="+key
+        parseXMLResponse(url, "ew")
+      } else Seq[JsObject]()
 
-          if(result.status != 200) None
-          else {
-            val defList : Seq[String] = parseXMLResponse(url, "hw")
+    if(lemmas.size == 0) None
+    else {
+      val words = Json.obj(
+        //"translations" -> Json.arr("free translation text")
+        "words" -> Json.arr(
+          Json.obj(
+            "start" -> 0,
+            "end" -> text.length,
+            "lemmas" -> lemmas
+          )
+        )
+      )
 
-            if(defList.length > 0)
-              Some(defList)
-            else None
-          }
-      }
+      Some((Set(name), words))
     }
-    else if(src == "eng" && dest == "eng"){
-      merriamWebsterCollegiateKey.flatMap { key => 
-        val url =  "http://www.dictionaryapi.com/api/v1/references/collegiate/xml/" + text.replaceAll("[^\\p{L}\\p{Nd}]+", "%20").trim +"?key="+key
-        val result = Await.result(WS.url(url).get(), Duration.Inf)
-
-        if(result.status != 200) None
-        else {            
-          val defList : Seq[String] = parseXMLResponse(url, "ew")
-
-          if(defList.length > 0)
-            Some(defList)
-          else None
-        }
-      }
-    }
-    else None
   }
 }

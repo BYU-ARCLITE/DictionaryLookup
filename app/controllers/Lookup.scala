@@ -10,7 +10,7 @@ import play.api.Play.current
 import play.api.Logger
 
 object Lookup extends Controller {
-  type TResult = (String, JsObject)
+  type TResult = (Set[String], JsObject)
   type TRequest = (String, String, String, Symbol)
 
   val serviceMap = Map( "BYUDictionaries" -> LookupBYU,
@@ -24,7 +24,7 @@ object Lookup extends Controller {
                         "Madamira" -> LookupMadamira  
                       )
 
-  def callService(user: User, t: Translator, req: TRequest): Option[(JsObject, Boolean)] = {
+  def callService(user: User, t: Translator, req: TRequest): Option[(Set[String], JsObject, Boolean)] = {
     val (text, rsrc, rdst, format) = req
     val langcodes = for {
 	  src <- LangCodes.convert(format, t.codeFormat, rsrc)
@@ -36,12 +36,12 @@ object Lookup extends Controller {
 	  val key = s"$name:$src-$dst:$text"
 
       Logger.info("Checking "+name)
-      Cache.getAs[JsObject](key)
-	    .map { json => (json, true) }
+      Cache.getAs[(Set[String], JsObject)](key)
+	    .map { case (names, json) => (names, json, true) }
         .orElse {
-          t.translate(user, src, dst, text).map { json =>
-		    Cache.set(key, json, t.expiration)
-		    (json, false)
+          t.translate(user, src, dst, text).map { case (names, json) =>
+		    Cache.set(key, (names, json), t.expiration)
+		    (names, json, false)
 		  }
         }
     }
@@ -54,9 +54,9 @@ object Lookup extends Controller {
 	} try {
       Logger.info("Checking "+name)
       callService(user, t, req) match {
-      case Some((json, cached)) =>
+      case Some((names, json, cached)) =>
 		if (!cached) { ServiceLog.record(user, req, name, true) }
-		return Some((name, json))
+		return Some((names, json))
       case None =>
         ServiceLog.record(user, req, name, false)
       }
@@ -84,24 +84,35 @@ object Lookup extends Controller {
 
   def lookup(opts: Map[String, Seq[String]], user: User) = {
     val text = opts("word")(0)
-    val srcLang = opts("srcLang")(0)
-    val destLang = opts("destLang")(0)
+    val src = opts("srcLang")(0)
+    val dst = opts("destLang")(0)
     val format = opts("codeFormat")
 	              .lift(0)
 	              .map(Symbol(_))
 				  .getOrElse('iso639_3)
 
-    getFirst(user, (text, srcLang, destLang, format)) match {
-    case Some((name,result)) =>
+	val basicResult = Json.obj(
+      "src" -> src,
+      "dst" -> dst,
+	  "codeFormat" -> format.toString,
+      "text" -> text
+    )
+
+    getFirst(user, (text, src, dst, format)) match {
+    case Some((names, result)) =>
       val response = Json.obj(
         "success" -> true,
-        "result" -> result,
-        "sources" -> Seq(name)
+        "result" -> (result ++ basicResult),
+        "sources" -> names.toList
       )
       Logger.info(response.toString)
       Ok(response)
     case None =>
-	  NotFound(Json.obj("success" -> false, "message" -> "No dictionary entries."))
+	  NotFound(Json.obj(
+	    "success" -> false,
+		"message" -> "No dictionary entries.",
+		"result" -> basicResult
+	  ))
     }
   }
 
