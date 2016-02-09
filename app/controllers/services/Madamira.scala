@@ -1,6 +1,6 @@
 package controllers
 
-import models.{User, ServiceLog}
+import models.User
 import scala.concurrent.{ExecutionContext, Future, Await}
 import scala.concurrent.duration._
 import play.api.libs.json._

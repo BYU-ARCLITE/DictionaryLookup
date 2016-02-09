@@ -3,6 +3,7 @@ package controllers
 import models.{User}
 import play.api.Play.{current, configuration}
 import play.api.Logger
+import play.api.libs.json.JsObject
 import java.lang.Character
 
 trait Translator {
@@ -16,7 +17,7 @@ trait Translator {
    * @param dest The destination language
    * @param text The text to translate
    */
-  def translate(user: User, src: String, dest: String, text: String): Option[Seq[String]]
+  def translate(user: User, src: String, dest: String, text: String): Option[JsObject]
 }
 
 object Utils {

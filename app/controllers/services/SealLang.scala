@@ -30,9 +30,9 @@ object LookupSeaLang extends Translator {
   /* Grabs all the direct Translations */
   def grabTranslations(json:Seq[JsValue]) : Seq[String] = {
     (for { entry <- json } yield {
-      val word = (entry\ "$t").asOpt[String]
+      val word = (entry \ "$t").asOpt[String]
       word.getOrElse("").replaceAll("\\n", "<br/>").stripPrefix("<br/>").stripSuffix("<br/>")
-    }).filterNot(w=>w=="")
+    }).filterNot(_ == "")
   }
 
   /**
@@ -48,46 +48,35 @@ object LookupSeaLang extends Translator {
   * TODO: After evaluation by users, possibly remove if it is too cumbersome to view.
   *       Similar problem to function englishToRussian(src: String, dest: String, text: String)
   */
-  def russianToEnglish(user: User, src: String, dest: String, text: String):Option[Seq[String]] = {
+  def russianToEnglish(user: User, src: String, dest: String, text: String): Option[Seq[String]] = {
     val query = WS.url("http://www.sealang.net/russtest/api.pl")
-    .withQueryString("service" -> "dictionary", "query" -> text, "format" -> "json", "phrase" -> text,
-                     "number" -> "5", "fold" -> "yes", "resource" -> "l1l2","encode" -> "unicode").get()
+    .withQueryString("service" -> "dictionary", "query" -> text,
+	                 "format" -> "json", "phrase" -> text,
+                     "number" -> "5", "fold" -> "yes",
+					 "resource" -> "l1l2","encode" -> "unicode").get()
     val result = Await.result(query, Duration.Inf)
     val json = result.json.asOpt[JsObject]
 
     if(result.status != 200) None
     else {
-      val entries = (json.get \ "return" \ "entry" \\ "sense")
+      val entries = (json.get \ "return" \ "entry").as[Seq[JsValue]]
 
       if (entries.size == 0) None
       else {
         var definitions = grabTranslations(entries)
-        //play.Logger.debug();
-
-        val source = src
-        val destination = dest
-        //var result = Option[(String, Int, Seq[String])]()
-        var result = Seq[String]()
-
-        definitions.foreach {
-          defini =>
-          if( defini.contains("см. также") )
-            {
-              var definit = ""
-              if (defini.contains("v см. также"))
-              {
-                definit = defini.replace("v см. также", "") 
-              }
-              else
-              {
-                definit = defini.replace("см. также", "")
-              }
-              //dagan :+ russianToEnglish(source, destination, defini)
-              //result = Lookup.getFirst(user, src, dest, definit).get._3 ++ result
-              result = result
+        val result = definitions /*.flatMap { defini =>
+          if (defini.contains("см. также")) {
+            val definit = if (defini.contains("v см. также")) {
+              defini.replace("v см. также", "") 
+            } else {
+              defini.replace("см. также", "")
             }
-            else{result ++ definitions}
-        }
+            //dagan :+ russianToEnglish(src, dest, defini)
+            Lookup.getFirst(user, src, dest, definit).get._3
+          } else {
+            Seq(defini)
+          }
+        }*/
       
         if (result.size != 0) {
           val temp = for { defin <- definitions } yield {
@@ -95,9 +84,7 @@ object LookupSeaLang extends Translator {
           }
           // Limit the translation to five definitions so that it does not get overbearing
           Some(temp.take(5))
-        }
-        else
-          None
+        } else None
       }
     }
   }
@@ -107,8 +94,10 @@ object LookupSeaLang extends Translator {
    */
   def russianToRussian(user: User, src: String, dest: String, text: String) = {
     val query = WS.url("http://www.sealang.net/russtest/api.pl")
-    .withQueryString("service" -> "dictionary", "query" -> text, "format" -> "json", "phrase" -> text,
-                     "number" -> "5", "fold" -> "yes", "encode" -> "unicode").get()
+    .withQueryString("service" -> "dictionary", "query" -> text,
+                     "format" -> "json", "phrase" -> text,
+                     "number" -> "5", "fold" -> "yes",
+                     "encode" -> "unicode").get()
     val result = Await.result(query, Duration.Inf)
     val json = result.json.asOpt[JsObject]
 
@@ -127,9 +116,7 @@ object LookupSeaLang extends Translator {
           }
           // Limit the translation to five definitions so that it does not get overbearing
           Some(temp.take(5))
-        }
-        else
-          None
+        } else None
       }
     }
   }
@@ -137,13 +124,42 @@ object LookupSeaLang extends Translator {
   /**
    * Endpoint for translating via SeaLang
    */
-  def translate(user: User, src: String, dest: String, text: String) = {
-    if (src == "eng" && dest == "rus") {         // English to Russian Translation
-      englishToRussian(user, src, dest, text)
-    } else if (src == "rus" && dest == "eng"){   // Russian to English Translation
-      russianToEnglish(user, src, dest, text)
-    } else if (src == "rus" && dest == "rus"){   // Russian To Russian
-      russianToRussian(user, src, dest, text)
-    } else None
-  }
+  def translate(user: User, src: String, dst: String, text: String) =
+    ((src, dst) match {
+    case ("eng","rus") =>  // English to Russian Translation
+      englishToRussian(user, src, dst, text)
+    case ("rus", "eng") => // Russian to English Translation
+      russianToEnglish(user, src, dst, text)
+    case ("rus", "rus") => // Russian To Russian
+      russianToRussian(user, src, dst, text)
+    case _ => None
+    }).map { translations =>
+	  Json.obj(
+	    //"translation" -> "free translation text"
+	    "words" -> Json.arr(
+	      Json.obj(
+		    "start" -> 0,
+		    "end" -> text.length,
+		    "lemmas" -> translations.map { str =>
+              Json.obj( // entry structure
+                //"pos" -> "(string with POS info)",
+                "representations" -> Json.arr("Cyrillic"),
+                "lemmaForm" -> "lemma",
+                "forms" -> Json.obj(
+                  "lemma" -> Json.obj(
+                    "Cyrillic" -> "(rep. value)"
+                  )
+                ),
+                "senses" -> Json.arr(
+                  Json.obj(
+                    //"examples" -> Json.arr("list of example sentences in the source language"),
+                    "definition" -> str
+				  )
+				)
+			  )
+			}
+		  )
+		)
+	  )
+	}
 }
