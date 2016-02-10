@@ -26,29 +26,28 @@ object LookupMerriamWebster extends Translator {
     val XMLDoc = XML.load(body)
     val response = (XMLDoc \\ "entry_list")
 
-    val defList = for {
+    for {
       entry <- response \\ "entry"
-      pos <- entry \\ "fl"
-      // ipa <- entry \\ "pr"
-      defins <- entry \\ "def"
+      pos <- entry \ "fl"
     } yield {
 
       //val wav = (entry \\ "wav").text
+	  
+      val word = (entry \\ headWordTag).text
+      val ipa = (entry \\ "pr").map(_.text)
+	  val reps = if (ipa.size == 0) Seq("Orthographic")
+	             else Seq("Orthographic", "IPA")
+	  val lemmaForm = if (ipa.size == 0) Json.obj("Orthographic" -> Seq(word))
+	                  else Json.obj("Orthographic" -> Seq(word), "IPA" -> ipa)
 
       Json.obj(
-        "representations" -> Json.arr("English Alphabet"),
+        "representations" -> reps,
         "pos" -> pos.text,
         "lemmaForm" -> "lemma",
-        "forms" -> Json.obj(
-          "lemma" -> Json.obj(
-            "English Alphabet" -> (entry \\ headWordTag).text
-          )
-        ),
-        "senses" -> Json.arr(
-          Json.obj(
-            "definition" -> defins.text.replace("<br>", "")
-          )
-        )
+        "forms" -> Json.obj("lemma" -> lemmaForm),
+        "senses" -> (entry \\ "dt").map { dt =>
+          Json.obj("definition" -> dt.text.replace("<br>", "\n"))
+        }
       )
     }
 
@@ -75,8 +74,6 @@ object LookupMerriamWebster extends Translator {
 
     exampleSound ++ ipa ++ partOfSpeech ++ defList
     */
-
-    defList
   }
 
   /**

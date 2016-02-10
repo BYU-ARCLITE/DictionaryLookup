@@ -20,8 +20,8 @@ object Lookup extends Controller {
                         //"Collins" -> LookupCollins,
                         "Glosbe" -> LookupGlosbe,
                         "SeaLang" -> LookupSeaLang,
-                        "GoogleTranslate" -> LookupGoogle, 
-                        "Madamira" -> LookupMadamira  
+                        "GoogleTranslate" -> LookupGoogle
+                        //"Madamira" -> LookupMadamira  
                       )
 
   def callService(user: User, t: Translator, req: TRequest): Option[(Set[String], JsObject, Boolean)] = {

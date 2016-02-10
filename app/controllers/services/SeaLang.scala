@@ -73,11 +73,11 @@ object LookupSeaLang extends Translator {
 
       if (senses.size > 0) {
         var lemma = Json.obj(
-          "representations" -> Json.arr("Cyrillic"),
+          "representations" -> Json.arr("Orthographic"),
           "lemmaForm" -> "lemma",
           "forms" -> Json.obj(
             "lemma" -> Json.obj(
-              "Cyrillic" -> word
+              "Orthographic" -> Json.arr(word)
             )
           ),
           "senses" -> senses

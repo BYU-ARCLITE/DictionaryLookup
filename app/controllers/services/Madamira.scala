@@ -1,6 +1,6 @@
 package controllers
 
-import models.User
+/*import models.User
 import scala.concurrent.{ExecutionContext, Future, Await}
 import scala.concurrent.duration._
 import play.api.libs.json._
@@ -140,7 +140,7 @@ object LookupMadamira extends Translator {
     res
   }
 
-  def translate(user: User, src: String, dest: String, text: String): Option[Seq[String]] = {
+  def translate(user: User, src: String, dst: String, text: String) = {
     play.Logger.debug("In the madamira lookup")
     val dialect = if (src == "arz") "EGY"
     else "MSA"
@@ -198,3 +198,4 @@ object LookupMadamira extends Translator {
     }
   }
 }
+*/
