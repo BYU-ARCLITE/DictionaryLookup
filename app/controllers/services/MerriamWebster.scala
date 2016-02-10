@@ -32,13 +32,13 @@ object LookupMerriamWebster extends Translator {
     } yield {
 
       //val wav = (entry \\ "wav").text
-	  
+
       val word = (entry \\ headWordTag).text
       val ipa = (entry \\ "pr").map(_.text)
-	  val reps = if (ipa.size == 0) Seq("Orthographic")
-	             else Seq("Orthographic", "IPA")
-	  val lemmaForm = if (ipa.size == 0) Json.obj("Orthographic" -> Seq(word))
-	                  else Json.obj("Orthographic" -> Seq(word), "IPA" -> ipa)
+      val reps = if (ipa.size == 0) Seq("Orthographic")
+                 else Seq("Orthographic", "IPA")
+      val lemmaForm = if (ipa.size == 0) Json.obj("Orthographic" -> Seq(word))
+                      else Json.obj("Orthographic" -> Seq(word), "IPA" -> ipa)
 
       Json.obj(
         "representations" -> reps,

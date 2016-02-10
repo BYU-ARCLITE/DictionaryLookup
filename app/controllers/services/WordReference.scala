@@ -35,25 +35,25 @@ object LookupWordReference extends Translator {
   )
 
   val PartsList = List("Entries","PrincipalTranslations","AdditionalTranslations")
-  
+
   def mapEntries(json: JsObject)(body: (JsObject => JsObject)) = {
     val terms = json.fields.collect {
-	  case (key, obj:JsObject) if key.startsWith("term") => obj
-	}
+      case (key, obj:JsObject) if key.startsWith("term") => obj
+    }
 
     terms.flatMap { obj =>
-	  PartsList.flatMap { pname =>
-	    (obj \ pname) match {
-		case part:JsObject =>
-		  part.fields.collect { case (_, entry:JsObject) => entry }
-		case _ => Nil
-	    }
-	  }
+      PartsList.flatMap { pname =>
+        (obj \ pname) match {
+        case part:JsObject =>
+          part.fields.collect { case (_, entry:JsObject) => entry }
+        case _ => Nil
+        }
+      }
     }
   }
 
   val TranslationList = List("FirstTranslation", "SecondTranslation", "ThirdTranslations", "FourthTranslation")
- 
+
   def getTranslationsIn(entry: JsObject) = TranslationList.flatMap { name =>
     (entry \ name \ "term") match {
       case translation:JsString => List(translation.as[String])
@@ -67,11 +67,11 @@ object LookupWordReference extends Translator {
     if(result.status != 200) None
     else {
       val lemmas = mapEntries(result.json.as[JsObject]) { entry =>
-	    val original = entry \ "OriginalTerm"
-		val pos = (original \ "POS").asOpt[String]
-		          .collect { case str if str.length > 0 => str }
-		
-	    var lemma = Json.obj(
+        val original = entry \ "OriginalTerm"
+        val pos = (original \ "POS").asOpt[String]
+                  .collect { case str if str.length > 0 => str }
+
+        var lemma = Json.obj(
           "representations" -> Json.arr("Orthographic"),
           "lemmaForm" -> "lemma",
           "forms" -> Json.obj(
@@ -79,22 +79,22 @@ object LookupWordReference extends Translator {
               "Orthographic" -> (original \ "term").as[String]
             )
           ),
-		  "senses" -> TranslationList.flatMap { name =>
-		    (entry \ name).asOpt[JsObject].map { trans =>
-		      val term = (trans \ "term").as[String]
-			  val sense = (trans \ "sense").as[String]
+          "senses" -> TranslationList.flatMap { name =>
+            (entry \ name).asOpt[JsObject].map { trans =>
+              val term = (trans \ "term").as[String]
+              val sense = (trans \ "sense").as[String]
               Json.obj("definition" -> s"$term ($sense)")
             }
-		  }
-		)
+          }
+        )
 
-		if (pos.isDefined) {
-		  lemma ++ Json.obj("pos" -> pos.get)
-		} else lemma
-	  }
+        if (pos.isDefined) {
+          lemma ++ Json.obj("pos" -> pos.get)
+        } else lemma
+      }
 
-	  if (lemmas.size == 0) None
-	  else Some(lemmas)
+      if (lemmas.size == 0) None
+      else Some(lemmas)
     }
   }
 
@@ -106,20 +106,20 @@ object LookupWordReference extends Translator {
 
     if (!wordReferenceKey.isDefined) return None
     if (whitespace.findFirstIn(text).isDefined) return None
-	
+
     val scode = codeMap.get(src)
     val dcode = codeMap.get(dst)
 
-	val hasEnglish = (scode, dcode) match {
-	case (Some("en"),Some(_)) => true
-	case (Some(_),Some("en")) => true
-	case _ => false
-	}
+    val hasEnglish = (scode, dcode) match {
+    case (Some("en"),Some(_)) => true
+    case (Some(_),Some("en")) => true
+    case _ => false
+    }
 
-	if(!hasEnglish) return None
+    if(!hasEnglish) return None
 
-	requestEntries(wordReferenceKey.get, scode.get, dcode.get, text)
-	  .map { lemmas =>
+    requestEntries(wordReferenceKey.get, scode.get, dcode.get, text)
+      .map { lemmas =>
         val words = Json.obj(
           //"translations" -> Json.arr("free translation text")
           "words" -> Json.arr(
@@ -132,6 +132,6 @@ object LookupWordReference extends Translator {
         )
 
         (Set(name), words)
-	  }
+      }
   }
 }

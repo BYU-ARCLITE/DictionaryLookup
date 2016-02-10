@@ -21,28 +21,28 @@ object Lookup extends Controller {
                         "Glosbe" -> LookupGlosbe,
                         "SeaLang" -> LookupSeaLang,
                         "GoogleTranslate" -> LookupGoogle
-                        //"Madamira" -> LookupMadamira  
+                        //"Madamira" -> LookupMadamira
                       )
 
   def callService(user: User, t: Translator, req: TRequest): Option[(Set[String], JsObject, Boolean)] = {
     val (text, rsrc, rdst, format) = req
     val langcodes = for {
-	  src <- LangCodes.convert(format, t.codeFormat, rsrc)
-	  dst <- LangCodes.convert(format, t.codeFormat, rdst)
-	} yield (src, dst)
-	
-	langcodes.flatMap { case (src, dst) =>
-	  val name = t.name
-	  val key = s"$name:$src-$dst:$text"
+      src <- LangCodes.convert(format, t.codeFormat, rsrc)
+      dst <- LangCodes.convert(format, t.codeFormat, rdst)
+    } yield (src, dst)
+
+    langcodes.flatMap { case (src, dst) =>
+      val name = t.name
+      val key = s"$name:$src-$dst:$text"
 
       Logger.info("Checking "+name)
       Cache.getAs[(Set[String], JsObject)](key)
-	    .map { case (names, json) => (names, json, true) }
+        .map { case (names, json) => (names, json, true) }
         .orElse {
           t.translate(user, src, dst, text).map { case (names, json) =>
-		    Cache.set(key, (names, json), t.expiration)
-		    (names, json, false)
-		  }
+            Cache.set(key, (names, json), t.expiration)
+            (names, json, false)
+          }
         }
     }
   }
@@ -55,24 +55,12 @@ object Lookup extends Controller {
       Logger.info("Checking "+name)
       callService(user, t, req) match {
       case Some((names, json, cached)) =>
-		if (!cached) { ServiceLog.record(user, req, name, true) }
-		return Some((names, json))
+        if (!cached) { ServiceLog.record(user, req, name, true) }
+        return Some((names, json))
       case None =>
         ServiceLog.record(user, req, name, false)
       }
-    }
-    else{
-        t.translate(user, tsrc, tdst, text) match {
-          case Some(res) =>
-            ServiceLog.record(user, srcLang, destLang, text, name, true)
-            return Some((t.name,t.expiration,res))
-          case None =>{
-            ServiceLog.record(user, srcLang, destLang, text, name, false)
-          }
-        }
-      } 
-    }
-    catch {
+    } catch {
       case e: ControlThrowable => throw e
       case e: Throwable => {
         Logger.debug(e.getMessage)
@@ -87,14 +75,14 @@ object Lookup extends Controller {
     val src = opts("srcLang")(0)
     val dst = opts("destLang")(0)
     val format = opts("codeFormat")
-	              .lift(0)
-	              .map(Symbol(_))
-				  .getOrElse('iso639_3)
+                  .lift(0)
+                  .map(Symbol(_))
+                  .getOrElse('iso639_3)
 
-	val basicResult = Json.obj(
+    val basicResult = Json.obj(
       "src" -> src,
       "dst" -> dst,
-	  "codeFormat" -> format.toString,
+      "codeFormat" -> format.toString,
       "text" -> text
     )
 
@@ -108,11 +96,11 @@ object Lookup extends Controller {
       Logger.info(response.toString)
       Ok(response)
     case None =>
-	  NotFound(Json.obj(
-	    "success" -> false,
-		"message" -> "No dictionary entries.",
-		"result" -> basicResult
-	  ))
+      NotFound(Json.obj(
+        "success" -> false,
+        "message" -> "No dictionary entries.",
+        "result" -> basicResult
+      ))
     }
   }
 
@@ -120,7 +108,7 @@ object Lookup extends Controller {
     implicit request =>
       implicit user => (try {
         lookup(request.body, user)
-	  } catch {
+      } catch {
         case _: Throwable => BadRequest
       }).withHeaders("Access-Control-Allow-Origin" -> "*")
   }

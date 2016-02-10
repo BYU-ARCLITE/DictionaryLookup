@@ -35,28 +35,28 @@ object LookupGlosbe extends Translator {
    */
   def processResults(text: String, phrases:Seq[JsObject], dst: String): Seq[JsObject] = {
     val targets = LangCodes.convert('iso639_3, 'iso639_2, dst) match {
-	case Some(p2code) => Seq(dst, p2code)
-	case _ => Seq(dst)
-	}
+    case Some(p2code) => Seq(dst, p2code)
+    case _ => Seq(dst)
+    }
 
     for {phrase  <- phrases } yield {
       val term = (phrase \ "phrase" \ "text").as[String]
 
       val defs = (phrase \ "meanings").as[Seq[JsObject]]
-	    .flatMap { obj =>
-		  (obj \ "language").asOpt[String].flatMap { lang =>
-		    if (targets.contains(lang)) None
-			else (obj \ "text").asOpt[String]
-		  }
-	    }
-		.distinct.filterNot(_ == "")
-		.map { definition =>
-		  Json.obj("definition" -> definition)
-		}
+        .flatMap { obj =>
+          (obj \ "language").asOpt[String].flatMap { lang =>
+            if (targets.contains(lang)) None
+            else (obj \ "text").asOpt[String]
+          }
+        }
+        .distinct.filterNot(_ == "")
+        .map { definition =>
+          Json.obj("definition" -> definition)
+        }
 
-	  val senses = Seq(Json.obj("definition" -> term)) ++ defs
+      val senses = Seq(Json.obj("definition" -> term)) ++ defs
 
-	  Json.obj(
+      Json.obj(
         "representations" -> Json.arr("Orthographic"),
         "lemmaForm" -> "lemma",
         "forms" -> Json.obj(
@@ -66,7 +66,7 @@ object LookupGlosbe extends Translator {
         ),
         "senses" -> senses
       )
-	}
+    }
   }
 
   /**
@@ -86,7 +86,7 @@ object LookupGlosbe extends Translator {
     if(result.status != 200) None
     else {
       (json \ "tuc").asOpt[Seq[JsObject]].map { tuc =>
-	    val phrase = (json \ "phrase").as[String]
+        val phrase = (json \ "phrase").as[String]
         val lemmas = processResults(phrase, tuc, dest)
 
         val words = Json.obj(

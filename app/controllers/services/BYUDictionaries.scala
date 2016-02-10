@@ -18,29 +18,31 @@ object LookupBYU extends Translator {
     DictionaryCache.getDictionaryEntry(key, text).orElse {
       DictionaryCache.getDictionaryEntry(key, text.toLowerCase)
     }.map { definition =>
-	  val words = Json.obj(
+      val words = Json.obj(
         //"translations" -> Json.arr("free translation text")
         "words" -> Json.arr(
           Json.obj(
             "start" -> 0,
             "end" -> text.length,
-            "lemmas" -> Json.obj(
-              "representations" -> Json.arr("Orthographic"),
-              "lemmaForm" -> "lemma",
-              "forms" -> Json.obj(
-                "lemma" -> Json.obj(
-                  "Orthographic" -> Json.arr(text)
+            "lemmas" -> Json.arr(
+              Json.obj(
+                "representations" -> Json.arr("Orthographic"),
+                "lemmaForm" -> "lemma",
+                "forms" -> Json.obj(
+                  "lemma" -> Json.obj(
+                    "Orthographic" -> Json.arr(text)
+                  )
+                ),
+                "senses" -> Json.arr(
+                  Json.obj("definition" -> definition)
                 )
-              ),
-              "senses" -> Json.arr(
-			    Json.obj("definition" -> definition)
-			  )
+              )
             )
           )
         )
       )
 
       (Set(name), words)
-	}
+    }
   }
 }
