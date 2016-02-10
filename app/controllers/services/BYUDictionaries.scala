@@ -2,6 +2,7 @@ package controllers
 
 import models.User
 import edu.byu.arclite.dictionary.DictionaryCache
+import play.api.libs.json._
 
 object LookupBYU extends Translator {
 
@@ -12,8 +13,34 @@ object LookupBYU extends Translator {
   /**
    * Endpoint for translating via BYU Dictionaries
    */
-  def translate(user: User, src: String, dest: String, text: String) = {
-      val firstTry = DictionaryCache.getDictionaryEntry(src + "-" + dest, text)
-      if (firstTry != None) firstTry else DictionaryCache.getDictionaryEntry(src + "-" + dest, text.toLowerCase)
-    }
+  def translate(user: User, src: String, dst: String, text: String) = {
+    val key = s"$src-$dst"
+    DictionaryCache.getDictionaryEntry(key, text).orElse {
+      DictionaryCache.getDictionaryEntry(key, text.toLowerCase)
+    }.map { definition =>
+	  val words = Json.obj(
+        //"translations" -> Json.arr("free translation text")
+        "words" -> Json.arr(
+          Json.obj(
+            "start" -> 0,
+            "end" -> text.length,
+            "lemmas" -> Json.obj(
+              "representations" -> Json.arr("Orthographic"),
+              "lemmaForm" -> "lemma",
+              "forms" -> Json.obj(
+                "lemma" -> Json.obj(
+                  "Orthographic" -> Json.arr(text)
+                )
+              ),
+              "senses" -> Json.arr(
+			    Json.obj("definition" -> definition)
+			  )
+            )
+          )
+        )
+      )
+
+      (Set(name), words)
+	}
+  }
 }
