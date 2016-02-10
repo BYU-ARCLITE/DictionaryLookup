@@ -17,11 +17,13 @@ object LookupGoogle extends Translator {
 
   /**
    * Endpoint for translating via Google
+   * TODO: Extract word-and-phrase alignment information
    */
   def translate(user: User, src: String, dest: String, text: String) = {
     googleKey.flatMap { key =>
       val query = WS.url("https://www.googleapis.com/language/translate/v2")
-        .withQueryString("source" -> src, "target" -> dest, "q" -> text, "key" -> key).get()
+        .withQueryString("source" -> src, "target" -> dest,
+		                 "q" -> text, "key" -> key).get()
       val result = Await.result(query, Duration.Inf)
       if(result.status != 200) None
       else {
@@ -30,6 +32,9 @@ object LookupGoogle extends Translator {
         if(translations.length > 0) Some(translations)
         else None
       }
-    }
+    }.map { translations =>
+	  val results = Json.obj("translations" -> translations)
+      (Set(name), results)
+	}
   }
 }
