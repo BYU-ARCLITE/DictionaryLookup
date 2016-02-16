@@ -10,7 +10,7 @@
                 <h1>Look Up Test</h1>
                 <form action="javascript:checkIfEmpty();">
                     <label>Word or Phrase to be Translated: <input type="text" id="words_to_translate"/></label>
-                    <br><br>
+                    <br><br> Translator
                     <label> Source Language:
                         <select id = "nativelanguageselection">
                             <option value = "eng">English</option>
@@ -176,18 +176,16 @@
                     }).join('<br/>');
 
                     var  logoURL = "http://www.dictionaryapi.com/images/info/branding-guidelines/mw-logo-light-background-50x50.png";
-
-                    if((data.srcLang==="en") || (data.destLang==="en")){
-                        theWebsite = '<img src="' + logoURL + 
-                        '" style="float:left; margin-right:25px"> </img> <p style="vertical-align: middle; height:50px;">Results Provided by Merriam-Webster Inc.<br><a href=http://www.merriam-webster.com/dictionary/' +
-                        data.text + ' target = _blank> Link to dictionary entry for ' + data.text + '</a> </p>';
+                    if((data.srcLang==="eng") || (data.destLang==="eng")){
+                        theWebsite = '<img src="' + "http://www.dictionaryapi.com/images/info/branding-guidelines/mw-logo-light-background-50x50.png" + 
+                        '" style="float:left; margin-right:25px"> </img> <p style="vertical-align: middle; height:50px;"><a href=http://www.merriam-webster.com/dictionary/' +
+                        data.text + ' target = _blank> Results Provided by <br> Merriam-Webster Inc. </a> </p>';
                     } 
-                    else if((data.srcLang==="es") || (data.destLang==="es")){
-                        theWebsite = '<img src="' + logoURL +
+                    else if((data.srcLang==="spa") || (data.destLang==="spa")){
+                        theWebsite = '<img src="' + "http://www.dictionaryapi.com/images/info/branding-guidelines/mw-logo-light-background-50x50.png" +
                         '" style="float:left; margin-right:25px"> </img> <p style="vertical-align: middle; height:50px;">Results Provided by Merriam-Webster Inc.<br><a href=http://www.spanishcentral.com/translate/'+
-                        data.text + ' target = _blank> Link to dictionary entry for ' + data.text + '</a> </p>';
+                        data.text + ' target = _blank> Results Provided by <br> Merriam-Webster Inc. </a> </p>';
                     }
-
                     break;
                 case "WordReference":
                         document.getElementById('final_translation').innerHTML =
@@ -207,8 +205,8 @@
                          }).join('<br/>');
 
                     theWebsite = '<img src=' + "'@routes.Assets.at( file = "images/GlosbeLogo.png")'" +
-                    '" style="float:left; margin-right:25px height= "50px" width= "50px"> </img> <p style="vertical-align: middle; height:50px;">Results Provided by Glosbe.<br><a href=https://en.glosbe.com/' + data.srcLang + '/' + data.destLang + '/' + data.text
-                    + ' target = _blank> Link to dictionary entry for ' + data.text + '</a> </p>';
+                    '" style="float:left; margin-right:25px height= "50px" width= "50px"> </img> <p style="vertical-align: middle; height:50px;"><br><a href=https://en.glosbe.com/' + data.srcLang + '/' + data.destLang + '/' + data.text
+                    + ' target = _blank>  Results Provided by<br> Glosbe. </a> </p>';
                     break;
                 default:
                     document.getElementById('final_translation').innerHTML =

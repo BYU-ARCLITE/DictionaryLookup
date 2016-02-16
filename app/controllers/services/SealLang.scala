@@ -62,7 +62,7 @@ object LookupSeaLang extends Translator {
       if (entries.size == 0) None
       else {
         var definitions = grabTranslations(entries)
-
+        //play.Logger.debug();
 
         val source = src
         val destination = dest

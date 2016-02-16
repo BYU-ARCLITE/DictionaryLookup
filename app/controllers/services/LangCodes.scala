@@ -44,6 +44,7 @@ object LangCodes {
 
   val ISO639_3to1 = Map(
     "aar" -> "aa","abk" -> "ab","afr" -> "af","aka" -> "ak","amh" -> "am",
+    "apc" -> "ar", "arz" -> "ar",
     "ara" -> "ar","arg" -> "an","asm" -> "as","ava" -> "av","ave" -> "ae",
     "aym" -> "ay","aze" -> "az","bak" -> "ba","bam" -> "bm","bel" -> "be",
     "ben" -> "bn","bis" -> "bi","bod" -> "bo","bos" -> "bs","bre" -> "br",

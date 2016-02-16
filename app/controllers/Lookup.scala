@@ -35,15 +35,29 @@ object Lookup extends Controller {
 	  tdst <- LangCodes.convert(format, t.codeFormat, destLang)
 	} try {
       Logger.info("Checking "+name)
+      
+      if(tsrc == "arz" || tsrc == "apc"){
       t.translate(user, tsrc, tdst, text) match {
         case Some(res) =>
-          ServiceLog.record(user, srcLang, destLang, text, name, true)
+          ServiceLog.record(user, "ara", destLang, text, name, true)
           return Some((t.name,t.expiration,res))
         case None =>{
-          ServiceLog.record(user, srcLang, destLang, text, name, false)
+          ServiceLog.record(user, "ara", destLang, text, name, false)
         }
       }
-    } catch {
+    }
+    else{
+        t.translate(user, tsrc, tdst, text) match {
+          case Some(res) =>
+            ServiceLog.record(user, srcLang, destLang, text, name, true)
+            return Some((t.name,t.expiration,res))
+          case None =>{
+            ServiceLog.record(user, srcLang, destLang, text, name, false)
+          }
+        }
+      } 
+    }
+    catch {
       case e: ControlThrowable => throw e
       case e: Throwable => {
         Logger.debug(e.getMessage)
