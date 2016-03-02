@@ -15,6 +15,8 @@ import java.net.URL;
 
 import scalaj.http.Http
 
+case class MAnalysis(start: Long, end: Long, lemma: String, tokens: Node, features: Node)
+
 object LookupMadamira extends Translator {
   val name = "Madamira"
   val expiration = Utils.getExpiration("Madamira")
@@ -70,32 +72,37 @@ object LookupMadamira extends Translator {
         <preprocessing sentence_ids="false" separate_punct="true" input_encoding="UTF8"/>
         <overall_vars output_encoding="UTF8" dialect="$dialect" output_analyses="TOP" morph_backoff="ADD_ALL" analyze_only="false"/>
         <requested_output>
-          <req_variable name="PREPROCESSED" value="true" />
           <req_variable name="STEM" value="true" />
-          <req_variable name="OFFSET" value="true" />
-          <req_variable name="TYPE" value="true" />
+          <req_variable name="GLOSS" value="true" />
           <req_variable name="LEMMA" value="true" />
           <req_variable name="DIAC" value="true" />
+
+          <req_variable name="POS" value="true" />
+
+          <req_variable name="OFFSET" value="true" />
           <req_variable name="LENGTH" value="true" />
+
+          <req_variable name="TYPE" value="true" />
+
           <req_variable name="ASP" value="true" />
           <req_variable name="CAS" value="true" />
-          <req_variable name="ENC0" value="true" />
-          <req_variable name="ENC1" value="true" />
-          <req_variable name="ENC2" value="true" />
           <req_variable name="GEN" value="true" />
           <req_variable name="MOD" value="true" />
           <req_variable name="NUM" value="true" />
           <req_variable name="PER" value="true" />
-          <req_variable name="POS" value="true" />
+          <req_variable name="STT" value="true" />
+          <req_variable name="VOX" value="true" />
+
+          <req_variable name="ENC0" value="true" />
+          <req_variable name="ENC1" value="true" />
+          <req_variable name="ENC2" value="true" />
+
           <req_variable name="PRC0" value="true" />
           <req_variable name="PRC1" value="true" />
           <req_variable name="PRC2" value="true" />
           <req_variable name="PRC3" value="true" />
-          <req_variable name="STT" value="true" />
-          <req_variable name="VOX" value="true" />
         </requested_output>
         <tokenization>
-          <scheme alias="D3" />
           <scheme alias="D3_BWFORM" />
         </tokenization>
       </madamira_configuration>
@@ -104,74 +111,71 @@ object LookupMadamira extends Translator {
           $text
         </in_seg>
       </in_doc>
-    </madamira_input>"""  
+    </madamira_input>"""
   }
 
-  def parseXml(text: String) = {
+  def parseXml(text: String): Seq[MAnalysis] = {
     val XMLdoc = XML.loadString(text)
-    (XMLdoc \\ "word_info").map { wordinfo =>
-    
-      // we get multiple return information from Madamira,
-	  // so to start I want to check and see which has the best score
-      val ScoreList : Seq[String] = for {
-       score <- wordinfo \\ "analysis" \\ "@score"
-      } yield { score.toString }
-	
-      val max = ScoreList.max
-      val index = ScoreList.indexOf(max)
-	  val wordList = (wordinfo \\ "word")
-	  wordList(index)
-	}
+    (XMLdoc \\ "word").flatMap { word =>
+      if (word \@ "type" != "ARABIC") Nil
+      else try {
+        val start = (word \@ "offset").toLong
+        val end = (word \@ "length").toLong + start
+
+        val tokens = (word \\ "tokenized" \\ "tok")(0)
+
+        // TODO: This might be backwards....
+        val analyses = (word \\ "analysis")
+                         .sortBy(a => (a \@ "score").toFloat)
+        val topAnalysis = analyses(0)
+        val features = (topAnalysis \\ "morph_feature_set")(0)
+
+        //TODO: Experiment with different source texts
+        // to figure out what attributes actually provide
+        // the best dictionary forms for recursive lookups
+        val lemma = features \@ "stem"
+        Seq(MAnalysis(start, end, lemma, tokens, features))
+      } catch {
+        case _: Throwable => Nil
+      }
+    }
   }
 
-  def getDefinitions(len: Long, lemmas: NodeSeq, restart: TRestart) = {
-      val words: Seq[String] = for {
-        word <- lemmas \\ "word"
-      } yield {
-        (word \\ "@word").toString
-      }
-
-	
+  def getDefinitions(lemmas: Seq[MAnalysis], restart: TRestart):
+                    (Set[String], Seq[JsObject]) = {
     val exclusion = Set("Madamira")
 
-	//TODO: Make requests for all segmented words
-	val text = words(0)
-    val result = restart(text, exclusion)
+    // We're ignoring free translations for now.
 
-    //play.Logger.info(result)
+    val results = lemmas.flatMap { wdata: MAnalysis =>
+      (for {
+        (names, result) <- restart(wdata.lemma, exclusion)
+        wlist <- (result \ "words").asOpt[Seq[JsObject]]
+      } yield {
+        //TODO: Add an additional word entry for the gloss &
+        // morphological information that we got from Madamira
+        // or integrate that into existing entries, and filter
+        // out entries that don't match the proper POS
 
-    val res = words.toSet
-    play.Logger.debug("List of words "+res.toString)
-    //play.Logger.debug(res.length.toString)
+        //update the start/end indices to match the surrounding text
+        val updated_words = wlist.map { wstruct =>
+          wstruct ++ Json.obj("start" -> wdata.start, "end" -> wdata.end)
+        }
+        (names, updated_words)
+      }).toList
+    }
 
-	//TODO: Merge result data from the restart
-    val definition = "Santi"
-    
-    Json.obj(
-      //"translations" -> Json.arr("free translation text")
-      "words" -> Json.arr(
-        Json.obj(
-          "start" -> 0,
-          "end" -> len,
-          "lemmas" -> Json.arr(
-            Json.obj(
-              "representations" -> Json.arr("Orthographic"),
-              "lemmaForm" -> "lemma",
-              "forms" -> Json.obj(
-                "lemma" -> Json.obj(
-                  "Orthographic" -> Json.arr(text)
-                )
-              ),
-              "senses" -> Json.arr(
-                Json.obj("definition" -> definition)
-              )
-            )
-          )
-        )
-      )
-    )
+    val names = results.foldLeft(Set[String]()) {
+      case (acc, (n:Set[String],_)) => acc ++ n
+    }
+
+    val words = results.foldLeft(Seq[JsObject]()) {
+      case (acc, (_,w:JsObject)) => acc ++ w
+    }
+
+    (names, words)
   }
-  
+
   def translate(user: User, src: String, dst: String, text: String)
                (implicit restart: TRestart) = {
 
@@ -180,18 +184,19 @@ object LookupMadamira extends Translator {
 
       val url = "http://127.0.0.1:8223"
       val result = Http(url)
-	                .postData(inputXmlData)
-	                .header("content-type", "application/xml")
-					.asString
+                    .postData(inputXmlData)
+                    .header("content-type", "application/xml")
+                    .asString
 
-      //play.Logger.debug("result: "+result.body)
+      play.Logger.debug("Madamira result:\n "+result.body)
       if(result.code != 200) {
         None
       } else {
         val lemmas = parseXml(result.body)
-		val words = getDefinitions(text.length, lemmas, restart)
-        Some((Set("Madamira"), words))
+        val (names, words) = getDefinitions(lemmas, restart)
+        if (words.size == 0) None
+        else Some((names ++ Set("Madamira"), Json.obj("words" -> words)))
       }
-	}
+    }
   }
 }
