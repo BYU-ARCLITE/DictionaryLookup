@@ -1,6 +1,7 @@
 package controllers
 
 import models.User
+import Utils._
 import edu.byu.arclite.dictionary.DictionaryCache
 import play.api.libs.json._
 
@@ -13,7 +14,8 @@ object LookupBYU extends Translator {
   /**
    * Endpoint for translating via BYU Dictionaries
    */
-  def translate(user: User, src: String, dst: String, text: String) = {
+  def translate(user: User, src: String, dst: String, text: String)
+               (implicit restart: TRestart) = {
     val key = s"$src-$dst"
     DictionaryCache.getDictionaryEntry(key, text).orElse {
       DictionaryCache.getDictionaryEntry(key, text.toLowerCase)

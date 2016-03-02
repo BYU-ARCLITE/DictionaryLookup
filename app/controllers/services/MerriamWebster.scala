@@ -1,6 +1,7 @@
 package controllers
 
 import models.User
+import Utils._
 import scala.concurrent.{ExecutionContext, Future, Await}
 import scala.concurrent.duration._
 import play.api.libs.json._
@@ -79,7 +80,8 @@ object LookupMerriamWebster extends Translator {
   /**
    * Endpoint for translating via merriamWebster
    */
-  def translate(user: User, src: String, dst: String, text: String) = {
+  def translate(user: User, src: String, dst: String, text: String)
+               (implicit restart: TRestart) = {
     val lemmas: Seq[JsObject] =
       if (((src == "spa" && dst == "eng") || (src == "eng" && dst == "spa")) && spanishKey.isDefined) {
         val key = spanishKey.get

@@ -1,6 +1,7 @@
 package controllers
 
 import models.User
+import Utils._
 import java.net.URLEncoder
 import scala.concurrent.{ExecutionContext, Future, Await}
 import scala.concurrent.duration._
@@ -135,7 +136,8 @@ object LookupSeaLang extends Translator {
   /**
    * Endpoint for translating via SeaLang
    */
-  def translate(user: User, src: String, dst: String, text: String) = {
+  def translate(user: User, src: String, dst: String, text: String)
+               (implicit restart: TRestart) = {
     ((src, dst) match {
     case ("eng","rus") =>  // English to Russian Translation
       englishToRussian(text)

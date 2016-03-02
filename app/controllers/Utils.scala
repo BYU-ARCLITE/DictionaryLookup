@@ -6,21 +6,26 @@ import play.api.Logger
 import play.api.libs.json.JsObject
 import java.lang.Character
 
-trait Translator {
-  val name: String
-  val expiration: Int
-  val codeFormat: Symbol
+package object Utils {
 
-  /**
-   * Endpoint for translating
-   * @param src The source language
-   * @param dest The destination language
-   * @param text The text to translate
-   */
-  def translate(user: User, src: String, dest: String, text: String): Option[(Set[String], JsObject)]
-}
+  type TRequest = (String, String, String, Symbol)
+  type TResult = (Set[String], JsObject)
+  type TRestart = (String, Set[String]) => Option[TResult]
 
-object Utils {
+  trait Translator {
+    val name: String
+    val expiration: Int
+    val codeFormat: Symbol
+
+    /**
+     * Endpoint for translating
+     * @param src The source language
+     * @param dest The destination language
+     * @param text The text to translate
+     */
+    def translate(user: User, src: String, dest: String, text: String)
+               (implicit restart: TRestart): Option[(Set[String], JsObject)]
+  }
 
   val entityNames = Map(
     "quot" -> 34, "amp" -> 38, "apos" -> 39, "lt" -> 60,

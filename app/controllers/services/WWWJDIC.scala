@@ -1,6 +1,7 @@
 package controllers
 
 import models.User
+import Utils._
 import java.net.URLEncoder
 import scala.concurrent.{ExecutionContext, Future, Await}
 import scala.concurrent.duration._
@@ -73,7 +74,8 @@ object LookupWWWJDIC extends Translator {
   }
 
   /* TODO: Make use of the word breaking / glossing feature */
-  def translate(user: User, src: String, dst: String, text: String) = {
+  def translate(user: User, src: String, dst: String, text: String)
+               (implicit restart: TRestart) = {
     (if (src == "ja") {
       dictionaries.get(dst).flatMap { dcode =>
         getTranslations(text, dcode)

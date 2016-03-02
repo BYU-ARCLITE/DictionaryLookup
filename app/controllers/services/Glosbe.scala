@@ -1,6 +1,7 @@
 package controllers
 
 import models.User
+import Utils._
 import java.net.URLEncoder
 import scala.concurrent.{ExecutionContext, Future, Await}
 import scala.concurrent.duration._
@@ -72,7 +73,8 @@ object LookupGlosbe extends Translator {
   /**
    * Endpoint for translating via Glosbe
    */
-  def translate(user: User, src: String, dest: String, text: String) = {
+  def translate(user: User, src: String, dest: String, text: String)
+               (implicit restart: TRestart) = {
     val query = WS.url("http://glosbe.com/gapi/translate")
         .withQueryString("from" -> src, "dest" -> dest,
                          "format" -> "json", "phrase" -> text).get()

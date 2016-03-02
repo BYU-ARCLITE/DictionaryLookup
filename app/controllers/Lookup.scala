@@ -2,6 +2,7 @@ package controllers
 
 import scala.util.control.ControlThrowable
 import controllers.authentication.Authentication
+import controllers.Utils._
 import models.{User, ServiceLog}
 import play.api.mvc.{Action, Controller}
 import play.api.libs.json._
@@ -10,8 +11,6 @@ import play.api.Play.current
 import play.api.Logger
 
 object Lookup extends Controller {
-  type TResult = (Set[String], JsObject)
-  type TRequest = (String, String, String, Symbol)
 
   val serviceMap = Map( "BYUDictionaries" -> LookupBYU,
                         "WWWJDIC" -> LookupWWWJDIC,
@@ -24,7 +23,9 @@ object Lookup extends Controller {
                         "Madamira" -> LookupMadamira
                       )
 
-  def callService(user: User, t: Translator, req: TRequest): Option[(Set[String], JsObject, Boolean)] = {
+  def callService(user: User, t: Translator, req: TRequest)
+                 (implicit restart: TRestart):
+				 Option[(Set[String], JsObject, Boolean)] = {
     val (text, rsrc, rdst, format) = req
     val langcodes = for {
       src <- LangCodes.convert(format, t.codeFormat, rsrc)
@@ -48,6 +49,12 @@ object Lookup extends Controller {
   }
 
   def getFirst(user: User, req: TRequest, exclusions: Set[String] = Set()): Option[TResult] = {
+
+    implicit val restart : TRestart = { (text: String, excls: Set[String]) =>
+	  val (_, rsrc, rdst, format) = req
+	  getFirst(user, (text, rsrc, rdst, format), exclusions ++ excls)
+	}
+
     for {
 	  name <- user.getServices if !exclusions.contains(name)
 	  t <- serviceMap.get(name)
