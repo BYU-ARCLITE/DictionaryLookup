@@ -119,12 +119,13 @@
         }
 
         function Lookup(){
+
             var xhr = new XMLHttpRequest(),
                 security_key_to_check = document.getElementById("security_key").value,
                 srclang = document.getElementById("nativelanguageselection").value,
                 dstlang = document.getElementById("secondlanguageselection").value,
                 lookupWord = document.getElementById("words_to_translate").value;
-
+            //alert("IN LOOP1");
             xhr.addEventListener('load',function(){
                 var resp;
                 if(xhr.status == 401){
@@ -141,6 +142,7 @@
                 if(resp.entries === void 0){  // Make sure we actually received translations
                     alert("No data recieved");
                 }else{
+                    //alert("IN LOOP2");
                     displayResult({
                         text: lookupWord,
                         translations: resp.entries,
@@ -161,7 +163,9 @@
             xhr.setRequestHeader("Authorization", security_key_to_check);
             xhr.send("srcLang="+encodeURIComponent(srclang)+
                      "&destLang="+encodeURIComponent(dstlang)+
-                     "&word="+encodeURIComponent(lookupWord));
+                     "&word="+encodeURIComponent(lookupWord)+
+                     "&codeFormat=iso639_3"
+                     );
         }
 
         function displayResult(data){

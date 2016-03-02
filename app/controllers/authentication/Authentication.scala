@@ -16,8 +16,8 @@ object Authentication extends Controller {
         .flatMap(User.findByKey _)
         .map(f(request))
         .getOrElse(Unauthorized)
-      } catch {
-        case _: Throwable => BadRequest
+      } catch { 
+        case _: Throwable => play.Logger.debug("BadRequest Authentication.scala keyedAction"); BadRequest
       }
   }
 
@@ -30,7 +30,7 @@ object Authentication extends Controller {
       } yield f(request)(user)
       response.getOrElse(Unauthorized)
     } catch {
-      case _: Throwable => BadRequest
+      case _: Throwable => play.Logger.debug("BadRequest Authentication.scala authAction"); BadRequest
     }
   }
 }

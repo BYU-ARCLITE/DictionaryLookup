@@ -20,8 +20,8 @@ object Lookup extends Controller {
                         //"Collins" -> LookupCollins,
                         "Glosbe" -> LookupGlosbe,
                         "SeaLang" -> LookupSeaLang,
-                        "GoogleTranslate" -> LookupGoogle
-                        //"Madamira" -> LookupMadamira
+                        "GoogleTranslate" -> LookupGoogle,
+                        "Madamira" -> LookupMadamira
                       )
 
   def callService(user: User, t: Translator, req: TRequest): Option[(Set[String], JsObject, Boolean)] = {
@@ -109,7 +109,7 @@ object Lookup extends Controller {
       implicit user => (try {
         lookup(request.body, user)
       } catch {
-        case _: Throwable => BadRequest
+        case santi : Throwable =>  play.Logger.debug( santi.getMessage() ); BadRequest
       }).withHeaders("Access-Control-Allow-Origin" -> "*")
   }
 

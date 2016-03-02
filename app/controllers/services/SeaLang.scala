@@ -104,7 +104,7 @@ object LookupSeaLang extends Translator {
       else None
     }
   }
-
+  
   /**
    * English to Russian Translations
    */

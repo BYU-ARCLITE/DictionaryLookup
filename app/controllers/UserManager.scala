@@ -20,10 +20,10 @@ object UserManager extends Controller {
         body("email")(0)
       ) match {
         case Some(user) => Ok(user.authKey)
-        case None => BadRequest
+        case None =>  play.Logger.debug("BadRequest UserManager.scala register case none"); BadRequest
       }
     } catch {
-      case _: Throwable => BadRequest
+      case _: Throwable => play.Logger.debug("BadRequest UserManager.scala register case _"); BadRequest
     }
   }
 
