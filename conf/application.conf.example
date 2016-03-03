@@ -17,6 +17,10 @@ HTTPS=false
 
 # Service configuration
 
+# BYU Dictionaries
+
+byu.dictpath = "###################################"
+
 # WordReference
 wordReference.key="#####"
 wordReference.expiration = 1 day

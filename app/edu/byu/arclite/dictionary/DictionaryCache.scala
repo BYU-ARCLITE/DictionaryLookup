@@ -21,18 +21,21 @@ object DictionaryCache {
     .map(_.toInt / 1000)
     .getOrElse(600) //default 10 minutes
 
+  val basePath = configuration.getString("byu.dictpath").getOrElse("./dictionaries")
+
   def getDictionaryEntry(language: String, key: String): Option[List[String]] = try {
     val dictionary = Cache.getOrElse[TrieMap[String, ListBuffer[String]]](language, expiration) {
-      Logger.info("Loading dictionary " + language)
-      Dictionary.loadFromFile(new File("./dictionaries/" + language + ".bin"))
+      val file = new File(basePath, language + ".bin")
+      Logger.info(s"Loading dictionary $language from ${file.getPath()}")
+      Dictionary.loadFromFile(file)
     }
     val normalizedKey = Normalizer.normalize(key, Normalizer.Form.NFC)
     dictionary.get(normalizedKey).flatMap { buf =>
       if(buf.length > 0) Some(buf.toList) else None
     }
   } catch {
-    case _: Throwable => //Should be more specific, but... eh.
-      Logger.info("Dictionary " + language + " not found.")
+    case e: Throwable =>
+      Logger.info(s"Dictionary $language could not be loaded: ${e.getMessage()}")
       None
   }
 }
