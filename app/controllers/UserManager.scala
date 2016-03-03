@@ -14,16 +14,26 @@ object UserManager extends Controller {
   def register = Action(parse.urlFormEncoded) {
     implicit request => try {
       val body = request.body
+      val username = body("username")(0)
       User.create(
-        body("username")(0),
+        username,
         body("password")(0),
         body("email")(0)
       ) match {
         case Some(user) => Ok(user.authKey)
-        case None =>  play.Logger.debug("BadRequest UserManager.scala register case none"); BadRequest
+        case None =>
+          BadRequest(Json.obj(
+            "success" -> false,
+            "message" -> s"Username '$username' is already taken."
+          ))
       }
     } catch {
-      case _: Throwable => play.Logger.debug("BadRequest UserManager.scala register case _"); BadRequest
+      case e: Throwable =>
+        play.Logger.debug("In register: " + e.getMessage())
+        BadRequest(Json.obj(
+          "success" -> false,
+          "message" -> e.getMessage()
+        ))
     }
   }
 
@@ -51,7 +61,7 @@ object UserManager extends Controller {
   def resetServiceList(username: String) = Authentication.authAction(username, parse.urlFormEncoded) {
     implicit request =>
       implicit user =>
-	    import scala.util.Try
+        import scala.util.Try
         val serviceList = request.body.iterator
           .flatMap { case (key, values) => Try(key.toInt -> values).toOption }
           .toList.sortBy(_._1)

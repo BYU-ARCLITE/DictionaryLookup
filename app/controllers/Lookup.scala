@@ -97,6 +97,7 @@ object Lookup extends Controller {
     case Some(result) =>
       val response = Json.obj(
         "success" -> true,
+        "message" -> "Found dictionary entries.",
         "result" -> (result ++ basicResult)
       )
       Logger.info(response.toString)
@@ -115,7 +116,12 @@ object Lookup extends Controller {
       implicit user => (try {
         lookup(request.body, user)
       } catch {
-        case santi : Throwable =>  play.Logger.debug( santi.getMessage() ); BadRequest
+        case e: Throwable =>
+          play.Logger.debug(e.getMessage())
+          BadRequest(Json.obj(
+            "success" -> false,
+            "message" -> e.getMessage()
+          ))
       }).withHeaders("Access-Control-Allow-Origin" -> "*")
   }
 

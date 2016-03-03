@@ -1,6 +1,7 @@
 package controllers.authentication
 
 import play.api.mvc._
+import play.api.libs.json._
 import models.User
 
 object Authentication extends Controller {
@@ -16,8 +17,13 @@ object Authentication extends Controller {
         .flatMap(User.findByKey _)
         .map(f(request))
         .getOrElse(Unauthorized)
-      } catch { 
-        case _: Throwable => play.Logger.debug("BadRequest Authentication.scala keyedAction"); BadRequest
+      } catch {
+        case e: Throwable =>
+          play.Logger.debug("In keyedAction: " + e.getMessage())
+          BadRequest(Json.obj(
+            "success" -> false,
+            "message" -> e.getMessage()
+          ))
       }
   }
 
@@ -30,7 +36,12 @@ object Authentication extends Controller {
       } yield f(request)(user)
       response.getOrElse(Unauthorized)
     } catch {
-      case _: Throwable => play.Logger.debug("BadRequest Authentication.scala authAction"); BadRequest
+      case e: Throwable =>
+        play.Logger.debug("In authAction: " + e.getMessage())
+        BadRequest(Json.obj(
+          "success" -> false,
+          "message" -> e.getMessage()
+        ))
     }
   }
 }
