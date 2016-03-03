@@ -30,7 +30,9 @@ object DictionaryCache {
       Dictionary.loadFromFile(file)
     }
     val normalizedKey = Normalizer.normalize(key, Normalizer.Form.NFC)
-    dictionary.get(normalizedKey).flatMap { buf =>
+    dictionary.get(normalizedKey).orElse {
+	  dictionary.get(normalizedKey.toLowerCase)
+	}.flatMap { buf =>
       if(buf.length > 0) Some(buf.toList) else None
     }
   } catch {
