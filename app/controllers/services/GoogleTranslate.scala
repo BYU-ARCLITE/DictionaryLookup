@@ -25,17 +25,22 @@ object LookupGoogle extends Translator {
     googleKey.flatMap { key =>
       val query = WS.url("https://www.googleapis.com/language/translate/v2")
         .withQueryString("source" -> src, "target" -> dest,
-		                 "q" -> text, "key" -> key).get()
+                         "q" -> text, "key" -> key).get()
       val result = Await.result(query, Duration.Inf)
       if(result.status != 200) None
       else {
         val translations = (result.json \ "data" \ "translations" \\ "translatedText")
-		    .map { jsstr => quoteExpr.replaceAllIn(Utils.unescape(jsstr.toString), "") }
+            .map { jsstr =>
+              Json.obj(
+                "text" -> quoteExpr.replaceAllIn(Utils.unescape(jsstr.toString), ""),
+                "source" -> name
+              )
+            }
         if(translations.length > 0) Some(translations)
         else None
       }
     }.map { translations =>
-	  Json.obj("translations" -> translations)
-	}
+      Json.obj("translations" -> translations)
+    }
   }
 }

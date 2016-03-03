@@ -48,7 +48,8 @@ object LookupMerriamWebster extends Translator {
         "forms" -> Json.obj("lemma" -> lemmaForm),
         "senses" -> (entry \\ "dt").map { dt =>
           Json.obj("definition" -> dt.text.replace("<br>", "\n"))
-        }
+        },
+        "sources" -> Seq(name)
       )
     }
 
@@ -105,7 +106,7 @@ object LookupMerriamWebster extends Translator {
           )
         )
       )
-	  Some(results)
+      Some(results)
     }
   }
 }

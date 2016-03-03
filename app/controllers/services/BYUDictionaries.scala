@@ -37,7 +37,8 @@ object LookupBYU extends Translator {
                 ),
                 "senses" -> Json.arr(
                   Json.obj("definition" -> definition)
-                )
+                ),
+                "sources" -> Seq(name)
               )
             )
           )

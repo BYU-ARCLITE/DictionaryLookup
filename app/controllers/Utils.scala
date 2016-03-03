@@ -100,7 +100,7 @@ package object Utils {
 
   def unescape(str: String): String =
     entityExpr.replaceAllIn(str, m =>
-	  m.group(1) match {
+      m.group(1) match {
       case hexExpr(hex) =>
         val codePoint = Integer.parseInt(hex, 16)
         new String(Character.toChars(codePoint))
@@ -111,7 +111,7 @@ package object Utils {
           new String(Character.toChars(codePoint))
         }.getOrElse(m.group(0))
       }
-	)
+    )
 
   def getExpiration(prefix: String): Int = configuration.getMilliseconds(s"$prefix.expiration")
     .orElse(configuration.getMilliseconds("services.expiration"))

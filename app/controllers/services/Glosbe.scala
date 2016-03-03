@@ -65,7 +65,8 @@ object LookupGlosbe extends Translator {
             "Orthographic" -> Json.arr(text)
           )
         ),
-        "senses" -> senses
+        "senses" -> senses,
+        "sources" -> Seq(name)
       )
     }
   }

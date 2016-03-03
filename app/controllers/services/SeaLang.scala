@@ -81,7 +81,8 @@ object LookupSeaLang extends Translator {
               "Orthographic" -> Json.arr(word)
             )
           ),
-          "senses" -> senses
+          "senses" -> senses,
+          "sources" -> Seq(name)
         )
 
         (entry \\ "pos").lift(0)

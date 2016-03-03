@@ -25,7 +25,7 @@ object Lookup extends Controller {
 
   def callService(user: User, t: Translator, req: TRequest)
                  (implicit restart: TRestart):
-				 Option[(JsObject, Boolean)] = {
+                 Option[(JsObject, Boolean)] = {
     val (text, rsrc, rdst, format) = req
     val langcodes = for {
       src <- LangCodes.convert(format, t.codeFormat, rsrc)
@@ -51,14 +51,14 @@ object Lookup extends Controller {
   def getFirst(user: User, req: TRequest, exclusions: Set[String] = Set()): Option[TResult] = {
 
     implicit val restart : TRestart = { (text: String, excls: Set[String]) =>
-	  val (_, rsrc, rdst, format) = req
-	  getFirst(user, (text, rsrc, rdst, format), exclusions ++ excls)
-	}
+      val (_, rsrc, rdst, format) = req
+      getFirst(user, (text, rsrc, rdst, format), exclusions ++ excls)
+    }
 
     for {
-	  name <- user.getServices if !exclusions.contains(name)
-	  t <- serviceMap.get(name)
-	} try {
+      name <- user.getServices if !exclusions.contains(name)
+      t <- serviceMap.get(name)
+    } try {
       Logger.info("Checking "+name)
       callService(user, t, req) match {
       case Some((json, cached)) =>
@@ -82,9 +82,9 @@ object Lookup extends Controller {
     val src = opts("srcLang")(0)
     val dst = opts("destLang")(0)
     val format = opts.get("codeFormat")
-	              .flatMap(_.lift(0))
-				  .map(Symbol(_))
-				  .getOrElse('iso639_3)
+                  .flatMap(_.lift(0))
+                  .map(Symbol(_))
+                  .getOrElse('iso639_3)
 
     val basicResult = Json.obj(
       "src" -> src,

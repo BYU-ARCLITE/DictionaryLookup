@@ -117,28 +117,27 @@ object LookupMadamira extends Translator {
   }
 
   val morphs = Seq(
-    ("Person","per"),
-    ("Aspect","asp"),
-    ("Voice","vox"),
-    ("Mood","mod"),
-    ("Gender","gen"),
-    ("Number","num"),
-    ("State","stt"),
-    ("Case","cas"),
-    ("Form of","stem")
+    "per", //Person
+    "asp", //Aspect
+    "vox", //Voice
+    "mod", //Mood
+    "gen", //Gender
+    "num", //Number
+    "stt", //State
+    "cas"  //Case
   )
 
   def featuresToJson(features: Node) = {
-    val morphology = morphs.map { case (label, attr) =>
+    val derivation = morphs.map { attr =>
       features \@ attr match {
       case "" | "na" | "u" => None
-      case value:String => Some(s"$label $value")
+      case value:String => Some("$attr:$value")
       }
     }.collect { case Some(str) => str }
 
-    val derivation = morphology match {
-    case Nil => Nil
-    case s:Seq[String] => Seq(s.mkString("; "))
+    val form:String = derivation match {
+    case Nil => "Unknown"
+    case s:Seq[String] => s.mkString(" ")
     }
 
     val gloss = features \@ "gloss" match {
@@ -147,13 +146,17 @@ object LookupMadamira extends Translator {
     }
 
     Json.obj(
-      "representations" -> Seq("Arabic Diacritized"),
+      "representations" -> Seq("Arabic"),
       "pos" -> (features \@ "pos"),
       "lemmaForm" -> "lemma",
-      "forms" -> Json.obj("lemma" -> (features \@ "diac")),
-      "senses" -> (derivation ++ gloss).map { dt =>
+      "forms" -> Json.obj(
+        "lemma" -> (features \@ "stem"),
+        form -> (features \@ "diac")
+      ),
+      "senses" -> gloss.map { dt =>
         Json.obj("definition" -> dt)
-      }
+      },
+      "sources" -> Seq(name)
     )
   }
 
@@ -198,7 +201,7 @@ object LookupMadamira extends Translator {
           wstruct ++ Json.obj("start" -> wdata.start, "end" -> wdata.end)
         }.toList
 
-		wdata.gloss :: updated_words
+        wdata.gloss :: updated_words
       }).getOrElse(Nil)
     }
   }

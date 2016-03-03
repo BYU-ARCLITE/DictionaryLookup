@@ -86,7 +86,8 @@ object LookupWordReference extends Translator {
               val sense = (trans \ "sense").as[String]
               Json.obj("definition" -> s"$term ($sense)")
             }
-          }
+          },
+          "sources" -> Seq(name)
         )
 
         if (pos.isDefined) {
