@@ -26,21 +26,31 @@ object Lookup extends Controller {
   def callService(user: User, t: Translator, req: TRequest)
                  (implicit restart: TRestart):
                  Option[(JsObject, Boolean)] = {
-    val (text, rsrc, rdst, format) = req
+
+    val name = t.name
+	val tformat = t.codeFormat
+    Logger.info(s"Converting codes to ${tformat.toString} for $name")
+
+    val (text, rsrc, rdst, rformat) = req
     val langcodes = for {
-      src <- LangCodes.convert(format, t.codeFormat, rsrc)
-      dst <- LangCodes.convert(format, t.codeFormat, rdst)
+      src <- LangCodes.convert(rformat, tformat, rsrc)
+      dst <- LangCodes.convert(rformat, tformat, rdst)
     } yield (src, dst)
 
     langcodes.flatMap { case (src, dst) =>
-      val name = t.name
       val key = s"$name:$src-$dst:$text"
+	  Logger.info(s"Checking $name")
 
-      Logger.info("Checking "+name)
       Cache.getAs[JsObject](key)
         .map { json => (json, true) }
         .orElse {
-          t.translate(user, src, dst, text).map { json =>
+		  (try {
+            t.translate(user, src, dst, text)
+		  } catch {
+		    case e: Throwable =>
+			  Logger.debug(s"Error in $name: ${e.getMessage()}")
+			  None
+		  }).map { json =>
             Cache.set(key, json, t.expiration)
             (json, false)
           }

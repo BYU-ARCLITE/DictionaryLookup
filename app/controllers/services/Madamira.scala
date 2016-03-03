@@ -22,7 +22,7 @@ case class MAnalysis(start: Long, end: Long,
 object LookupMadamira extends Translator {
   val name = "Madamira"
   val expiration = Utils.getExpiration("Madamira")
-  val codeFormat = 'iso6239_3
+  val codeFormat = 'iso639_3
   val madamiraURL = configuration.getString("services.madamira")
 
   val dialects = Map(
