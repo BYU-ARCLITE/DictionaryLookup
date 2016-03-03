@@ -88,20 +88,24 @@ object LookupGlosbe extends Translator {
      */
     if(result.status != 200) None
     else {
-      (json \ "tuc").asOpt[Seq[JsObject]].map { tuc =>
+      (json \ "tuc").asOpt[Seq[JsObject]].flatMap { tuc =>
         val phrase = (json \ "phrase").as[String]
         val lemmas = processResults(phrase, tuc, dest)
 
-        Json.obj(
-          //"translations" -> Json.arr("free translation text")
-          "words" -> Json.arr(
-            Json.obj(
-              "start" -> 0,
-              "end" -> text.length,
-              "lemmas" -> lemmas
+        if (lemmas.size == 0) None
+        else {
+          val results = Json.obj(
+            //"translations" -> Json.arr("free translation text")
+            "words" -> Json.arr(
+              Json.obj(
+                "start" -> 0,
+                "end" -> text.length,
+                "lemmas" -> lemmas
+              )
             )
           )
-        )
+          Some(results)
+        }
       }
     }
   }
