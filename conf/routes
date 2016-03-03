@@ -11,10 +11,12 @@ POST    /api/lookup                 controllers.Lookup.authlookup
 OPTIONS /api/lookup                 controllers.Lookup.preflight
 
 GET     /register                   controllers.Application.register
+GET     /manageAccount              controllers.Application.manageAccount
+
 POST    /api/register               controllers.UserManager.register
-POST    /api/user/{name}/newkey     controllers.UserManager.resetKey(name)
-POST    /api/user/{name}/newpass    controllers.UserManager.resetPass(name)
-POST    /api/user/{name}/services   controllers.UserManager.resetServiceList(name)
+POST    /api/user/:name/newkey     controllers.UserManager.resetKey(name:String)
+POST    /api/user/:name/newpass    controllers.UserManager.resetPass(name:String)
+POST    /api/user/:name/services   controllers.UserManager.resetServiceList(name:String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

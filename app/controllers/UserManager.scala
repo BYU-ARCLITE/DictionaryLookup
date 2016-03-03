@@ -20,7 +20,10 @@ object UserManager extends Controller {
         body("password")(0),
         body("email")(0)
       ) match {
-        case Some(user) => Ok(user.authKey)
+        case Some(user) => Ok(Json.obj(
+		  "success" -> true,
+		  "authkey" -> user.authKey
+		))
         case None =>
           BadRequest(Json.obj(
             "success" -> false,
@@ -41,32 +44,39 @@ object UserManager extends Controller {
     implicit request =>
       implicit user =>
         val nuser = user.setKey()
-        Ok(nuser.authKey)
+        Ok(Json.obj(
+		  "success" -> true,
+		  "authkey" -> nuser.authKey
+		))
   }
 
-  def resetPass(username: String) = Authentication.authAction(username, parse.urlFormEncoded) {
+  def resetPass(username: String) = Authentication.authAction(username, parse.multipartFormData) {
     implicit request =>
       implicit user =>
-        val nuser = user.setPass(request.body("newpassword")(0))
-        Ok(nuser.authKey)
+        user.setPass(request.body.dataParts("newpassword")(0))
+        Ok(Json.obj("success" -> true))
   }
 
-  def resetEmail(username: String) = Authentication.authAction(username, parse.urlFormEncoded) {
+  def resetEmail(username: String) = Authentication.authAction(username, parse.multipartFormData) {
     implicit request =>
       implicit user =>
-        user.setEmail(request.body("email")(0))
-        Ok
+        user.setEmail(request.body.dataParts("email")(0))
+        Ok(Json.obj("success" -> true))
   }
 
-  def resetServiceList(username: String) = Authentication.authAction(username, parse.urlFormEncoded) {
-    implicit request =>
-      implicit user =>
-        import scala.util.Try
-        val serviceList = request.body.iterator
-          .flatMap { case (key, values) => Try(key.toInt -> values).toOption }
-          .toList.sortBy(_._1)
-          .flatMap(_._2)
-        user.setServices(serviceList)
-        Ok
-  }
+  val IntPattern = raw"([1-9]\d*|0)".r
+  def resetServiceList(username: String) =
+    Authentication.authAction(username, parse.multipartFormData) {
+      implicit request =>
+        implicit user =>
+		  import scala.util.Try
+          val serviceList = request.body.dataParts.toList
+            .collect { case (IntPattern(key), value :: _) =>
+			  (key.toInt -> value)
+			}
+			.sortBy(_._1)
+            .map(_._2)
+          user.setServices(serviceList)
+          Ok(Json.obj("success" -> true))
+    }
 }
