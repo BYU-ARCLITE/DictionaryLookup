@@ -9,7 +9,7 @@ import java.lang.Character
 package object Utils {
 
   type TRequest = (String, String, String, Symbol)
-  type TResult = (Set[String], JsObject)
+  type TResult = JsObject
   type TRestart = (String, Set[String]) => Option[TResult]
 
   trait Translator {
@@ -24,7 +24,7 @@ package object Utils {
      * @param text The text to translate
      */
     def translate(user: User, src: String, dest: String, text: String)
-               (implicit restart: TRestart): Option[(Set[String], JsObject)]
+               (implicit restart: TRestart): Option[JsObject]
   }
 
   val entityNames = Map(

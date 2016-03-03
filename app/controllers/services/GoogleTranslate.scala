@@ -35,8 +35,7 @@ object LookupGoogle extends Translator {
         else None
       }
     }.map { translations =>
-	  val results = Json.obj("translations" -> translations)
-      (Set(name), results)
+	  Json.obj("translations" -> translations)
 	}
   }
 }

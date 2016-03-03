@@ -103,7 +103,7 @@ object LookupWordReference extends Translator {
    * Endpoint for translating via WordReference
    */
   def translate(user: User, src: String, dst: String, text: String)
-               (implicit restart: TRestart): Option[(Set[String], JsObject)] = {
+               (implicit restart: TRestart): Option[JsObject] = {
 
     if (!wordReferenceKey.isDefined) return None
     if (whitespace.findFirstIn(text).isDefined) return None
@@ -121,7 +121,7 @@ object LookupWordReference extends Translator {
 
     requestEntries(wordReferenceKey.get, scode.get, dcode.get, text)
       .map { lemmas =>
-        val words = Json.obj(
+        Json.obj(
           //"translations" -> Json.arr("free translation text")
           "words" -> Json.arr(
             Json.obj(
@@ -131,8 +131,6 @@ object LookupWordReference extends Translator {
             )
           )
         )
-
-        (Set(name), words)
       }
   }
 }

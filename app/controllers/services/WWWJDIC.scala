@@ -88,7 +88,7 @@ object LookupWWWJDIC extends Translator {
       val senses = defs.map { text =>
         Json.obj("definition" -> text)
       }
-      val words = Json.obj(
+      Json.obj(
         //"translations" -> Json.arr("free translation text")
         "words" -> Json.arr(
           Json.obj(
@@ -109,8 +109,6 @@ object LookupWWWJDIC extends Translator {
           )
         )
       )
-
-      (Set(name), words)
     }
   }
 }

@@ -95,7 +95,7 @@ object LookupMerriamWebster extends Translator {
 
     if(lemmas.size == 0) None
     else {
-      val words = Json.obj(
+      val results = Json.obj(
         //"translations" -> Json.arr("free translation text")
         "words" -> Json.arr(
           Json.obj(
@@ -105,8 +105,7 @@ object LookupMerriamWebster extends Translator {
           )
         )
       )
-
-      Some((Set(name), words))
+	  Some(results)
     }
   }
 }

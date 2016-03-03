@@ -147,8 +147,7 @@ object LookupSeaLang extends Translator {
       russianToRussian(text)
     case _ => None
     }).map { lemmas =>
-
-      val words = Json.obj(
+      Json.obj(
         //"translations" -> Json.arr("free translation text")
         "words" -> Json.arr(
           Json.obj(
@@ -158,8 +157,6 @@ object LookupSeaLang extends Translator {
           )
         )
       )
-
-      (Set(name), words)
     }
   }
 }

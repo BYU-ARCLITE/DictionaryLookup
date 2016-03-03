@@ -91,7 +91,7 @@ object LookupGlosbe extends Translator {
         val phrase = (json \ "phrase").as[String]
         val lemmas = processResults(phrase, tuc, dest)
 
-        val words = Json.obj(
+        Json.obj(
           //"translations" -> Json.arr("free translation text")
           "words" -> Json.arr(
             Json.obj(
@@ -101,8 +101,6 @@ object LookupGlosbe extends Translator {
             )
           )
         )
-
-        (Set(name), words)
       }
     }
   }

@@ -25,7 +25,7 @@ object Lookup extends Controller {
 
   def callService(user: User, t: Translator, req: TRequest)
                  (implicit restart: TRestart):
-				 Option[(Set[String], JsObject, Boolean)] = {
+				 Option[(JsObject, Boolean)] = {
     val (text, rsrc, rdst, format) = req
     val langcodes = for {
       src <- LangCodes.convert(format, t.codeFormat, rsrc)
@@ -37,12 +37,12 @@ object Lookup extends Controller {
       val key = s"$name:$src-$dst:$text"
 
       Logger.info("Checking "+name)
-      Cache.getAs[(Set[String], JsObject)](key)
-        .map { case (names, json) => (names, json, true) }
+      Cache.getAs[JsObject](key)
+        .map { json => (json, true) }
         .orElse {
-          t.translate(user, src, dst, text).map { case (names, json) =>
-            Cache.set(key, (names, json), t.expiration)
-            (names, json, false)
+          t.translate(user, src, dst, text).map { json =>
+            Cache.set(key, json, t.expiration)
+            (json, false)
           }
         }
     }
@@ -61,9 +61,9 @@ object Lookup extends Controller {
 	} try {
       Logger.info("Checking "+name)
       callService(user, t, req) match {
-      case Some((names, json, cached)) =>
+      case Some((json, cached)) =>
         if (!cached) { ServiceLog.record(user, req, name, true) }
-        return Some((names, json))
+        return Some(json)
       case None =>
         ServiceLog.record(user, req, name, false)
       }
@@ -81,10 +81,10 @@ object Lookup extends Controller {
     val text = opts("word")(0)
     val src = opts("srcLang")(0)
     val dst = opts("destLang")(0)
-    val format = opts("codeFormat")
-                  .lift(0)
-                  .map(Symbol(_))
-                  .getOrElse('iso639_3)
+    val format = opts.get("codeFormat")
+	              .flatMap(_.lift(0))
+				  .map(Symbol(_))
+				  .getOrElse('iso639_3)
 
     val basicResult = Json.obj(
       "src" -> src,
@@ -94,11 +94,10 @@ object Lookup extends Controller {
     )
 
     getFirst(user, (text, src, dst, format)) match {
-    case Some((names, result)) =>
+    case Some(result) =>
       val response = Json.obj(
         "success" -> true,
-        "result" -> (result ++ basicResult),
-        "sources" -> names.toList
+        "result" -> (result ++ basicResult)
       )
       Logger.info(response.toString)
       Ok(response)

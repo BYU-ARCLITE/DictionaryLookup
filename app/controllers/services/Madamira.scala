@@ -185,32 +185,22 @@ object LookupMadamira extends Translator {
     }
   }
 
-  def getDefinitions(analyses: Seq[MAnalysis], restart: TRestart):
-                    (Set[String], Seq[JsObject]) = {
+  def getDefinitions(analyses: Seq[MAnalysis], restart: TRestart) = {
     val exclusion = Set("Madamira")
 
-    val results = analyses.flatMap { wdata: MAnalysis =>
+    analyses.flatMap { wdata: MAnalysis =>
       (for {
-        (names, result) <- restart(wdata.lemma, exclusion)
+        result <- restart(wdata.lemma, exclusion)
         wlist <- (result \ "words").asOpt[Seq[JsObject]]
       } yield {
         //update the start/end indices to match the surrounding text
         val updated_words = wlist.map { wstruct =>
           wstruct ++ Json.obj("start" -> wdata.start, "end" -> wdata.end)
         }.toList
-        (names, wdata.gloss :: updated_words)
-      }).toList
-    }
 
-    val names = results.foldLeft(Set[String]()) {
-      case (acc, (n,_)) => acc ++ n
+		wdata.gloss :: updated_words
+      }).getOrElse(Nil)
     }
-
-    val words = results.foldLeft(Seq[JsObject]()) {
-      case (acc, (_,w)) => acc ++ w
-    }
-
-    (names, words)
   }
 
   def translate(user: User, src: String, dst: String, text: String)
@@ -230,9 +220,9 @@ object LookupMadamira extends Translator {
         None
       } else {
         val analyses = parseXml(result.body)
-        val (names, words) = getDefinitions(analyses, restart)
+        val words = getDefinitions(analyses, restart)
         if (words.size == 0) None
-        else Some((names ++ Set("Madamira"), Json.obj("words" -> words)))
+        else Some(Json.obj("words" -> words))
       }
     }
   }

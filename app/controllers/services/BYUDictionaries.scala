@@ -20,7 +20,7 @@ object LookupBYU extends Translator {
     DictionaryCache.getDictionaryEntry(key, text).orElse {
       DictionaryCache.getDictionaryEntry(key, text.toLowerCase)
     }.map { definition =>
-      val words = Json.obj(
+      Json.obj(
         //"translations" -> Json.arr("free translation text")
         "words" -> Json.arr(
           Json.obj(
@@ -43,8 +43,6 @@ object LookupBYU extends Translator {
           )
         )
       )
-
-      (Set(name), words)
     }
   }
 }
