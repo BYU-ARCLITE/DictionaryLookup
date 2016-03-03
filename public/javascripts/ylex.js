@@ -1,0 +1,106 @@
+var YLex = (function(){
+
+	function engineToHTML(source, lemma){
+		return "";
+	}
+
+	function getReprRenderer(name){
+		switch(name){
+		case "WAV": return function(value){
+			return '<audio controls><source src="'
+					+ value + '" type="audio/wav"></audio>';
+		}
+		default: return function(value){ return value; }
+		}
+	}
+
+	function processRepr(name, values){
+		var renderer = getReprRenderer(name);
+		return values.map(renderer).join(", ");
+	}
+
+	function renderSense(sense){
+		var html = sense.definition;
+		if(sense.examples){
+			html += "<br/><i>Examples:</i>"
+				 + sense.examples.map(function(s){ return "<br/>"+s; });
+		}
+		if(sense.notes){
+			html += "<br/><i>Notes:</i>"
+				 + sense.notes.map(function(s){ return "<br/>"+s; });
+		}
+	}
+
+	function renderLemma(lemma){
+		var html, prefRep = lemma.representation[0],
+			formList = Object.keys(lemma.forms),
+			lemmaForm = lemma.forms[lemma.lemmaForm];
+
+		html = "<b>"+processRepr(lemmaForm[prefRep])+"</b><dl>";
+		Object.keys(lemmaForm).forEach(function(repr){
+			if(repr === prefRep){ return; }
+			html += "<dt>"+repr+"</dt><dd>"
+				 +processRepr(repr, lemmaForm[repr]) + "</dd>";
+		});
+
+		if(formList.length > 1){
+			html += "<i>Other Forms:</i><dl>";
+			formList.forEach(function(fname){
+				if(fname == lemma.lemmaForm){ return; }
+				var form = lemma.forms[fname];
+				html += "<dt>"+fname+"</dt><dd><dl>";
+				html += Object.keys(form).map(function(repr){
+				    return "<dt>"+repr+"</dt><dd>"
+						 + processRepr(repr, form[repr]) + "</dd>";
+				}).join('')+"</dl></dd>";
+			});
+			html += "</dl>";
+		}
+
+		html += "</dl>" + lemma.pos + "<ol><li>"
+			 + senses.map(renderSense).join("</li><li>")
+			 + "</li></ol>";
+
+		html += lemma.sources.map(function(source){
+			return engineToHTML(source, lemma);
+		}).join("<br/>");
+
+        return html;
+	}
+
+	function renderWord(text, word){
+		var original = text.substring(word.start, word.end);
+		return "<b>"+original+"</b><ol><li>"
+				+ word.lemmas.map(renderLemma).join("</li><li>")
+				+ "</li></ol>";
+	}
+
+	function renderResult(result){
+		var html = '<div class="sourceText">' + result.text + '</div>';
+		if(result.translations){
+			html += '<div class="translationResult">\
+						<b>Free Translations:</b>\
+						<div class="translations">' +
+							result.translations.map(function(trans){
+								return '"'+trans.text+'"<div class="engine">' + engineToHTML(trans.source)
+							}).join("") +
+						'</div>\
+					</div>';
+		}
+		if(result.words){
+			html += '<div class="translationResult">\
+						<b>Definitions:</b>\
+						<div class="translations">' +
+							result.words.map(function(word){
+								return renderWord(result.text, word);
+							}).join("") +
+						'</div>\
+					</div>';
+		}
+		return html;
+	}
+
+	return {
+		"renderResult": renderResult
+	};
+}());

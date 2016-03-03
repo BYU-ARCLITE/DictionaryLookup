@@ -95,7 +95,7 @@
                 <!-- <p id ='partOfSpeech'> </p> -->
                 <!-- <p1 id ='wordSearched'></p1>  -->
                 <br>
-                <p id="Def"></p> 
+                <p id="Def"></p>
                 <p id="final_translation"></p>
                 <br>
                 <div id="attribution";  style = "background-color: #FFF; height: 50px; align:left; vertical-align:center;"></div>
@@ -107,6 +107,7 @@
         <div>
     </div>
 
+    <script src="@routes.Assets.at(file="javascripts/ylex.js")"></script>
     <script type ="text/javascript">
 
         function checkIfEmpty(){
@@ -125,7 +126,8 @@
                 srclang = document.getElementById("nativelanguageselection").value,
                 dstlang = document.getElementById("secondlanguageselection").value,
                 lookupWord = document.getElementById("words_to_translate").value;
-            //alert("IN LOOP1");
+
+            xhr.responseType = "json";
             xhr.addEventListener('load',function(){
                 var resp;
                 if(xhr.status == 401){
@@ -133,23 +135,11 @@
                     console.log(xhr.responseText);
                     return;
                 }
-                else if (xhr.status == 404) {
-                    alert("Error, Requested from a resource that does not exist");
-                    console.log(xhr.responseText);
-                    return;
-                }
-                resp = JSON.parse(xhr.responseText);
-                if(resp.entries === void 0){  // Make sure we actually received translations
-                    alert("No data recieved");
-                }else{
-                    //alert("IN LOOP2");
-                    displayResult({
-                        text: lookupWord,
-                        translations: resp.entries,
-                        engine: resp.source,
-                        srcLang: srclang,
-                        destLang: dstlang
-                    });
+                resp = xhr.response;
+                if (!resp.success) {
+                    alert(resp.message);
+                } else {
+                    document.getElementById('Def').innerHTML = YLex.renderResult(resp.result);
                 }
             },false);
 
@@ -161,65 +151,12 @@
             xhr.open("POST", "@{routes.Lookup.authlookup().absoluteURL(configuration.getBoolean("HTTPS").getOrElse(false))}",true);
             xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
             xhr.setRequestHeader("Authorization", security_key_to_check);
-            xhr.send("srcLang="+encodeURIComponent(srclang)+
-                     "&destLang="+encodeURIComponent(dstlang)+
-                     "&word="+encodeURIComponent(lookupWord)+
-                     "&codeFormat=iso639_3"
-                     );
-        }
-
-        function displayResult(data){
-            var theWebsite;
-            document.getElementById('Def').innerHTML = "Definition for: "
-                + data.text.toUpperCase();
-            switch(data.engine){
-                case "Merriam-Webster Inc.":
-                    document.getElementById('final_translation').innerHTML =
-                    data.translations.map(function(entry, i){
-                        return entry
-                    }).join('<br/>');
-
-                    var  logoURL = "http://www.dictionaryapi.com/images/info/branding-guidelines/mw-logo-light-background-50x50.png";
-                    if((data.srcLang==="eng") || (data.destLang==="eng")){
-                        theWebsite = '<img src="' + "http://www.dictionaryapi.com/images/info/branding-guidelines/mw-logo-light-background-50x50.png" + 
-                        '" style="float:left; margin-right:25px"> </img> <p style="vertical-align: middle; height:50px;"><a href=http://www.merriam-webster.com/dictionary/' +
-                        data.text + ' target = _blank> Results Provided by <br> Merriam-Webster Inc. </a> </p>';
-                    } 
-                    else if((data.srcLang==="spa") || (data.destLang==="spa")){
-                        theWebsite = '<img src="' + "http://www.dictionaryapi.com/images/info/branding-guidelines/mw-logo-light-background-50x50.png" +
-                        '" style="float:left; margin-right:25px"> </img> <p style="vertical-align: middle; height:50px;">Results Provided by Merriam-Webster Inc.<br><a href=http://www.spanishcentral.com/translate/'+
-                        data.text + ' target = _blank> Results Provided by <br> Merriam-Webster Inc. </a> </p>';
-                    }
-                    break;
-                case "WordReference":
-                        document.getElementById('final_translation').innerHTML =
-                    data.translations.map(function(entry, i){
-                        return entry.replace("", i+1 + ": ");
-                         }).join('<br/>');
-                    theWebsite = 'Results Provided WordReference <a target =_blank href=http://www.wordreference.com/'
-                    +[data.srcLang] + '/' + [data.destLang] + '/translation.asp?spen='
-                        + data.text + '> Link to dictionary entry for "'
-                        + data.text + '" </a>';
-                    break;
-
-                case "Glosbe":
-                    document.getElementById('final_translation').innerHTML =
-                    data.translations.map(function(entry, i){
-                        return entry.replace("", i+1 + ": ");
-                         }).join('<br/>');
-
-                    theWebsite = '<img src=' + "'@routes.Assets.at( file = "images/GlosbeLogo.png")'" +
-                    '" style="float:left; margin-right:25px height= "50px" width= "50px"> </img> <p style="vertical-align: middle; height:50px;"><br><a href=https://en.glosbe.com/' + data.srcLang + '/' + data.destLang + '/' + data.text
-                    + ' target = _blank>  Results Provided by<br> Glosbe. </a> </p>';
-                    break;
-                default:
-                    document.getElementById('final_translation').innerHTML =
-                    data.translations.map(function(entry, i){
-                        return entry.replace("", i+1 + ": ");
-                    }).join('<br/>');
-                    theWebsite = "Results Provided by " + data.engine;
-            }
-            document.getElementById('attribution').innerHTML = theWebsite;
+            xhr.send(
+                "srcLang="+encodeURIComponent(srclang)+
+                "&destLang="+encodeURIComponent(dstlang)+
+                "&word="+encodeURIComponent(lookupWord)+
+                "&codeFormat=iso639_3"
+            );
         }
     </script>
 }

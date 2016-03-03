@@ -59,7 +59,6 @@ object Lookup extends Controller {
       name <- user.getServices if !exclusions.contains(name)
       t <- serviceMap.get(name)
     } try {
-      Logger.info("Checking "+name)
       callService(user, t, req) match {
       case Some((json, cached)) =>
         if (!cached) { ServiceLog.record(user, req, name, true) }
