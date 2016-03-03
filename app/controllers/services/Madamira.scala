@@ -15,7 +15,9 @@ import java.net.URL;
 
 import scalaj.http.Http
 
-case class MAnalysis(start: Long, end: Long, lemma: String, tokens: Node, features: Node)
+case class MAnalysis(start: Long, end: Long,
+                     lemma: String, gloss: JsObject,
+                     tokens: Node, features: Node)
 
 object LookupMadamira extends Translator {
   val name = "Madamira"
@@ -114,6 +116,47 @@ object LookupMadamira extends Translator {
     </madamira_input>"""
   }
 
+  val morphs = Seq(
+    ("Person","per"),
+    ("Aspect","asp"),
+    ("Voice","vox"),
+    ("Mood","mod"),
+    ("Gender","gen"),
+    ("Number","num"),
+    ("State","stt"),
+    ("Case","cas"),
+    ("Form of","stem")
+  )
+
+  def featuresToJson(features: Node) = {
+    val morphology = morphs.map { case (label, attr) =>
+      features \@ attr match {
+      case "" | "na" | "u" => None
+      case value:String => Some(s"$label $value")
+      }
+    }.collect { case Some(str) => str }
+
+    val derivation = morphology match {
+    case Nil => Nil
+    case s:Seq[String] => Seq(s.mkString("; "))
+    }
+
+    val gloss = features \@ "gloss" match {
+    case "" => Nil
+    case term:String => Seq(term)
+    }
+
+    Json.obj(
+      "representations" -> Seq("Arabic Diacritized"),
+      "pos" -> (features \@ "pos"),
+      "lemmaForm" -> "lemma",
+      "forms" -> Json.obj("lemma" -> (features \@ "diac")),
+      "senses" -> (derivation ++ gloss).map { dt =>
+        Json.obj("definition" -> dt)
+      }
+    )
+  }
+
   def parseXml(text: String): Seq[MAnalysis] = {
     val XMLdoc = XML.loadString(text)
     (XMLdoc \\ "word").flatMap { word =>
@@ -134,43 +177,37 @@ object LookupMadamira extends Translator {
         // to figure out what attributes actually provide
         // the best dictionary forms for recursive lookups
         val lemma = features \@ "stem"
-        Seq(MAnalysis(start, end, lemma, tokens, features))
+        val gloss = featuresToJson(features)
+        Seq(MAnalysis(start, end, lemma, gloss, tokens, features))
       } catch {
         case _: Throwable => Nil
       }
     }
   }
 
-  def getDefinitions(lemmas: Seq[MAnalysis], restart: TRestart):
+  def getDefinitions(analyses: Seq[MAnalysis], restart: TRestart):
                     (Set[String], Seq[JsObject]) = {
     val exclusion = Set("Madamira")
 
-    // We're ignoring free translations for now.
-
-    val results = lemmas.flatMap { wdata: MAnalysis =>
+    val results = analyses.flatMap { wdata: MAnalysis =>
       (for {
         (names, result) <- restart(wdata.lemma, exclusion)
         wlist <- (result \ "words").asOpt[Seq[JsObject]]
       } yield {
-        //TODO: Add an additional word entry for the gloss &
-        // morphological information that we got from Madamira
-        // or integrate that into existing entries, and filter
-        // out entries that don't match the proper POS
-
         //update the start/end indices to match the surrounding text
         val updated_words = wlist.map { wstruct =>
           wstruct ++ Json.obj("start" -> wdata.start, "end" -> wdata.end)
-        }
-        (names, updated_words)
+        }.toList
+        (names, wdata.gloss :: updated_words)
       }).toList
     }
 
     val names = results.foldLeft(Set[String]()) {
-      case (acc, (n:Set[String],_)) => acc ++ n
+      case (acc, (n,_)) => acc ++ n
     }
 
     val words = results.foldLeft(Seq[JsObject]()) {
-      case (acc, (_,w:JsObject)) => acc ++ w
+      case (acc, (_,w)) => acc ++ w
     }
 
     (names, words)
@@ -192,8 +229,8 @@ object LookupMadamira extends Translator {
       if(result.code != 200) {
         None
       } else {
-        val lemmas = parseXml(result.body)
-        val (names, words) = getDefinitions(lemmas, restart)
+        val analyses = parseXml(result.body)
+        val (names, words) = getDefinitions(analyses, restart)
         if (words.size == 0) None
         else Some((names ++ Set("Madamira"), Json.obj("words" -> words)))
       }
