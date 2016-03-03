@@ -150,8 +150,8 @@ object LookupMadamira extends Translator {
       "pos" -> (features \@ "pos"),
       "lemmaForm" -> "lemma",
       "forms" -> Json.obj(
-        "lemma" -> (features \@ "stem"),
-        form -> (features \@ "diac")
+        "lemma" -> Json.obj("Arabic" -> Seq(features \@ "stem")),
+        form -> Json.obj("Arabic" -> Seq(features \@ "diac"))
       ),
       "senses" -> gloss.map { dt =>
         Json.obj("definition" -> dt)
