@@ -16,6 +16,7 @@ dist
 /.settings
 
 /conf/application.conf
+/conf/logback.xml
 
 .sbtserver
 project/.*
