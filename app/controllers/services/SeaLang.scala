@@ -89,7 +89,9 @@ object LookupSeaLang extends Translator {
             )
           ),
           "senses" -> senses,
-          "sources" -> Seq(name)
+          "sources" -> Json.arr(
+            Json.obj("name" -> name, "attribution" -> s"<i>$name</i>")
+          )
         )
 
         (entry \\ "pos").lift(0)

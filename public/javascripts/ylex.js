@@ -1,9 +1,5 @@
 var YLex = (function(){
 
-	function engineToHTML(source, lemma){
-		return "";
-	}
-
 	function getReprRenderer(name){
 		switch(name){
 		case "WAV": return function(value){
@@ -64,12 +60,12 @@ var YLex = (function(){
 			html += "</dl>";
 		}
 
-		html += "<div>"+(lemma.pos||"(Unknown Part of Speech)") + "<ol><li>"
+		html += "<div>"+(lemma.pos||"") + "<ol><li>"
 			 + lemma.senses.map(renderSense).join("</li><li>")
 			 + "</li></ol></div>";
 
 		html += lemma.sources.map(function(source){
-			return engineToHTML(source, lemma);
+			return source.attribution;
 		}).join("<br/>");
 
         return html;
@@ -89,7 +85,7 @@ var YLex = (function(){
 						<b>Free Translations:</b>\
 						<div class="translations">' +
 							result.translations.map(function(trans){
-								return '"'+trans.text+'"<div class="engine">' + engineToHTML(trans.source)
+								return '"'+trans.text+'"<div class="source">' + sourceToHTML(trans.source)
 							}).join("") +
 						'</div>\
 					</div>';

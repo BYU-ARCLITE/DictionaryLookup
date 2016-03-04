@@ -23,7 +23,7 @@ object LookupMerriamWebster extends Translator {
   val ChrExp = raw"^(bix|gg).*".r
   val NumExp = raw"^(\d).*".r
 
-  def parseXMLResponse(URL:String, headWordTag:String) : Seq[JsObject] = {
+  def parseXMLResponse(URL: String, attr: String, headWordTag: String) = {
     val url = new URL(URL)
     val body = url.openStream
     val XMLDoc = XML.load(body)
@@ -70,7 +70,12 @@ object LookupMerriamWebster extends Translator {
         "senses" -> (entry \\ "dt").map { dt =>
           Json.obj("definition" -> dt.text.replace("<br>", "\n"))
         },
-        "sources" -> Seq(name)
+        "sources" -> Json.arr(
+          Json.obj(
+            "name" -> name,
+            "attribution" -> attr
+          )
+        )
       )
     }
   }
@@ -80,15 +85,34 @@ object LookupMerriamWebster extends Translator {
    */
   def translate(user: User, src: String, dst: String, text: String)
                (implicit restart: TRestart) = {
+    val logoURL = "http://www.dictionaryapi.com/images/info/branding-guidelines/mw-logo-light-background-50x50.png"
     val lemmas: Seq[JsObject] =
       if (((src == "spa" && dst == "eng") || (src == "eng" && dst == "spa")) && spanishKey.isDefined) {
         val key = spanishKey.get
         val url = "http://www.dictionaryapi.com/api/v1/references/spanish/xml/" + text.replaceAll("[^\\p{L}\\p{Nd}]+", "%20").trim +"?key="+key
-        parseXMLResponse(url, "hw")
+        val attr = s"""
+          <a href="http://www.spanishcentral.com/translate/$text
+            target="Merriam-Webster">$text at SpanishCentral.com</a>
+          <br/>Merriam-Webster's Spanish-English Dictionary
+          <div class="merriamLogo">
+            <a href="http://www.spanishcentral.com/translate/$text
+              target="Merriam-Webster"><img src="$logoURL"/></a>
+          </div>
+        """
+        parseXMLResponse(url, attr, "hw")
       } else if(src == "eng" && dst == "eng" && collegiateKey.isDefined){
         val key = collegiateKey.get
         val url = "http://www.dictionaryapi.com/api/v1/references/collegiate/xml/" + text.replaceAll("[^\\p{L}\\p{Nd}]+", "%20").trim +"?key="+key
-        parseXMLResponse(url, "ew")
+        val attr = s"""
+          <a href="http://www.merriam-webster.com/dictionary/$text
+            target="Merriam-Webster">$text at Merriam-Webster.com</a>
+          <br/> Merriam-Webster's Collegiate® Dictionary
+          <div class="merriamLogo">
+            <a href="http://www.merriam-webster.com/dictionary/$text
+              target="Merriam-Webster"><img src="$logoURL"/></a>
+          </div>
+        """
+        parseXMLResponse(url, attr, "ew")
       } else Seq[JsObject]()
 
     if(lemmas.size == 0) None

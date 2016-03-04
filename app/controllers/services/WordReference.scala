@@ -87,7 +87,16 @@ object LookupWordReference extends Translator {
               Json.obj("definition" -> s"$term ($sense)")
             }
           },
-          "sources" -> Seq(name)
+          "sources" -> Json.arr(
+            Json.obj(
+              "name" -> name,
+              "attribution" -> s"""
+                  <a href="http://www.wordreference.com/$scode$dcode/$text
+                     target="wordreference">$text at WordReference.com</a>
+                  © WordReference.com
+                """
+            )
+          )
         )
 
         if (pos.isDefined) {

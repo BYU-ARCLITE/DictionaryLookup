@@ -156,7 +156,9 @@ object LookupMadamira extends Translator {
       "senses" -> gloss.map { dt =>
         Json.obj("definition" -> dt)
       },
-      "sources" -> Seq(name)
+      "sources" -> Json.arr(
+        Json.obj("name" -> name, "attribution" -> s"<i>$name</i>")
+      )
     )
   }
 
