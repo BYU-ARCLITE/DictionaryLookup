@@ -28,9 +28,13 @@ object LookupSeaLang extends Translator {
   val expiration = Utils.getExpiration("seaLang")
   val codeFormat = 'iso639_3
 
-  def processSense(sense: JsObject): Option[JsObject] = {
+  def processSense(sense: JsObject): Option[JsObject] =
     (sense \ "$t").asOpt[String]
-      .orElse { (sense \ "def" \ "$t").asOpt[String] }
+      .orElse {
+	    // there may be a POS in here, too, but it's
+		// not clear how to associate it with a lemma
+	    (sense \ "def" \ "$t").asOpt[String]
+	  }
       .map { definition =>
 
         /*if (definition.contains("см. также")) {
@@ -54,15 +58,17 @@ object LookupSeaLang extends Translator {
 
         result
       }
-  }
 
-  def processSenses(entry: JsObject): Seq[JsObject] = {
-    ((entry \ "sense") match {
-    case a:JsArray => a.as[Seq[JsObject]].map(processSense(_))
-    case o:JsObject => Seq(processSense(o))
-    case _ => Seq[Option[JsObject]]()
-    }).collect { case Some(o) => o }
-  }
+  def processSenses(entry: JsObject): Seq[JsObject] =
+    try {
+      ((entry \ "sense").get match {
+      case a:JsArray => a.as[Seq[JsObject]].map(processSense(_))
+      case o:JsObject => Seq(processSense(o))
+      case _ => Nil
+      }).collect { case Some(o) => o }
+    } catch {
+	  case _: Throwable => Nil
+	}
 
   def processEntries(json: JsObject): Seq[JsObject] =
     (for {
@@ -70,6 +76,7 @@ object LookupSeaLang extends Translator {
       word <- (entry \ "form" \ "orth" \ "$t").asOpt[String]
     } yield {
 
+	  play.api.Logger.debug("Word: " + word)
       val senses = processSenses(entry)
 
       if (senses.size > 0) {
@@ -101,6 +108,7 @@ object LookupSeaLang extends Translator {
 
     if(response.status != 200) None
     else response.json.asOpt[JsObject].flatMap { json =>
+	  play.api.Logger.debug("SeaLang: "+json.toString())
       val lemmas = processEntries(json)
       if (lemmas.size > 0) Some(lemmas)
       else None
