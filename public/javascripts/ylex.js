@@ -29,19 +29,26 @@ var YLex = (function(){
 			html += "<br/><i>Notes:</i>"
 				 + sense.notes.map(function(s){ return "<br/>"+s; });
 		}
+		return html;
 	}
 
 	function renderLemma(lemma){
-		var html, prefRep = lemma.representation[0],
-			formList = Object.keys(lemma.forms),
-			lemmaForm = lemma.forms[lemma.lemmaForm];
+		var html, prefRep = lemma.representations[0],
+			lemmaForm = lemma.forms[lemma.lemmaForm],
+			repList = Object.keys(lemmaForm),
+			formList = Object.keys(lemma.forms);
 
-		html = "<b>"+processRepr(lemmaForm[prefRep])+"</b><dl>";
-		Object.keys(lemmaForm).forEach(function(repr){
-			if(repr === prefRep){ return; }
-			html += "<dt>"+repr+"</dt><dd>"
-				 +processRepr(repr, lemmaForm[repr]) + "</dd>";
-		});
+		html = "<b>"+processRepr(prefRep, lemmaForm[prefRep])+"</b>";
+		
+		if(repList.length > 1){
+			html += "<dl>"; 
+			repList.forEach(function(repr){
+				if(repr === prefRep){ return; }
+				html += "<dt>"+repr+"</dt><dd>"
+					 +processRepr(repr, lemmaForm[repr]) + "</dd>";
+			});
+			html += "</dl>";
+		}
 
 		if(formList.length > 1){
 			html += "<i>Other Forms:</i><dl>";
@@ -57,9 +64,9 @@ var YLex = (function(){
 			html += "</dl>";
 		}
 
-		html += "</dl>" + lemma.pos + "<ol><li>"
-			 + senses.map(renderSense).join("</li><li>")
-			 + "</li></ol>";
+		html += "<div>"+lemma.pos + "<ol><li>"
+			 + lemma.senses.map(renderSense).join("</li><li>")
+			 + "</li></ol></div>";
 
 		html += lemma.sources.map(function(source){
 			return engineToHTML(source, lemma);
@@ -76,7 +83,7 @@ var YLex = (function(){
 	}
 
 	function renderResult(result){
-		var html = '<div class="sourceText">' + result.text + '</div>';
+		var html = '<div class="sourceText"><b>Original Text:</b>&nbsp;' + result.text + '</div>';
 		if(result.translations){
 			html += '<div class="translationResult">\
 						<b>Free Translations:</b>\
