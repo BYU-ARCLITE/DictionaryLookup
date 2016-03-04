@@ -87,9 +87,9 @@ object Lookup extends Controller {
   }
 
   def lookup(opts: Map[String, Seq[String]], user: User) = {
-    val text = opts("word")(0)
+    val text = opts("text")(0)
     val src = opts("srcLang")(0)
-    val dst = opts("destLang")(0)
+    val dst = opts("dstLang")(0)
     val format = opts.get("codeFormat")
                   .flatMap(_.lift(0))
                   .map(Symbol(_))
@@ -120,10 +120,10 @@ object Lookup extends Controller {
     }
   }
 
-  def authlookup = Authentication.keyedAction(parse.urlFormEncoded) {
+  def authlookup = Authentication.keyedAction(parse.multipartFormData) {
     implicit request =>
       implicit user => (try {
-        lookup(request.body, user)
+        lookup(request.body.dataParts, user)
       } catch {
         case e: Throwable =>
           play.Logger.debug(e.getMessage())

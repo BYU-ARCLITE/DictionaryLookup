@@ -11,9 +11,9 @@ import play.api.Logger
 
 object UserManager extends Controller {
 
-  def register = Action(parse.urlFormEncoded) {
+  def register = Action(parse.multipartFormData) {
     implicit request => try {
-      val body = request.body
+      val body = request.body.dataParts
       val username = body("username")(0)
       User.create(
         username,
