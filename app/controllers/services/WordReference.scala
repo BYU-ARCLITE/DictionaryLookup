@@ -44,13 +44,13 @@ object LookupWordReference extends Translator {
 
     terms.flatMap { obj =>
       PartsList.flatMap { pname =>
-        (obj \ pname) match {
-        case part:JsObject =>
+	    (obj \ pname).asOpt[JsObject] match {
+        case Some(part) =>
           part.fields.collect { case (_, entry:JsObject) => entry }
         case _ => Nil
         }
       }
-    }
+    }.map(body)
   }
 
   val TranslationList = List("FirstTranslation", "SecondTranslation", "ThirdTranslations", "FourthTranslation")
@@ -77,7 +77,7 @@ object LookupWordReference extends Translator {
           "lemmaForm" -> "lemma",
           "forms" -> Json.obj(
             "lemma" -> Json.obj(
-              "Orthographic" -> (original \ "term").as[String]
+              "Orthographic" -> Seq((original \ "term").as[String])
             )
           ),
           "senses" -> TranslationList.flatMap { name =>
