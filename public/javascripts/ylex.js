@@ -64,7 +64,7 @@ var YLex = (function(){
 			html += "</dl>";
 		}
 
-		html += "<div>"+lemma.pos + "<ol><li>"
+		html += "<div>"+(lemma.pos||"(Unknown Part of Speech)") + "<ol><li>"
 			 + lemma.senses.map(renderSense).join("</li><li>")
 			 + "</li></ol></div>";
 

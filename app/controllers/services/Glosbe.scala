@@ -32,43 +32,53 @@ object LookupGlosbe extends Translator {
 
   /**
    * Grabs all the definitions with the direct translations
-   * Limits to 5 definitions, otherwise it is cumbersome to read
    */
   def processResults(text: String, phrases:Seq[JsObject], dst: String): Seq[JsObject] = {
-    val targets = LangCodes.convert('iso639_3, 'iso639_2, dst) match {
+    val targets = LangCodes.convert('iso639_3, 'iso639_1, dst) match {
     case Some(p2code) => Seq(dst, p2code)
     case _ => Seq(dst)
     }
 
-    for {phrase  <- phrases } yield {
-      val term = (phrase \ "phrase" \ "text").as[String]
-
-      val defs = (phrase \ "meanings").as[Seq[JsObject]]
-        .flatMap { obj =>
-          (obj \ "language").asOpt[String].flatMap { lang =>
-            if (targets.contains(lang)) None
-            else (obj \ "text").asOpt[String]
-          }
-        }
-        .distinct.filterNot(_ == "")
-        .map { definition =>
-          Json.obj("definition" -> definition)
-        }
-
-      val senses = Seq(Json.obj("definition" -> term)) ++ defs
-
-      Json.obj(
-        "representations" -> Json.arr("Orthographic"),
-        "lemmaForm" -> "lemma",
-        "forms" -> Json.obj(
-          "lemma" -> Json.obj(
-            "Orthographic" -> Json.arr(text)
-          )
-        ),
-        "senses" -> senses,
-        "sources" -> Seq(name)
-      )
+    def filterLanguage(obj: JsObject) = {
+      (obj \ "language").asOpt[String].flatMap { lang =>
+        if (!targets.contains(lang)) None
+        else (obj \ "text").asOpt[String]
+      }.toList
     }
+
+    val lemmas = for {phrase  <- phrases } yield {
+
+      val term = (phrase \ "phrase")
+        .asOpt[JsObject].toList
+        .flatMap(filterLanguage)
+
+      val defs = (phrase \ "meanings")
+        .asOpt[Seq[JsObject]].toList.flatten
+        .flatMap(filterLanguage)
+
+      val senses = (term ++ defs)
+        .filterNot(_ == "").distinct
+
+      if (senses.size == 0) None
+      else {
+        val lemma = Json.obj(
+          "representations" -> Json.arr("Orthographic"),
+          "lemmaForm" -> "lemma",
+          "forms" -> Json.obj(
+            "lemma" -> Json.obj(
+              "Orthographic" -> Json.arr(text)
+            )
+          ),
+          "senses" -> senses.map { definition =>
+            Json.obj("definition" -> definition)
+          },
+          "sources" -> Seq(name)
+        )
+        Some(lemma)
+      }
+    }
+
+    lemmas.collect { case Some(lemma) => lemma }
   }
 
   /**
