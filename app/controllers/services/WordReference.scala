@@ -44,7 +44,7 @@ object LookupWordReference extends Translator {
 
     terms.flatMap { obj =>
       PartsList.flatMap { pname =>
-	    (obj \ pname).asOpt[JsObject] match {
+        (obj \ pname).asOpt[JsObject] match {
         case Some(part) =>
           part.fields.collect { case (_, entry:JsObject) => entry }
         case _ => Nil

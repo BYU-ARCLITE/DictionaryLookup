@@ -20,6 +20,8 @@ object LookupMerriamWebster extends Translator {
 
   val spanishKey = configuration.getString("merriamWebster.spanishKey")
   val collegiateKey = configuration.getString("merriamWebster.collegiateKey")
+  val ChrExp = raw"^(bix|gg).*".r
+  val NumExp = raw"^(\d).*".r
 
   def parseXMLResponse(URL:String, headWordTag:String) : Seq[JsObject] = {
     val url = new URL(URL)
@@ -37,24 +39,19 @@ object LookupMerriamWebster extends Translator {
       val word = (entry \\ headWordTag).text
       val ipa = (entry \\ "pr").map(_.text)
 
-      val sound : Seq[String] = for {
-        entry <- XMLDoc \\ "wav"
-      } yield {
-        val file = entry.text
-        val dir = if(file.substring(0,3) == "bix" )
-              "bix"
-            else if (file.substring(0,2) == "gg")
-              "gg"
-            else if (file.substring(0,1).matches("""\d"""))
-              "number"
-            else
-              file.substring(0,1)
+      val sound = (entry \\ "wav").take(1).map { wav =>
+        val file = wav.text
+        val dir = file match {
+          case ChrExp(str) => str
+          case NumExp(_) => "number"
+          case _ => file.substring(0,1)
+        }
         s"http://media.merriam-webster.com/soundc11/$dir/$file"
       }
 
       var reps = Seq("Orthographic")
       var lemmaReps = Map("Orthographic" -> Seq(word))
-      
+
       if (ipa.size > 0) {
         reps = reps ++ Seq("IPA")
         lemmaReps = lemmaReps ++ Map("IPA" -> ipa)
