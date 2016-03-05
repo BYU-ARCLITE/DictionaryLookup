@@ -142,6 +142,7 @@ object LookupMadamira extends Translator {
 
     val gloss = features \@ "gloss" match {
     case "" => Nil
+    case "NO_ANALYSIS" => Nil
     case term:String => Seq(term)
     }
 
@@ -194,17 +195,18 @@ object LookupMadamira extends Translator {
     val exclusion = Set("Madamira")
 
     analyses.flatMap { wdata: MAnalysis =>
-      (for {
+
+      wdata.gloss :: (for {
         result <- restart(wdata.lemma, exclusion)
         wlist <- (result \ "words").asOpt[Seq[JsObject]]
       } yield {
+
         //update the start/end indices to match the surrounding text
         val updated_words = wlist.map { wstruct =>
           wstruct ++ Json.obj("start" -> wdata.start, "end" -> wdata.end)
         }.toList
 
-        wdata.gloss :: updated_words
-      }).getOrElse(Nil)
+      }).getOrElse(Nil).asInstanceOf[List[JsObject]]
     }
   }
 
@@ -225,7 +227,11 @@ object LookupMadamira extends Translator {
         None
       } else {
         val analyses = parseXml(result.body)
-        val words = getDefinitions(analyses, restart)
+
+        val words = analyses.flatMap { wdata: MAnalysis =>
+          restart(wdata.lemma, Set("Madamira"))
+        } 
+
         if (words.size == 0) None
         else Some(Json.obj("words" -> words))
       }
