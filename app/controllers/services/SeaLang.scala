@@ -159,7 +159,6 @@ object LookupSeaLang extends Translator {
     case _ => None
     }).map { lemmas =>
       Json.obj(
-        //"translations" -> Json.arr("free translation text")
         "words" -> Json.arr(
           Json.obj(
             "start" -> 0,

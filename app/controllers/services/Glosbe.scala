@@ -107,7 +107,6 @@ object LookupGlosbe extends Translator {
         if (lemmas.size == 0) None
         else {
           val results = Json.obj(
-            //"translations" -> Json.arr("free translation text")
             "words" -> Json.arr(
               Json.obj(
                 "start" -> 0,

@@ -132,7 +132,6 @@ object LookupWordReference extends Translator {
     requestEntries(wordReferenceKey.get, scode.get, dcode.get, text)
       .map { lemmas =>
         Json.obj(
-          //"translations" -> Json.arr("free translation text")
           "words" -> Json.arr(
             Json.obj(
               "start" -> 0,

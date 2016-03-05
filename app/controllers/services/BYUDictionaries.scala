@@ -19,7 +19,6 @@ object LookupBYU extends Translator {
     val key = s"$src-$dst"
     DictionaryCache.getDictionaryEntry(key, text).map { definition =>
       Json.obj(
-        //"translations" -> Json.arr("free translation text")
         "words" -> Json.arr(
           Json.obj(
             "start" -> 0,

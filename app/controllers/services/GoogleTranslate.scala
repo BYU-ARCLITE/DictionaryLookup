@@ -33,7 +33,7 @@ object LookupGoogle extends Translator {
             .map { jsstr =>
               Json.obj(
                 "text" -> quoteExpr.replaceAllIn(Utils.unescape(jsstr.toString), ""),
-                "source" -> name
+                "source" -> Json.obj("name" -> name, "attribution" -> s"<i>$name</i>")
               )
             }
         if(translations.length > 0) Some(translations)

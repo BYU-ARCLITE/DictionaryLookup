@@ -65,7 +65,7 @@ var YLex = (function(){
 			 + "</li></ol></div>";
 
 		html += lemma.sources.map(function(source){
-			return source.attribution;
+			return '<div class="source">'+source.attribution+'</div>';
 		}).join("<br/>");
 
         return html;
@@ -85,7 +85,10 @@ var YLex = (function(){
 						<b>Free Translations:</b>\
 						<div class="translations">' +
 							result.translations.map(function(trans){
-								return '"'+trans.text+'"<div class="source">' + sourceToHTML(trans.source)
+								return '"'+trans.text
+										  + '"<div class="source">'
+										  + trans.source.attribution
+										  + '</div>'
 							}).join("") +
 						'</div>\
 					</div>';
