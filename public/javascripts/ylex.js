@@ -17,11 +17,11 @@ var YLex = (function(){
 
 	function renderSense(sense){
 		var html = sense.definition;
-		if(sense.examples){
+		if(sense.examples && sense.examples.length){
 			html += "<br/><i>Examples:</i>"
 				 + sense.examples.map(function(s){ return "<br/>"+s; });
 		}
-		if(sense.notes){
+		if(sense.notes && sense.notes.length){
 			html += "<br/><i>Notes:</i>"
 				 + sense.notes.map(function(s){ return "<br/>"+s; });
 		}
@@ -35,9 +35,9 @@ var YLex = (function(){
 			formList = Object.keys(lemma.forms);
 
 		html = "<b>"+processRepr(prefRep, lemmaForm[prefRep])+"</b>";
-		
+
 		if(repList.length > 1){
-			html += "<dl>"; 
+			html += "<dl>";
 			repList.forEach(function(repr){
 				if(repr === prefRep){ return; }
 				html += "<dt>"+repr+"</dt><dd>"
@@ -46,23 +46,34 @@ var YLex = (function(){
 			html += "</dl>";
 		}
 
+		if(lemma.pos){
+			html += "<div>"+lemma.pos+"</div>";
+		}
+
 		if(formList.length > 1){
-			html += "<i>Other Forms:</i><dl>";
+			html += "<div><i>Other Forms:</i><dl>";
 			formList.forEach(function(fname){
 				if(fname == lemma.lemmaForm){ return; }
 				var form = lemma.forms[fname];
-				html += "<dt>"+fname+"</dt><dd><dl>";
-				html += Object.keys(form).map(function(repr){
-				    return "<dt>"+repr+"</dt><dd>"
-						 + processRepr(repr, form[repr]) + "</dd>";
-				}).join('')+"</dl></dd>";
+				html += "<dt>"+fname+"</dt><dd>";
+				if(repList.length > 1){
+					html += "<dl>" + Object.keys(form).map(function(repr){
+						return "<dt>"+repr+"</dt><dd>"
+							+ processRepr(repr, form[repr]) + "</dd>";
+					}).join('')+"</dl>";
+				}else{
+					html += processRepr(repList[0], form[repList[0]]);
+				}
+				html += "</dd>";
 			});
-			html += "</dl>";
+			html += "</dl></div>";
 		}
 
-		html += "<div>"+(lemma.pos||"") + "<ol><li>"
-			 + lemma.senses.map(renderSense).join("</li><li>")
-			 + "</li></ol></div>";
+		if(lemma.senses && lemma.senses.length){
+			html += "<div><ol><li>"
+				 + lemma.senses.map(renderSense).join("</li><li>")
+				 + "</li></ol></div>";
+		}
 
 		html += lemma.sources.map(function(source){
 			return '<div class="source">'+source.attribution+'</div>';
