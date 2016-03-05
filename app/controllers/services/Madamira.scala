@@ -228,10 +228,8 @@ object LookupMadamira extends Translator {
       } else {
         val analyses = parseXml(result.body)
 
-        val words = analyses.flatMap { wdata: MAnalysis =>
-          restart(wdata.lemma, Set("Madamira"))
-        } 
-
+        val words = getDefinitions(analyses, restart)
+        
         if (words.size == 0) None
         else Some(Json.obj("words" -> words))
       }
