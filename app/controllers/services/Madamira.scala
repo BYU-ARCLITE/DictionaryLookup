@@ -127,11 +127,11 @@ object LookupMadamira extends Translator {
     "cas"  //Case
   )
 
-  def featuresToJson(features: Node) = {
+  def featuresToJson(features: Node, start: Long, end: Long) = {
     val derivation = morphs.map { attr =>
       features \@ attr match {
       case "" | "na" | "u" => None
-      case value:String => Some("$attr:$value")
+      case value:String => Some(s"$attr:$value")
       }
     }.collect { case Some(str) => str }
 
@@ -147,18 +147,25 @@ object LookupMadamira extends Translator {
     }
 
     Json.obj(
-      "representations" -> Seq("Arabic"),
-      "pos" -> (features \@ "pos"),
-      "lemmaForm" -> "lemma",
-      "forms" -> Json.obj(
-        "lemma" -> Json.obj("Arabic" -> Seq(features \@ "stem")),
-        form -> Json.obj("Arabic" -> Seq(features \@ "diac"))
-      ),
-      "senses" -> gloss.map { dt =>
-        Json.obj("definition" -> dt)
-      },
-      "sources" -> Json.arr(
-        Json.obj("name" -> name, "attribution" -> s"<i>$name</i>")
+      "start" -> start,
+      "finish" -> end,
+      "lemmas" ->
+      Json.arr(
+        Json.obj(
+          "representations" -> Json.arr("Arabic"),
+          "pos" -> (features \@ "pos"),
+          "lemmaForm" -> "lemma",
+          "forms" -> Json.obj(
+            "lemma" -> Json.obj("Arabic" -> Seq(features \@ "stem")),
+            form -> Json.obj("Arabic" -> Seq(features \@ "diac"))
+          ),
+          "senses" -> gloss.map { dt =>
+            Json.obj("definition" -> dt)
+          },
+          "sources" -> Json.arr(
+            Json.obj("name" -> name, "attribution" -> s"<i>$name</i>")
+          )
+        )
       )
     )
   }
@@ -183,7 +190,7 @@ object LookupMadamira extends Translator {
         // to figure out what attributes actually provide
         // the best dictionary forms for recursive lookups
         val lemma = features \@ "stem"
-        val gloss = featuresToJson(features)
+        val gloss = featuresToJson(features, start, end)
         Seq(MAnalysis(start, end, lemma, gloss, tokens, features))
       } catch {
         case _: Throwable => Nil
@@ -227,9 +234,9 @@ object LookupMadamira extends Translator {
         None
       } else {
         val analyses = parseXml(result.body)
-
+println(analyses.toString)
         val words = getDefinitions(analyses, restart)
-        
+
         if (words.size == 0) None
         else Some(Json.obj("words" -> words))
       }
