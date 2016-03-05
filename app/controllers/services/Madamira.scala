@@ -148,9 +148,8 @@ object LookupMadamira extends Translator {
 
     Json.obj(
       "start" -> start,
-      "finish" -> end,
-      "lemmas" ->
-      Json.arr(
+      "end" -> end,
+      "lemmas" -> Json.arr(
         Json.obj(
           "representations" -> Json.arr("Arabic"),
           "pos" -> (features \@ "pos"),
@@ -209,11 +208,11 @@ object LookupMadamira extends Translator {
       } yield {
 
         //update the start/end indices to match the surrounding text
-        val updated_words = wlist.map { wstruct =>
+        wlist.map { wstruct =>
           wstruct ++ Json.obj("start" -> wdata.start, "end" -> wdata.end)
         }.toList
 
-      }).getOrElse(Nil).asInstanceOf[List[JsObject]]
+      }).getOrElse(Nil)
     }
   }
 
