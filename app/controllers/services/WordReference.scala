@@ -91,7 +91,7 @@ object LookupWordReference extends Translator {
             Json.obj(
               "name" -> name,
               "attribution" -> s"""
-                  <a href="http://www.wordreference.com/$scode$dcode/$text
+                  <a href="http://www.wordreference.com/$scode$dcode/$text"
                      target="wordreference">$text at WordReference.com</a>
                   © WordReference.com
                 """

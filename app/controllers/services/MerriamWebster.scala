@@ -91,11 +91,11 @@ object LookupMerriamWebster extends Translator {
         val key = spanishKey.get
         val url = "http://www.dictionaryapi.com/api/v1/references/spanish/xml/" + text.replaceAll("[^\\p{L}\\p{Nd}]+", "%20").trim +"?key="+key
         val attr = s"""
-          <a href="http://www.spanishcentral.com/translate/$text
+          <a href="http://www.spanishcentral.com/translate/$text"
             target="Merriam-Webster">$text at SpanishCentral.com</a>
           <br/>Merriam-Webster's Spanish-English Dictionary
           <div class="merriamLogo">
-            <a href="http://www.spanishcentral.com/translate/$text
+            <a href="http://www.spanishcentral.com/translate/$text"
               target="Merriam-Webster"><img src="$logoURL"/></a>
           </div>
         """
@@ -104,11 +104,11 @@ object LookupMerriamWebster extends Translator {
         val key = collegiateKey.get
         val url = "http://www.dictionaryapi.com/api/v1/references/collegiate/xml/" + text.replaceAll("[^\\p{L}\\p{Nd}]+", "%20").trim +"?key="+key
         val attr = s"""
-          <a href="http://www.merriam-webster.com/dictionary/$text
+          <a href="http://www.merriam-webster.com/dictionary/$text"
             target="Merriam-Webster">$text at Merriam-Webster.com</a>
           <br/> Merriam-Webster's Collegiate® Dictionary
           <div class="merriamLogo">
-            <a href="http://www.merriam-webster.com/dictionary/$text
+            <a href="http://www.merriam-webster.com/dictionary/$text"
               target="Merriam-Webster"><img src="$logoURL"/></a>
           </div>
         """
