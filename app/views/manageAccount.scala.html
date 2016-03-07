@@ -1,0 +1,62 @@
+@()(implicit request: RequestHeader)
+@import play.api.Play.{current, configuration};
+
+@main("ARCLITE Dictionary Lookup Service") {
+    <link rel="stylesheet" type="text/css" href="/assets/stylesheets/main.css">
+
+    <div class="container">
+		<label>Username: <input id="username" type="text"/></label><br/>
+		<label>Password: <input id="password" type="password"/></label>
+		<hr/>
+		<label>
+			Set Service Priorities:<br/>
+			<textarea id="services"></textarea>
+		</label>
+		<button id="setservices">Set</button>
+		<hr/>
+
+        <div class="footer">
+            Contact us at <a href="mailto:arclitelab@@gmail.com">arclitelab@@gmail.com</a>
+        <div>
+    </div>
+
+    <script type ="text/javascript">
+		var uname = document.getElementById('username'),
+			pass = document.getElementById('password'),
+			services = document.getElementById('services');
+
+		document.getElementById('setservices').addEventListener('click', function(){
+			var xhr = new XMLHttpRequest(),
+				data = new FormData();
+
+            services.value.split('\n').forEach(function(sname,i){
+				data.append(i, sname);
+			});
+
+            xhr.responseType = "json";
+            xhr.addEventListener('load',function(){
+                var resp;
+                if(xhr.status == 401){
+                    alert("Incorrect username or password.");
+                    console.log(xhr.responseText);
+                    return;
+                }
+                resp = xhr.response;
+                if (!resp.success) {
+                    alert(resp.message);
+                } else {
+                    alert("Successfully set service list.");
+                }
+            },false);
+
+            xhr.addEventListener("error",function(e){
+                alert("An error occurred in setting the service list.");
+                console.dir(e);
+            },false );
+
+            xhr.open("POST", "/api/user/"+uname.value+"/services",true);
+            xhr.setRequestHeader("Authorization", pass.value);
+            xhr.send(data);
+        },false);
+    </script>
+}

@@ -3,23 +3,29 @@ package controllers
 import models.{User}
 import play.api.Play.{current, configuration}
 import play.api.Logger
+import play.api.libs.json.JsObject
 import java.lang.Character
 
-trait Translator {
-  val name: String
-  val expiration: Int
-  val codeFormat: Symbol
+package object Utils {
 
-  /**
-   * Endpoint for translating
-   * @param src The source language
-   * @param dest The destination language
-   * @param text The text to translate
-   */
-  def translate(user: User, src: String, dest: String, text: String): Option[Seq[String]]
-}
+  type TRequest = (String, String, String, Symbol)
+  type TResult = JsObject
+  type TRestart = (String, Set[String]) => Option[TResult]
 
-object Utils {
+  trait Translator {
+    val name: String
+    val expiration: Int
+    val codeFormat: Symbol
+
+    /**
+     * Endpoint for translating
+     * @param src The source language
+     * @param dest The destination language
+     * @param text The text to translate
+     */
+    def translate(user: User, src: String, dest: String, text: String)
+               (implicit restart: TRestart): Option[JsObject]
+  }
 
   val entityNames = Map(
     "quot" -> 34, "amp" -> 38, "apos" -> 39, "lt" -> 60,
@@ -94,7 +100,7 @@ object Utils {
 
   def unescape(str: String): String =
     entityExpr.replaceAllIn(str, m =>
-	  m.group(1) match {
+      m.group(1) match {
       case hexExpr(hex) =>
         val codePoint = Integer.parseInt(hex, 16)
         new String(Character.toChars(codePoint))
@@ -105,7 +111,7 @@ object Utils {
           new String(Character.toChars(codePoint))
         }.getOrElse(m.group(0))
       }
-	)
+    )
 
   def getExpiration(prefix: String): Int = configuration.getMilliseconds(s"$prefix.expiration")
     .orElse(configuration.getMilliseconds("services.expiration"))

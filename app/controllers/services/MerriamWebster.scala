@@ -1,6 +1,7 @@
 package controllers
 
-import models.{User, ServiceLog}
+import models.User
+import Utils._
 import scala.concurrent.{ExecutionContext, Future, Await}
 import scala.concurrent.duration._
 import play.api.libs.json._
@@ -17,127 +18,115 @@ object LookupMerriamWebster extends Translator {
   val expiration = Utils.getExpiration("merriamWebster")
   val codeFormat = 'iso639_3
 
-  val merriamWebsterSpanishKey = configuration.getString("merriamWebster.spanishKey")
-  val merriamWebsterCollegiateKey = configuration.getString("merriamWebster.collegiateKey")
+  val spanishKey = configuration.getString("merriamWebster.spanishKey")
+  val collegiateKey = configuration.getString("merriamWebster.collegiateKey")
+  val ChrExp = raw"^(bix|gg).*".r
+  val NumExp = raw"^(\d).*".r
 
-  def parseXMLResponse(URL:String, headWordTag:String) : Seq[String] = {
-    val (true, body) = try {
-      val url = new URL(URL)
-      val body = url.openStream
-      (true, body)
-    } catch { case ex:Exception => (false, null) }
-
+  def parseXMLResponse(URL: String, attr: String, headWordTag: String) = {
+    val url = new URL(URL)
+    val body = url.openStream
     val XMLDoc = XML.load(body)
-    val response = (XMLDoc \\ "entry_list") 
+    val response = (XMLDoc \\ "entry_list")
 
-    val defList : Seq[String] = for {
-      //entry <- response \\ "entry"
+    for {
       entry <- response \\ "entry"
-      //pos <- entry \\ "fl"
-     defins <- entry \\ "def"
-      } yield {   
-        val word = (entry \\ headWordTag).text
-        //val wav = (entry \\ "wav").text
+      pos <- entry \ "fl"
+    } yield {
 
-        val defns = defins.text
-        //val dog = defns.replace("th century", "th century <br>")
-        //dog
-        val dog = defns.replace("<br>", "")
-        dog        
-        //defns
-    }
+      //val wav = (entry \\ "wav").text
 
-    val partOfSpeechList : Seq[String] = for {
-      pos <- response \\ "fl"
-      } 
-      yield{
-        val ps = pos.text 
-        "PART OF SPEECH  " + ps
+      val word = (entry \\ headWordTag).text
+      val ipa = (entry \\ "pr").map(_.text)
+
+      val sound = (entry \\ "wav").take(1).map { wav =>
+        val file = wav.text
+        val dir = file match {
+          case ChrExp(str) => str
+          case NumExp(_) => "number"
+          case _ => file.substring(0,1)
+        }
+        s"http://media.merriam-webster.com/soundc11/$dir/$file"
       }
 
-    val ipaList : Seq[String] = for {
-      ipa <- response \\ "pr"
-    }
-    yield {
-      val ipA = ipa.text  
-      "IPA!!!!!!  " + ipA
-    }
+      var reps = Seq("Orthographic")
+      var lemmaReps = Map("Orthographic" -> Seq(word))
 
-    def isNum(item:String) : Boolean = {
-        val bool = if ((item == '0')||(item == '1')||(item == '2')||(item == '3')||(item == '4')||(item == '5')||(item == '6')||(item == '7')||(item == '8')||(item == '9'))
-          true
-        false
+      if (ipa.size > 0) {
+        reps = reps ++ Seq("IPA")
+        lemmaReps = lemmaReps ++ Map("IPA" -> ipa)
+      }
+
+      if (sound.size > 0) {
+        reps = reps ++ Seq("WAV")
+        lemmaReps = lemmaReps ++ Map("WAV" -> sound)
+      }
+
+      Json.obj(
+        "representations" -> reps,
+        "pos" -> pos.text,
+        "lemmaForm" -> "lemma",
+        "forms" -> Json.obj("lemma" -> Json.toJson(lemmaReps)),
+        "senses" -> (entry \\ "dt").map { dt =>
+          Json.obj("definition" -> dt.text.replace("<br>", "\n"))
+        },
+        "sources" -> Json.arr(
+          Json.obj(
+            "name" -> name,
+            "attribution" -> attr
+          )
+        )
+      )
     }
-
-    val sound : Seq[String] = for {
-      entry <- XMLDoc \\ "wav"
-      } yield {   
-        val file = entry.text
-        val dir = if(file.substring(0,3) == "bix" )
-              "bix"
-            else if (file.substring(0,2) == "gg")
-              "gg"
-            else if (isNum(file.substring(0,1)))
-              "number"
-            else
-              file.substring(0,1)
-        val html = "<audio controls class='merriamAudio'><source src='http://media.merriam-webster.com/soundc11/" + dir + "/" + file + "' type='audio/wav'>Audio File Not Found.</audio>"
-        html
-    }
-
-    /* If you want to reduce the amount of definitions or audio files, uncomment below*/ 
-    val exampleSound : Seq[String] = if(sound.length > 0)
-        {val snd : Seq[String] = Seq[String](sound(0)); snd} else {sound}
-    val definitions : Seq[String] = if(defList.length > 5)
-        {
-            val defin : Seq[String] = Seq[String](defList(0), defList(1), defList(2), defList(3), defList(4))
-            defin
-        } else {defList}
-    val partOfSpeech : Seq[String] = Seq[String](partOfSpeechList(0))
-    val ipa : Seq[String] = Seq[String](ipaList(0))
-
-    /*ipa ++ partOfSpeech ++*/  exampleSound ++ definitions
-    
-    /*val exampleSound : Seq[String] = if(sound.length > 0)
-        {"<br/>Audio Examples:" +: sound} else {sound}
-    defList ++ exampleSound.distinct*/
-    
   }
 
   /**
    * Endpoint for translating via merriamWebster
    */
-  def translate(user: User, src: String, dest: String, text: String) = {
-    if((src == "spa" && dest == "eng") || (src == "eng" && dest == "spa")){
-      merriamWebsterSpanishKey.flatMap { key => 
+  def translate(user: User, src: String, dst: String, text: String)
+               (implicit restart: TRestart) = {
+    val logoURL = "http://www.dictionaryapi.com/images/info/branding-guidelines/mw-logo-light-background-50x50.png"
+    val lemmas: Seq[JsObject] =
+      if (((src == "spa" && dst == "eng") || (src == "eng" && dst == "spa")) && spanishKey.isDefined) {
+        val key = spanishKey.get
         val url = "http://www.dictionaryapi.com/api/v1/references/spanish/xml/" + text.replaceAll("[^\\p{L}\\p{Nd}]+", "%20").trim +"?key="+key
-        val result = Await.result(WS.url(url).get(), Duration.Inf)
+        val attr = s"""
+          <a href="http://www.spanishcentral.com/translate/$text"
+            target="Merriam-Webster">$text at SpanishCentral.com</a>
+          <br/>Merriam-Webster's Spanish-English Dictionary
+          <div class="merriamLogo">
+            <a href="http://www.spanishcentral.com/translate/$text"
+              target="Merriam-Webster"><img src="$logoURL"/></a>
+          </div>
+        """
+        parseXMLResponse(url, attr, "hw")
+      } else if(src == "eng" && dst == "eng" && collegiateKey.isDefined){
+        val key = collegiateKey.get
+        val url = "http://www.dictionaryapi.com/api/v1/references/collegiate/xml/" + text.replaceAll("[^\\p{L}\\p{Nd}]+", "%20").trim +"?key="+key
+        val attr = s"""
+          <a href="http://www.merriam-webster.com/dictionary/$text"
+            target="Merriam-Webster">$text at Merriam-Webster.com</a>
+          <br/> Merriam-Webster's Collegiate® Dictionary
+          <div class="merriamLogo">
+            <a href="http://www.merriam-webster.com/dictionary/$text"
+              target="Merriam-Webster"><img src="$logoURL"/></a>
+          </div>
+        """
+        parseXMLResponse(url, attr, "ew")
+      } else Seq[JsObject]()
 
-          if(result.status != 200) None
-          else {
-            val defList : Seq[String] = parseXMLResponse(url, "hw")
-
-            if(defList.length > 0)
-              Some(defList)
-            else None
-          }
-      }
+    if(lemmas.size == 0) None
+    else {
+      val results = Json.obj(
+        "words" -> Json.arr(
+          Json.obj(
+            "start" -> 0,
+            "end" -> text.length,
+            "lemmas" -> lemmas
+          )
+        )
+      )
+      Some(results)
     }
-    else if(src == "eng" && dest == "eng"){
-      merriamWebsterCollegiateKey.flatMap { key => 
-        val url =  "http://www.dictionaryapi.com/api/v1/references/collegiate/xml/" + text.replaceAll("[^\\p{L}\\p{Nd}]+", "%20").trim +"?key="+key
-        val result = Await.result(WS.url(url).get(), Duration.Inf)
-
-        if(result.status != 200) None
-        else {            
-          val defList : Seq[String] = parseXMLResponse(url, "ew")
-
-          if(defList.length > 0)
-            Some(defList)
-          else None
-        }
-      }
-    }
-    else None
   }
 }

@@ -1,6 +1,7 @@
 package controllers
 
 import models.User
+import Utils._
 import java.net.URLEncoder
 import scala.concurrent.{ExecutionContext, Future, Await}
 import scala.concurrent.duration._
@@ -29,43 +30,67 @@ object LookupGlosbe extends Translator {
   val expiration = Utils.getExpiration("glosbe")
   val codeFormat = 'iso639_3
 
-  /* Grabs all the direct Translations */
-  def grabTranslations(json:Seq[JsObject], text:String) : Seq[String] = {
-    for { tuc <- json } yield {
-      val word = (tuc\ "phrase" \ "text").asOpt[String]
-      word.getOrElse("")
-    }
-  }
-
   /**
    * Grabs all the definitions with the direct translations
-   * Limits to 5 definitions, otherwise it is cumbersome to read
    */
-  def grabPhrase(json:Seq[JsObject], text:String) : Seq[String] = {
-  for { tuc <- json } yield {
-    val word = (tuc\"phrase"\"text").asOpt[String]
-
-    val meanings = (tuc\ "meanings").asOpt[Seq[JsObject]]
-    val defs : Seq[String] = if (meanings == None) Seq("")
-      else
-        for {
-          text <- meanings.get
-        } yield {
-          val result = (text\ "text").asOpt[String]
-          result getOrElse " "
-        }
-
-        if (defs.distinct == Seq("")) ""
-        else ("<b>(" + word.getOrElse(text + "</b> - original text<b>") + ")</b><br>" + defs.distinct.slice(0,2).mkString("<br>"))
+  def processResults(text: String, phrases:Seq[JsObject], dst: String): Seq[JsObject] = {
+    val targets = LangCodes.convert('iso639_3, 'iso639_1, dst) match {
+    case Some(p2code) => Seq(dst, p2code)
+    case _ => Seq(dst)
     }
+
+    def filterLanguage(obj: JsObject) = {
+      (obj \ "language").asOpt[String].flatMap { lang =>
+        if (!targets.contains(lang)) None
+        else (obj \ "text").asOpt[String]
+      }.toList
+    }
+
+    val lemmas = for {phrase  <- phrases } yield {
+
+      val term = (phrase \ "phrase")
+        .asOpt[JsObject].toList
+        .flatMap(filterLanguage)
+
+      val defs = (phrase \ "meanings")
+        .asOpt[Seq[JsObject]].toList.flatten
+        .flatMap(filterLanguage)
+
+      val senses = (term ++ defs)
+        .filterNot(_ == "").distinct
+
+      if (senses.size == 0) None
+      else {
+        val lemma = Json.obj(
+          "representations" -> Json.arr("Orthographic"),
+          "lemmaForm" -> "lemma",
+          "forms" -> Json.obj(
+            "lemma" -> Json.obj(
+              "Orthographic" -> Json.arr(text)
+            )
+          ),
+          "senses" -> senses.map { definition =>
+            Json.obj("definition" -> definition)
+          },
+          "sources" -> Json.arr(
+            Json.obj("name" -> name, "attribution" -> s"<i>$name</i>")
+          )
+        )
+        Some(lemma)
+      }
+    }
+
+    lemmas.collect { case Some(lemma) => lemma }
   }
 
   /**
    * Endpoint for translating via Glosbe
    */
-  def translate(user: User, src: String, dest: String, text: String) = {
+  def translate(user: User, src: String, dest: String, text: String)
+               (implicit restart: TRestart) = {
     val query = WS.url("http://glosbe.com/gapi/translate")
-        .withQueryString("from" -> src, "dest" -> dest, "format" -> "json", "phrase" -> text).get()
+        .withQueryString("from" -> src, "dest" -> dest,
+                         "format" -> "json", "phrase" -> text).get()
     val result = Await.result(query, Duration.Inf)
     val json = result.json.as[JsObject]
 
@@ -75,22 +100,24 @@ object LookupGlosbe extends Translator {
      */
     if(result.status != 200) None
     else {
+      (json \ "tuc").asOpt[Seq[JsObject]].flatMap { tuc =>
+        val phrase = (json \ "phrase").as[String]
+        val lemmas = processResults(phrase, tuc, dest)
 
-        val tuc = (json\ "tuc").asOpt[Seq[JsObject]]
-        if (tuc == None) None
+        if (lemmas.size == 0) None
         else {
-            val trans : String = grabTranslations(tuc.get, text).filterNot(_ == "").mkString(", ")
-            val defs : Seq[String]= grabPhrase(tuc.get, text).filterNot(_ == "")
-
-            if (trans.length == 0) {
-              if (defs.isEmpty) None
-              else Some((defs.updated(0, "<b><i>Definitions:</i></b><br>" + defs(0))).filterNot(_ == "").slice(0,5))
-            } else {
-              val addTransTitle = "<b><i>Translations:</i></b><br>"+trans+"<br><br>"
-              if (defs.isEmpty) Some(Seq(addTransTitle))
-              else Some((defs.updated(0, addTransTitle + "<b><i>Definitions:</i></b><br>" + defs(0))).filterNot(_ == "").slice(0,5))
-            }
+          val results = Json.obj(
+            "words" -> Json.arr(
+              Json.obj(
+                "start" -> 0,
+                "end" -> text.length,
+                "lemmas" -> lemmas
+              )
+            )
+          )
+          Some(results)
         }
+      }
     }
   }
 }

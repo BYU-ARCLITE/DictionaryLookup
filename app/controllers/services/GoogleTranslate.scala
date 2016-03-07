@@ -1,6 +1,7 @@
 package controllers
 
 import models.User
+import Utils._
 import scala.concurrent.{ExecutionContext, Future, Await}
 import scala.concurrent.duration._
 import play.api.libs.json._
@@ -17,19 +18,29 @@ object LookupGoogle extends Translator {
 
   /**
    * Endpoint for translating via Google
+   * TODO: Extract word-and-phrase alignment information
    */
-  def translate(user: User, src: String, dest: String, text: String) = {
+  def translate(user: User, src: String, dest: String, text: String)
+               (implicit restart: TRestart) = {
     googleKey.flatMap { key =>
       val query = WS.url("https://www.googleapis.com/language/translate/v2")
-        .withQueryString("source" -> src, "target" -> dest, "q" -> text, "key" -> key).get()
+        .withQueryString("source" -> src, "target" -> dest,
+                         "q" -> text, "key" -> key).get()
       val result = Await.result(query, Duration.Inf)
       if(result.status != 200) None
       else {
         val translations = (result.json \ "data" \ "translations" \\ "translatedText")
-		    .map { jsstr => quoteExpr.replaceAllIn(Utils.unescape(jsstr.toString), "") }
+            .map { jsstr =>
+              Json.obj(
+                "text" -> quoteExpr.replaceAllIn(Utils.unescape(jsstr.toString), ""),
+                "source" -> Json.obj("name" -> name, "attribution" -> s"<i>$name</i>")
+              )
+            }
         if(translations.length > 0) Some(translations)
         else None
       }
+    }.map { translations =>
+      Json.obj("translations" -> translations)
     }
   }
 }

@@ -1,6 +1,7 @@
 package controllers
 
 import models.User
+import Utils._
 import java.net.URLEncoder
 import scala.concurrent.{ExecutionContext, Future, Await}
 import scala.concurrent.duration._
@@ -16,8 +17,6 @@ object LookupWordReference extends Translator {
   val codeFormat = 'iso639_1
 
   val wordReferenceKey = configuration.getString("wordReference.key")
-  val TranslationList = List("FirstTranslation", "SecondTranslation", "ThirdTranslations", "FourthTranslation")
-  val PartsList = List("Entries","PrincipalTranslations","AdditionalTranslations")
   val whitespace = "\\s".r
 
   val codeMap = Map(
@@ -36,19 +35,25 @@ object LookupWordReference extends Translator {
     "tr" -> "tr" //Turkish
   )
 
-  def mapEntriesIn(json: JsObject)(body: JsObject => List[String]) = json.fields
-    .collect({ case (key, obj:JsObject) if key.startsWith("term") => obj})
-    .toList.flatMap { obj =>
-      PartsList.flatMap { partName =>
-        (obj \ partName) match {
-          case part:JsObject =>
-            part.fields.collect({
-              case (_, obj:JsObject) => obj
-            }).toList.flatMap(body)
-          case _ => Nil
+  val PartsList = List("Entries","PrincipalTranslations","AdditionalTranslations")
+
+  def mapEntries(json: JsObject)(body: (JsObject => JsObject)) = {
+    val terms = json.fields.collect {
+      case (key, obj:JsObject) if key.startsWith("term") => obj
+    }
+
+    terms.flatMap { obj =>
+      PartsList.flatMap { pname =>
+        (obj \ pname).asOpt[JsObject] match {
+        case Some(part) =>
+          part.fields.collect { case (_, entry:JsObject) => entry }
+        case _ => Nil
         }
       }
-    }
+    }.map(body)
+  }
+
+  val TranslationList = List("FirstTranslation", "SecondTranslation", "ThirdTranslations", "FourthTranslation")
 
   def getTranslationsIn(entry: JsObject) = TranslationList.flatMap { name =>
     (entry \ name \ "term") match {
@@ -61,29 +66,80 @@ object LookupWordReference extends Translator {
     val url = "http://api.wordreference.com/0.8/" + URLEncoder.encode(s"$key/json/$scode$dcode/$text", "UTF-8")
     val result = Await.result(WS.url(url).get(), Duration.Inf)
     if(result.status != 200) None
-    else mapEntriesIn(result.json.as[JsObject]) { entry =>
-      getTranslationsIn(entry) match {
-        case Nil => Nil
-        case translations =>
-          List("(" + (entry \ "OriginalTerm" \ "sense").as[String] + ") " + translations.mkString(", "))
+    else {
+      val lemmas = mapEntries(result.json.as[JsObject]) { entry =>
+        val original = entry \ "OriginalTerm"
+        val pos = (original \ "POS").asOpt[String]
+                  .collect { case str if str.length > 0 => str }
+
+        var lemma = Json.obj(
+          "representations" -> Json.arr("Orthographic"),
+          "lemmaForm" -> "lemma",
+          "forms" -> Json.obj(
+            "lemma" -> Json.obj(
+              "Orthographic" -> Seq((original \ "term").as[String])
+            )
+          ),
+          "senses" -> TranslationList.flatMap { name =>
+            (entry \ name).asOpt[JsObject].map { trans =>
+              val term = (trans \ "term").as[String]
+              val sense = (trans \ "sense").as[String]
+              Json.obj("definition" -> s"$term ($sense)")
+            }
+          },
+          "sources" -> Json.arr(
+            Json.obj(
+              "name" -> name,
+              "attribution" -> s"""
+                  <a href="http://www.wordreference.com/$scode$dcode/$text"
+                     target="wordreference">$text at WordReference.com</a>
+                  © WordReference.com
+                """
+            )
+          )
+        )
+
+        if (pos.isDefined) {
+          lemma ++ Json.obj("pos" -> pos.get)
+        } else lemma
       }
-    } match {
-      case Nil => None
-      case entries => Some(entries)
+
+      if (lemmas.size == 0) None
+      else Some(lemmas)
     }
   }
 
   /**
    * Endpoint for translating via WordReference
    */
-  def translate(user: User, src: String, dest: String, text: String) = {
-    if(whitespace.findFirstIn(text).isDefined) None
-    else for {
-      key <- wordReferenceKey
-      scode <- codeMap.get(src)
-      dcode <- codeMap.get(dest)
-      if scode == "en" || dcode == "en"
-      entries <- requestEntries(key, scode, dcode, text)
-    } yield entries
+  def translate(user: User, src: String, dst: String, text: String)
+               (implicit restart: TRestart): Option[JsObject] = {
+
+    if (!wordReferenceKey.isDefined) return None
+    if (whitespace.findFirstIn(text).isDefined) return None
+
+    val scode = codeMap.get(src)
+    val dcode = codeMap.get(dst)
+
+    val hasEnglish = (scode, dcode) match {
+    case (Some("en"),Some(_)) => true
+    case (Some(_),Some("en")) => true
+    case _ => false
+    }
+
+    if(!hasEnglish) return None
+
+    requestEntries(wordReferenceKey.get, scode.get, dcode.get, text)
+      .map { lemmas =>
+        Json.obj(
+          "words" -> Json.arr(
+            Json.obj(
+              "start" -> 0,
+              "end" -> text.length,
+              "lemmas" -> lemmas
+            )
+          )
+        )
+      }
   }
 }

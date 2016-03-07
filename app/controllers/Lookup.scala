@@ -2,6 +2,7 @@ package controllers
 
 import scala.util.control.ControlThrowable
 import controllers.authentication.Authentication
+import controllers.Utils._
 import models.{User, ServiceLog}
 import play.api.mvc.{Action, Controller}
 import play.api.libs.json._
@@ -10,7 +11,6 @@ import play.api.Play.current
 import play.api.Logger
 
 object Lookup extends Controller {
-  type TResult = (String,Int,Seq[String])
 
   val serviceMap = Map( "BYUDictionaries" -> LookupBYU,
                         "WWWJDIC" -> LookupWWWJDIC,
@@ -19,45 +19,64 @@ object Lookup extends Controller {
                         //"Collins" -> LookupCollins,
                         "Glosbe" -> LookupGlosbe,
                         "SeaLang" -> LookupSeaLang,
-                        "GoogleTranslate" -> LookupGoogle, 
-                        "Madamira" -> LookupMadamira  
-                        )
+                        "GoogleTranslate" -> LookupGoogle,
+                        "Madamira" -> LookupMadamira
+                      )
 
-  def getFirst(
-    user: User, format: Symbol,
-    srcLang: String, destLang: String,
-	text: String, exclusions: Set[String] = Set()
-  ): Option[TResult] = {
-    for {
-	  name <- user.getServices if !exclusions.contains(name)
-	  t <- serviceMap.get(name)
-	  tsrc <- LangCodes.convert(format, t.codeFormat, srcLang)
-	  tdst <- LangCodes.convert(format, t.codeFormat, destLang)
-	} try {
-      Logger.info("Checking "+name)
-      
-      if(tsrc == "arz" || tsrc == "apc"){
-      t.translate(user, tsrc, tdst, text) match {
-        case Some(res) =>
-          ServiceLog.record(user, "ara", destLang, text, name, true)
-          return Some((t.name,t.expiration,res))
-        case None =>{
-          ServiceLog.record(user, "ara", destLang, text, name, false)
-        }
-      }
-    }
-    else{
-        t.translate(user, tsrc, tdst, text) match {
-          case Some(res) =>
-            ServiceLog.record(user, srcLang, destLang, text, name, true)
-            return Some((t.name,t.expiration,res))
-          case None =>{
-            ServiceLog.record(user, srcLang, destLang, text, name, false)
+  def callService(user: User, t: Translator, req: TRequest)
+                 (implicit restart: TRestart):
+                 Option[(JsObject, Boolean)] = {
+
+    val name = t.name
+	val tformat = t.codeFormat
+    Logger.info(s"Converting codes to ${tformat.toString} for $name")
+
+    val (text, rsrc, rdst, rformat) = req
+    val langcodes = for {
+      src <- LangCodes.convert(rformat, tformat, rsrc)
+      dst <- LangCodes.convert(rformat, tformat, rdst)
+    } yield (src, dst)
+
+    langcodes.flatMap { case (src, dst) =>
+      val key = s"$name:$src-$dst:$text"
+	  Logger.info(s"Checking $name")
+
+      Cache.getAs[JsObject](key)
+        .map { json => (json, true) }
+        .orElse {
+		  (try {
+            t.translate(user, src, dst, text)
+		  } catch {
+		    case e: Throwable =>
+			  Logger.debug(s"Error in $name: ${e.getMessage()}")
+			  None
+		  }).map { json =>
+            Cache.set(key, json, t.expiration)
+            (json, false)
           }
         }
-      } 
     }
-    catch {
+  }
+
+  def getFirst(user: User, req: TRequest, exclusions: Set[String] = Set()): Option[TResult] = {
+
+    implicit val restart : TRestart = { (text: String, excls: Set[String]) =>
+      val (_, rsrc, rdst, format) = req
+      getFirst(user, (text, rsrc, rdst, format), exclusions ++ excls)
+    }
+
+    for {
+      name <- user.getServices if !exclusions.contains(name)
+      t <- serviceMap.get(name)
+    } try {
+      callService(user, t, req) match {
+      case Some((json, cached)) =>
+        if (!cached) { ServiceLog.record(user, req, name, true) }
+        return Some(json)
+      case None =>
+        ServiceLog.record(user, req, name, false)
+      }
+    } catch {
       case e: ControlThrowable => throw e
       case e: Throwable => {
         Logger.debug(e.getMessage)
@@ -67,36 +86,52 @@ object Lookup extends Controller {
     None
   }
 
-  def lookup(opts: Map[String, Seq[String]], user: User) = (try {
-    val srcLang = opts("srcLang")(0)
-    val destLang = opts("destLang")(0)
-    val format = 'iso639_3
-    val text = opts("word")(0)
-    val key = s"$srcLang-$destLang:$text"
-    Cache.getAs[JsObject](key).map(json => Ok(json)).getOrElse {
-      getFirst(user, format, srcLang, destLang, text) match {
-        case Some((name,exp,tseq)) => {
-          val response = Json.obj(
-            "success" -> true,
-            "entries" -> tseq,
-            "source" -> name
-          )
-          Cache.set(key, response, exp)
-          Logger.info(response.toString)
-          Ok(response)
-        }
-        case None => NotFound(Json.obj("success" -> false, "message" -> "No dictionary entries."))
-      }
-    }
-  } catch {
-    case e: ControlThrowable => throw e
-    case _: Throwable => BadRequest
-  }).withHeaders("Access-Control-Allow-Origin" -> "*")
+  def lookup(opts: Map[String, Seq[String]], user: User) = {
+    val text = opts("text")(0)
+    val src = opts("srcLang")(0)
+    val dst = opts("dstLang")(0)
+    val format = opts.get("codeFormat")
+                  .flatMap(_.lift(0))
+                  .map(Symbol(_))
+                  .getOrElse('iso639_3)
 
-  def authlookup = Authentication.keyedAction(parse.urlFormEncoded) {
+    val basicResult = Json.obj(
+      "src" -> src,
+      "dst" -> dst,
+      "codeFormat" -> format.toString,
+      "text" -> text
+    )
+
+    getFirst(user, (text, src, dst, format)) match {
+    case Some(result) =>
+      val response = Json.obj(
+        "success" -> true,
+        "message" -> "Found dictionary entries.",
+        "result" -> (result ++ basicResult)
+      )
+      Logger.info(response.toString)
+      Ok(response)
+    case None =>
+      NotFound(Json.obj(
+        "success" -> false,
+        "message" -> "No dictionary entries.",
+        "result" -> basicResult
+      ))
+    }
+  }
+
+  def authlookup = Authentication.keyedAction(parse.multipartFormData) {
     implicit request =>
-      implicit user =>
-        lookup(request.body, user)
+      implicit user => (try {
+        lookup(request.body.dataParts, user)
+      } catch {
+        case e: Throwable =>
+          play.Logger.debug(e.getMessage())
+          BadRequest(Json.obj(
+            "success" -> false,
+            "message" -> e.getMessage()
+          ))
+      }).withHeaders("Access-Control-Allow-Origin" -> "*")
   }
 
   def preflight = Action {

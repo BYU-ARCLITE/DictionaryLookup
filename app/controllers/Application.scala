@@ -15,7 +15,12 @@ object Application extends Controller {
       Ok(views.html.register())
   }
 
-def lookupTest = Action {
+  def manageAccount = Action {
+    implicit request =>
+      Ok(views.html.manageAccount())
+  }
+
+  def lookupTest = Action {
     implicit request =>
       Ok(views.html.lookupTest())
   }
