@@ -50,7 +50,7 @@ object LookupWWWJDIC extends Translator {
     codes.map((_,"ja")) ++ codes.map(("ja",_))	
   }
 
-  def getXML(query: Future[WSResponse]) = {
+  def getXML(query: Future[WSResponse]) : Option[xml.Elem] = {
     val response = Await.result(query, Duration.Inf)
     if (response.status != 200) None
     else {
@@ -110,46 +110,51 @@ object LookupWWWJDIC extends Translator {
     }.getOrElse(Nil)
   }
 
+  def parseDefins(XMLDoc: xml.Elem) = {
+    var defins = (XMLDoc \\ "pre")
+	  .flatMap(_.text.split("\n"))
+      .flatMap(_.split("""[,\s\/]*\(\d+\)"""))
+      .map(_.trim).distinct
+      .filterNot(_ == "")
+    if (defins.length == 0) None
+    else Some(defins)  
+  }
+
   /**
    *  Translate From Japanese for all of the languages in the list above.
    *  TODO: Add back in to-Japanese translations without segmentation
    */
   def getWordDefinitions(text: String, dictCode: String): Seq[JsObject] = {
     getTokens(text).map { token =>
-      val query = WS.url(s"$endpoint?${dictCode}ZUQ$text").get()
-      val lemmas = getXML(query).map { XMLDoc =>
-        var raw = (XMLDoc \\ "pre").text.split("\n")
-        val defins = raw.flatMap(_.split("""[,\s\/]*\(\d+\)"""))
-                        .map(_.trim).distinct
-                        .filterNot(_ == "")
-
-        if (defins.length == 0) None
-        else {
-          val lemma = Json.obj(
-            "representations" -> Json.arr("Orthographic"),
-            "lemmaForm" -> "lemma",
-            "forms" -> Json.obj(
-              "lemma" -> Json.obj(
-                "Orthographic" -> Json.arr(token.lemma)
-              )
-            ),
-            "senses" -> defins.map { text =>
-              Json.obj("definition" -> text)
-            },
-            "sources" -> Json.arr(
-              Json.obj("name" -> name, "attribution" -> s"<i>$name</i>")
+	  val word = token.lemma
+      val query = WS.url(s"$endpoint?${dictCode}ZUQ$word").get()
+      for {
+	    doc <- getXML(query)
+		defins <- parseDefins(doc)
+	  } yield {
+        val lemma = Json.obj(
+          "representations" -> Json.arr("Orthographic"),
+          "lemmaForm" -> "lemma",
+          "forms" -> Json.obj(
+            "lemma" -> Json.obj(
+              "Orthographic" -> Json.arr(word)
             )
+          ),
+          "senses" -> defins.map { text =>
+            Json.obj("definition" -> text)
+          },
+          "sources" -> Json.arr(
+            Json.obj("name" -> name, "attribution" -> s"<i>$name</i>")
           )
-          Some(lemma)
-        }
-      }.collect { case Some(lemma) => lemma }
+        )
 
-      Json.obj(
-        "start" -> token.start,
-        "end" -> token.end,
-        "lemmas" -> lemmas
-      )
-    }
+        Json.obj(
+          "start" -> token.start,
+          "end" -> token.end,
+          "lemmas" -> Json.arr(lemma)
+        )
+      }
+    }.collect { case Some(lemma) => lemma }
   }
 
   def translate(user: User, src: String, dst: String, text: String)
