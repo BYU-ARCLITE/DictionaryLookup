@@ -13,7 +13,7 @@ import ExecutionContext.Implicits.global
 import xml.{Elem, XML, NodeSeq}
 
 case class JAnalysis(start: Long, end: Long,
-                     lemma: String, gloss: JsObject)
+                     lemma: String, glosses: Seq[JsObject])
 
 object LookupWWWJDIC extends Translator {
   /**
@@ -57,114 +57,120 @@ object LookupWWWJDIC extends Translator {
       val data = response.body
                  .replace("""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">""", "")
                  .replace("""<META http-equiv="Content-Type" content="text/html; charset=UTF-8">""", "")
+                 .replace("""<br>""", "\n")
                  .replace("""<p>""", "")
-                 .replace("""<br>""", "<br/>")
 
       Some(XML.loadString(data))
     }
   }
 
+  //TODO: Figure out how to use parser combinators here
+  def parseGlossEntry(text: String) : Seq[JsObject] = {
+    val body = text.split("\n").last.trim
+    Seq[JsObject]()
+    /*Json.obj(
+      "representations" -> Json.arr("Orthographic"),
+      "pos" -> pos,
+      "lemmaForm" -> "lemma",
+      "forms" -> Json.obj(
+        "lemma" -> Json.obj("Orthographic" -> Seq(word))
+      ),
+      "senses" -> gloss.map { dt =>
+        Json.obj("definition" -> dt)
+      },
+      "sources" -> Json.arr(
+        Json.obj("name" -> name, "attribution" -> s"<i>$name</i>")
+      )
+    )*/
+  }
+
   def getTokens(text: String) = {
     val query = WS.url(s"$endpoint?9ZIG$text").get()
     getXML(query).map { XMLDoc =>
-      /*val glosses = (XMLDoc \\ "li").map { node =>
-        val entry = node.text
-        val word = ""
-        val pos = ""
+      val entries = (XMLDoc \\ "li").map { node =>
+        parseGlossEntry(node.text)
+      }
 
-        val gloss = Json.obj(
-          "start" -> start,
-          "end" -> end,
-          "lemmas" -> Json.arr(
-            Json.obj(
-              "representations" -> Json.arr("Orthographic"),
-              "pos" -> pos,
-              "lemmaForm" -> "lemma",
-              "forms" -> Json.obj(
-                "lemma" -> Json.obj("Orthographic" -> Seq(word))
-              ),
-              "senses" -> gloss.map { dt =>
-                Json.obj("definition" -> dt)
-              },
-              "sources" -> Json.arr(
-                Json.obj("name" -> name, "attribution" -> s"<i>$name</i>")
-              )
-            )
-          )
-        )
-      }*/
-
-      (XMLDoc \\ "FONT").map { node =>
+      val indices = (XMLDoc \\ "FONT").map { node =>
         val word = node.text
         val start = text.indexOfSlice(word)
-        val end = start + word.length
+        (start, word)
+      }
 
-        val gloss = Json.obj(
-          "start" -> start,
-          "end" -> end,
-          "lemmas" -> Json.arr()
-        )
+      //TODO: Restart on unglossed segments
 
-        JAnalysis(start, end, word, gloss)
+      for {
+        ((start, word), glosses) <- (indices zip entries)
+      } yield {
+        val end = start+word.length
+        JAnalysis(start, end, word, glosses)
       }
     }.getOrElse(Nil)
   }
 
-  def parseDefins(XMLDoc: xml.Elem) = {
-    var defins = (XMLDoc \\ "pre")
-	  .flatMap(_.text.split("\n"))
+  //TODO: rewrite to produce a lemma/entry object
+  //TODO: Figure out how to use parser combinators here
+  def parseEntries(XMLDoc: xml.Elem) : Seq[JsObject] = {
+    /*var defins = (XMLDoc \\ "pre")
+      .flatMap(_.text.split("\n"))
       .flatMap(_.split("""[,\s\/]*\(\d+\)"""))
       .map(_.trim).distinct
       .filterNot(_ == "")
     if (defins.length == 0) None
-    else Some(defins)  
+    else Some(defins)*/
+    Seq[JsObject]()
   }
 
-  /**
-   *  Translate From Japanese for all of the languages in the list above.
-   *  TODO: Add back in to-Japanese translations without segmentation
-   */
-  def getWordDefinitions(text: String, dictCode: String): Seq[JsObject] = {
-    getTokens(text).map { token =>
-	  val word = token.lemma
-      val query = WS.url(s"$endpoint?${dictCode}ZUQ$word").get()
-      for {
-	    doc <- getXML(query)
-		defins <- parseDefins(doc)
-	  } yield {
-        val lemma = Json.obj(
-          "representations" -> Json.arr("Orthographic"),
-          "lemmaForm" -> "lemma",
-          "forms" -> Json.obj(
-            "lemma" -> Json.obj(
-              "Orthographic" -> Json.arr(word)
-            )
-          ),
-          "senses" -> defins.map { text =>
-            Json.obj("definition" -> text)
-          },
-          "sources" -> Json.arr(
-            Json.obj("name" -> name, "attribution" -> s"<i>$name</i>")
-          )
-        )
-
-        Json.obj(
-          "start" -> token.start,
-          "end" -> token.end,
-          "lemmas" -> Json.arr(lemma)
-        )
-      }
-    }.collect { case Some(lemma) => lemma }
+  def getDefinitions(text: String, dictCode: String) : Seq[JsObject] = {
+    //TODO: filter results according to the parts of speech
+    // from the contextual glosses
+    val query = WS.url(s"$endpoint?${dictCode}ZUQ$text").get()
+    getXML(query).map(parseEntries).getOrElse(Nil)
   }
 
+  def fromJapanese(text: String, dictCode: String) = {
+    val words = getTokens(text).map { token =>
+      val lemmas = token.glosses ++ getDefinitions(token.lemma, dictCode)
+      Json.obj(
+        "start" -> token.start,
+        "end" -> token.end,
+        "lemmas" -> lemmas
+      )
+    }
+    if(words.size == 0) None
+    else Some(words)
+  }
+
+  def toJapanese (text: String, dictCode: String) = {
+    val defs = getDefinitions(text, dictCode)
+    if (defs.size == 0) None
+    else {
+      val word = Json.obj(
+        "start" -> 0,
+        "end" -> text.length,
+        "lemmas" -> defs
+      )
+      Some(Seq(word))
+    }
+  }
+
+  //TODO: Automatically transliterate hiragana into romaji
   def translate(user: User, src: String, dst: String, text: String)
                (implicit request: RequestHeader, restart: TRestart) = {
-    if (src == "ja") {
+    val result = (src, dst) match {
+    case ("ja", _) =>
       codeMap.get(dst).flatMap { dcode =>
-        val words = getWordDefinitions(text, dcode)
-        if(words.size == 0) None
-        else Some(Json.obj("words" -> words))
+        fromJapanese(text, dcode)
       }
-    } else None
+    case (_, "ja") =>
+      codeMap.get(src).flatMap { dcode =>
+        toJapanese(text, dcode)
+      }
+    case _ => None
+    }
+
+    result.map { words =>
+      Json.obj("words" -> words)
+    }
   }
 }
