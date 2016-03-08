@@ -219,7 +219,8 @@ object LookupMadamira extends Translator {
   def translate(user: User, src: String, dst: String, text: String)
                (implicit restart: TRestart) = {
 
-    dialects.get(src).flatMap { dialect =>
+    if (dst != "eng") None
+    else dialects.get(src).flatMap { dialect =>
       val inputXmlData = genInputXML(dialect, text)
 
       val url = "http://127.0.0.1:8223"
