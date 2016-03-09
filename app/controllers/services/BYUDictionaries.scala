@@ -3,6 +3,7 @@ package controllers
 import models.User
 import Utils._
 import edu.byu.arclite.dictionary.DictionaryCache
+import play.api.mvc._
 import play.api.libs.json._
 
 object LookupBYU extends Translator {
@@ -15,7 +16,7 @@ object LookupBYU extends Translator {
    * Endpoint for translating via BYU Dictionaries
    */
   def translate(user: User, src: String, dst: String, text: String)
-               (implicit restart: TRestart) = {
+               (implicit request: RequestHeader, restart: TRestart) = {
     val key = s"$src-$dst"
     DictionaryCache.getDictionaryEntry(key, text).map { definition =>
       Json.obj(

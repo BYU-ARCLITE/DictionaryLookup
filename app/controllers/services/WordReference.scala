@@ -5,6 +5,7 @@ import Utils._
 import java.net.URLEncoder
 import scala.concurrent.{ExecutionContext, Future, Await}
 import scala.concurrent.duration._
+import play.api.mvc._
 import play.api.libs.json._
 import play.api.libs.ws.WS
 import play.api.Play.{current, configuration}
@@ -113,7 +114,7 @@ object LookupWordReference extends Translator {
    * Endpoint for translating via WordReference
    */
   def translate(user: User, src: String, dst: String, text: String)
-               (implicit restart: TRestart): Option[JsObject] = {
+               (implicit request: RequestHeader, restart: TRestart): Option[JsObject] = {
 
     if (!wordReferenceKey.isDefined) return None
     if (whitespace.findFirstIn(text).isDefined) return None

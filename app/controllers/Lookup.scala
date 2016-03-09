@@ -4,7 +4,7 @@ import scala.util.control.ControlThrowable
 import controllers.authentication.Authentication
 import controllers.Utils._
 import models.{User, ServiceLog}
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{Action, Controller, RequestHeader}
 import play.api.libs.json._
 import play.api.cache.Cache
 import play.api.Play.current
@@ -24,7 +24,7 @@ object Lookup extends Controller {
                       )
 
   def callService(user: User, t: Translator, req: TRequest)
-                 (implicit restart: TRestart):
+                 (implicit rh: RequestHeader, restart: TRestart):
                  Option[(JsObject, Boolean)] = {
 
     val name = t.name
@@ -58,18 +58,19 @@ object Lookup extends Controller {
     }
   }
 
-  def getFirst(user: User, req: TRequest, exclusions: Set[String] = Set()): Option[TResult] = {
+  def getFirst(rh: RequestHeader, user: User, req: TRequest, exclusions: Set[String] = Set()) :
+              Option[JsObject] = {
 
-    implicit val restart : TRestart = { (text: String, excls: Set[String]) =>
+    val restart : TRestart = { (text: String, excls: Set[String]) =>
       val (_, rsrc, rdst, format) = req
-      getFirst(user, (text, rsrc, rdst, format), exclusions ++ excls)
+      getFirst(rh, user, (text, rsrc, rdst, format), exclusions ++ excls)
     }
 
     for {
       name <- user.getServices if !exclusions.contains(name)
       t <- serviceMap.get(name)
     } try {
-      callService(user, t, req) match {
+      callService(user, t, req)(rh, restart) match {
       case Some((json, cached)) =>
         if (!cached) { ServiceLog.record(user, req, name, true) }
         return Some(json)
@@ -86,7 +87,7 @@ object Lookup extends Controller {
     None
   }
 
-  def lookup(opts: Map[String, Seq[String]], user: User) = {
+  def lookup(rh: RequestHeader, opts: Map[String, Seq[String]], user: User) = {
     val text = opts("text")(0)
     val src = opts("srcLang")(0)
     val dst = opts("dstLang")(0)
@@ -102,7 +103,7 @@ object Lookup extends Controller {
       "text" -> text
     )
 
-    getFirst(user, (text, src, dst, format)) match {
+    getFirst(rh, user, (text, src, dst, format)) match {
     case Some(result) =>
       val response = Json.obj(
         "success" -> true,
@@ -123,7 +124,7 @@ object Lookup extends Controller {
   def authlookup = Authentication.keyedAction(parse.multipartFormData) {
     implicit request =>
       implicit user => (try {
-        lookup(request.body.dataParts, user)
+        lookup(request, request.body.dataParts, user)
       } catch {
         case e: Throwable =>
           play.Logger.debug(e.getMessage())

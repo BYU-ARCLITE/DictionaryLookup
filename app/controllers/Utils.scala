@@ -1,6 +1,7 @@
 package controllers
 
 import models.{User}
+import play.api.mvc._
 import play.api.Play.{current, configuration}
 import play.api.Logger
 import play.api.libs.json.JsObject
@@ -24,7 +25,7 @@ package object Utils {
      * @param text The text to translate
      */
     def translate(user: User, src: String, dest: String, text: String)
-               (implicit restart: TRestart): Option[JsObject]
+               (implicit request: RequestHeader, restart: TRestart): Option[JsObject]
   }
 
   val entityNames = Map(

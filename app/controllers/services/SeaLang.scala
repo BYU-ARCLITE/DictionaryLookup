@@ -5,6 +5,7 @@ import Utils._
 import java.net.URLEncoder
 import scala.concurrent.{ExecutionContext, Future, Await}
 import scala.concurrent.duration._
+import play.api.mvc._
 import play.api.libs.json._
 import play.api.libs.ws._
 import play.api.Play.{current, configuration}
@@ -148,7 +149,7 @@ object LookupSeaLang extends Translator {
    * Endpoint for translating via SeaLang
    */
   def translate(user: User, src: String, dst: String, text: String)
-               (implicit restart: TRestart) = {
+               (implicit request: RequestHeader, restart: TRestart) = {
     ((src, dst) match {
     case ("eng","rus") =>  // English to Russian Translation
       englishToRussian(text)

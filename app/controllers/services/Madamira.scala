@@ -4,6 +4,7 @@ import models.User
 import Utils._
 import scala.concurrent.{ExecutionContext, Future, Await}
 import scala.concurrent.duration._
+import play.api.mvc._
 import play.api.libs.json._
 import play.api.libs.ws.WS
 import play.api.Play.{current, configuration}
@@ -217,7 +218,7 @@ object LookupMadamira extends Translator {
   }
 
   def translate(user: User, src: String, dst: String, text: String)
-               (implicit restart: TRestart) = {
+               (implicit request: RequestHeader, restart: TRestart) = {
 
     if (dst != "eng") None
     else dialects.get(src).flatMap { dialect =>

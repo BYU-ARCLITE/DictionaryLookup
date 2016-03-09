@@ -4,6 +4,7 @@ import models.User
 import Utils._
 import scala.concurrent.{ExecutionContext, Future, Await}
 import scala.concurrent.duration._
+import play.api.mvc._
 import play.api.libs.json._
 import play.api.libs.ws.WS
 import play.api.Play.{current, configuration}
@@ -84,7 +85,7 @@ object LookupMerriamWebster extends Translator {
    * Endpoint for translating via merriamWebster
    */
   def translate(user: User, src: String, dst: String, text: String)
-               (implicit restart: TRestart) = {
+               (implicit request: RequestHeader, restart: TRestart) = {
     val logoURL = "http://www.dictionaryapi.com/images/info/branding-guidelines/mw-logo-light-background-50x50.png"
     val lemmas: Seq[JsObject] =
       if (((src == "spa" && dst == "eng") || (src == "eng" && dst == "spa")) && spanishKey.isDefined) {
