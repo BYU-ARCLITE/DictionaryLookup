@@ -29,24 +29,17 @@ object LookupSeaLang extends Translator {
   val expiration = Utils.getExpiration("seaLang")
   val codeFormat = 'iso639_3
 
-  def processSense(sense: JsObject): Option[JsObject] =
+  val ReExpr = raw""".*?см\. также\s*(.*?)\s*""".r
+  def processSense(sense: JsObject): Option[Either[JsObject, String]] =
     (sense \ "$t").asOpt[String]
       .orElse {
 	    // there may be a POS in here, too, but it's
 		// not clear how to associate it with a lemma
 	    (sense \ "def" \ "$t").asOpt[String]
 	  }
-      .map { definition =>
-
-        /*if (definition.contains("см. также")) {
-          val nword = if (definition.contains("v см. также")) {
-            definition.replace("v см. также", "")
-          } else {
-            definition.replace("см. также", "")
-          }
-          Right(nword)
-        } else {*/
-
+      .map {
+	  case ReExpr(nword) => Right(nword)
+	  case definition : String =>
         var result = Json.obj("definition" -> definition)
 
         (sense \ "usage" \ "$t").asOpt[String].foreach { str =>
@@ -57,18 +50,22 @@ object LookupSeaLang extends Translator {
           result = result ++ Json.obj("examples" -> Json.arr(str))
         }
 
-        result
+        Left(result)
       }
 
-  def processSenses(entry: JsObject): Seq[JsObject] =
+  def processSenses(entry: JsObject): (Seq[JsObject],Seq[String]) =
     try {
-      ((entry \ "sense").get match {
+      val senses = (entry \ "sense").get match {
       case a:JsArray => a.as[Seq[JsObject]].map(processSense(_))
       case o:JsObject => Seq(processSense(o))
       case _ => Nil
-      }).collect { case Some(o) => o }
+      }
+	  
+	  val defins = senses.collect { case Some(Left(o)) => o }
+	  val redirs = senses.collect { case Some(Right(o)) => o }
+	  (defins, redirs)
     } catch {
-	  case _: Throwable => Nil
+	  case _: Throwable => (Nil, Nil)
 	}
 
   def processEntries(json: JsObject): Seq[JsObject] =
@@ -78,9 +75,9 @@ object LookupSeaLang extends Translator {
     } yield {
 
 	  play.api.Logger.debug("Word: " + word)
-      val senses = processSenses(entry)
+      val (defins, redirs) = processSenses(entry)
 
-      if (senses.size > 0) {
+      if (defins.size > 0) {
         var lemma = Json.obj(
           "representations" -> Json.arr("Orthographic"),
           "lemmaForm" -> "lemma",
@@ -89,7 +86,7 @@ object LookupSeaLang extends Translator {
               "Orthographic" -> Json.arr(word)
             )
           ),
-          "senses" -> senses,
+          "senses" -> defins,
           "sources" -> Json.arr(
             Json.obj("name" -> name, "attribution" -> s"<i>$name</i>")
           )
