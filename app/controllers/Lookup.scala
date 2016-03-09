@@ -61,7 +61,7 @@ object Lookup extends Controller {
   def getFirst(rh: RequestHeader, user: User, req: TRequest, exclusions: Set[String] = Set()) :
               Option[JsObject] = {
 
-    val restart : TRestart = { (text: String, excls: Set[String]) =>
+    def restart(text: String, excls: Set[String]) = {
       val (_, rsrc, rdst, format) = req
       getFirst(rh, user, (text, rsrc, rdst, format), exclusions ++ excls)
     }

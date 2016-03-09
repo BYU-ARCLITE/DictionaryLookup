@@ -33,13 +33,13 @@ object LookupSeaLang extends Translator {
   def processSense(sense: JsObject): Option[Either[JsObject, String]] =
     (sense \ "$t").asOpt[String]
       .orElse {
-	    // there may be a POS in here, too, but it's
-		// not clear how to associate it with a lemma
-	    (sense \ "def" \ "$t").asOpt[String]
-	  }
+        // there may be a POS in here, too, but it's
+        // not clear how to associate it with a lemma
+        (sense \ "def" \ "$t").asOpt[String]
+      }
       .map {
-	  case ReExpr(nword) => Right(nword)
-	  case definition : String =>
+      case ReExpr(nword) => Right(nword)
+      case definition : String =>
         var result = Json.obj("definition" -> definition)
 
         (sense \ "usage" \ "$t").asOpt[String].foreach { str =>
@@ -60,24 +60,24 @@ object LookupSeaLang extends Translator {
       case o:JsObject => Seq(processSense(o))
       case _ => Nil
       }
-	  
-	  val defins = senses.collect { case Some(Left(o)) => o }
-	  val redirs = senses.collect { case Some(Right(o)) => o }
-	  (defins, redirs)
-    } catch {
-	  case _: Throwable => (Nil, Nil)
-	}
 
-  def processEntries(json: JsObject): Seq[JsObject] =
-    (for {
+      val defins = senses.collect { case Some(Left(d)) => d }
+      val redirs = senses.collect { case Some(Right(w)) => w }
+      (defins, redirs)
+    } catch {
+      case _: Throwable => (Nil, Nil)
+    }
+
+  def processEntries(json: JsObject, restart: TRestart): Seq[JsObject] = {
+    val entries = for {
       entry <- (json \ "return" \ "entry").as[Seq[JsObject]];
       word <- (entry \ "form" \ "orth" \ "$t").asOpt[String]
     } yield {
 
-	  play.api.Logger.debug("Word: " + word)
+      play.api.Logger.debug("Word: " + word)
       val (defins, redirs) = processSenses(entry)
 
-      if (defins.size > 0) {
+      val lOpt = if (defins.size > 0) {
         var lemma = Json.obj(
           "representations" -> Json.arr("Orthographic"),
           "lemmaForm" -> "lemma",
@@ -98,9 +98,28 @@ object LookupSeaLang extends Translator {
 
         Some(lemma)
       } else None
-    }).collect { case Some(lemma) => lemma }
 
-  def processQuery(querystr: (String, String)*): Option[Seq[JsObject]] = {
+      (lOpt, redirs)
+    }
+
+    val lemmas = entries.collect { case (Some(lemma), _) => lemma }
+
+    val nset = Set[String]()
+    val nwords = entries
+                  .collect { case (_, redirs) => redirs }.flatten
+                  .flatMap { nword => restart(nword, nset).toList }
+                  .flatMap { jword => (jword \\ "lemmas") }
+                  .flatMap {
+                    case JsArray(nl) =>
+                      nl.flatMap(_.asOpt[JsObject].toList)
+                    case _ => Nil
+                  }
+
+    lemmas ++ nwords
+  }
+
+  def processQuery(querystr: (String, String)*)
+                  (implicit restart: TRestart): Option[Seq[JsObject]] = {
     val query = WS.url("http://www.sealang.net/russtest/api.pl")
       .withQueryString(querystr:_*).get()
 
@@ -108,17 +127,18 @@ object LookupSeaLang extends Translator {
 
     if(response.status != 200) None
     else response.json.asOpt[JsObject].flatMap { json =>
-	  play.api.Logger.debug("SeaLang: "+json.toString())
-      val lemmas = processEntries(json)
+      play.api.Logger.debug("SeaLang: "+json.toString())
+      val lemmas = processEntries(json, restart)
       if (lemmas.size > 0) Some(lemmas)
       else None
     }
   }
-  
+
   /**
    * English to Russian Translations
    */
-  def englishToRussian(text: String) =
+  def englishToRussian(text: String)
+                      (implicit restart: TRestart) =
     processQuery("service" -> "dictionary", "query" -> text,
                  "format" -> "json", "phrase" -> text,
                  "number" -> "5", "fold" -> "yes",
@@ -127,7 +147,8 @@ object LookupSeaLang extends Translator {
  /**
   * Russian To English Translations
   */
-  def russianToEnglish(text: String) =
+  def russianToEnglish(text: String)
+                      (implicit restart: TRestart) =
     processQuery("service" -> "dictionary", "query" -> text,
                  "format" -> "json", "phrase" -> text,
                  "number" -> "5", "fold" -> "yes",
@@ -136,7 +157,8 @@ object LookupSeaLang extends Translator {
   /**
    * Specifically Handles Russian Definitions
    */
-  def russianToRussian(text: String) =
+  def russianToRussian(text: String)
+                      (implicit restart: TRestart) =
     processQuery("service" -> "dictionary", "query" -> text,
                  "format" -> "json", "phrase" -> text,
                  "number" -> "5", "fold" -> "yes",
