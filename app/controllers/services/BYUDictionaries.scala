@@ -12,6 +12,8 @@ object LookupBYU extends Translator {
   val expiration = Utils.getExpiration("byu")
   val codeFormat = 'iso639_3
 
+  def getPairs = DictionaryCache.getPairs
+
   /**
    * Endpoint for translating via BYU Dictionaries
    */

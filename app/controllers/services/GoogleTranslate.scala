@@ -17,6 +17,11 @@ object LookupGoogle extends Translator {
   val googleKey = configuration.getString("google.key")
   val quoteExpr = """^\s*"\s*|\s*"\s*$""".r
 
+  def getPairs = for {
+    from <- LangCodes.googleCodes
+	to <- LangCodes.googleCodes
+  } yield (from, to)
+
   /**
    * Endpoint for translating via Google
    */

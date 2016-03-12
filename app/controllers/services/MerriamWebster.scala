@@ -24,6 +24,16 @@ object LookupMerriamWebster extends Translator {
   val ChrExp = raw"^(bix|gg).*".r
   val NumExp = raw"^(\d).*".r
 
+  def getPairs = {
+    val spa = if (spanishKey.isDefined) {
+	  Set(("spa", "eng"), ("eng", "spa"))
+	} else Set()
+    val eng = if (collegiateKey.isDefined) {
+	  Set(("eng","eng"))
+	} else Set()
+	spa ++ eng
+  }
+
   def parseXMLResponse(URL: String, attr: String, headWordTag: String) = {
     val url = new URL(URL)
     val body = url.openStream

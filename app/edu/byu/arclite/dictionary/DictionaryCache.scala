@@ -23,6 +23,20 @@ object DictionaryCache {
 
   val basePath = configuration.getString("byu.dictpath").getOrElse("./dictionaries")
 
+  val DictPat = """(.*)?-(.*)?\.bin""".r
+  def getPairs: Set[(String, String)] = {
+    val d = new File(basePath)
+    if (d.exists && d.isDirectory) {
+      d.listFiles
+	    .filter(_.isFile)
+		.map(_.getName)
+		.collect { case DictPat(from, to) => (from, to) }
+		.toSet
+    } else {
+      Set()
+    }
+  }
+
   def getDictionaryEntry(language: String, key: String): Option[List[String]] = try {
     val dictionary = Cache.getOrElse[TrieMap[String, ListBuffer[String]]](language, expiration) {
       val file = new File(basePath, language + ".bin")

@@ -19,12 +19,18 @@ package object Utils {
     val codeFormat: Symbol
 
     /**
+     * Utility method for getting the set of supported
+     * language pairs from this service.
+     */
+    def getPairs: Set[(String,String)]
+
+    /**
      * Endpoint for translating
      * @param src The source language
-     * @param dest The destination language
+     * @param dst The destination language
      * @param text The text to translate
      */
-    def translate(user: User, src: String, dest: String, text: String)
+    def translate(user: User, src: String, dst: String, text: String)
                (implicit request: RequestHeader, restart: TRestart): Option[JsObject]
   }
 
@@ -119,4 +125,19 @@ package object Utils {
     .map(_.toInt / 1000)
     .getOrElse(3600*24)
 
+  def getPairsFor(tlist: Seq[Translator], format: Symbol) = {
+    val init = Set[(String,String)]()
+    tlist.foldLeft(init) { (acc, t) =>
+      val pairs = t.getPairs
+      val fpairs = if (t.codeFormat == format) pairs
+      else pairs.flatMap { case (from, to) =>
+        val npair = for {
+		  nfrom <- LangCodes.convert(t.codeFormat, format, from)
+          nto <- LangCodes.convert(t.codeFormat, format, to)
+        } yield (nfrom, nto)
+		npair.toSet
+      }
+	  acc ++ fpairs
+    }
+  }
 }

@@ -27,7 +27,10 @@ object Application extends Controller {
 
   def aboutDict = Action {
     implicit request =>
-      Ok(views.html.aboutDict())
+	  val pairs = Utils.getPairsFor(Lookup.serviceMap.values.toList, 'iso639_3)
+	  val froms = pairs.map(_._1).toList.sorted
+	  val tos = pairs.map(_._2).toList.sorted
+      Ok(views.html.aboutDict(froms, tos, pairs))
   }
 
 }

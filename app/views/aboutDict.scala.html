@@ -1,4 +1,4 @@
-@()(implicit request: RequestHeader)
+@(froms: Seq[String], tos: Seq[String], pairs: Set[(String, String)])(implicit request: RequestHeader)
 
 @main("About the BYU Dictionary Service"){
 <head>
@@ -11,152 +11,37 @@
 		        <p>
 		            The BYU Dictionary Service is a multilingual dictionary search system built to enhance language learning by making available the most comprehesive and complete dictionary information possible. Words and phrases are checked against a number of different backing electronic dictionary services to find the best possible translation. The Dictionary Service is implemented as an HTTP Web Service, intended to be consumed by client applications which provide their own user interface. More dictionaries are being added all the time, further building and improving the language learning process.
 		        </p>
-					<h2>Backing Services & Supported Languages</h2>
+				<h2>Backing Services</h2>
 				<ul>
 					<li>
-						<a href="">BYU Dictionary</a>
-						<ul>
-							<li>Chinese</li>
-							<li>Japanese</li>
-							<li>Dutch</li>
-							<li>Korean</li>
-							<li>English</li>
-							<li>Portuguese</li>
-							<li>French</li>
-							<li>Russian</li>
-							<li>German</li>
-							<li>Spanish</li>
-							<li>Hebrew</li>
-							<li>Swedish</li>
-							<li>Italian</li>
-						</ul>
+						BYU Dictionary
 					</li><li>
 						<a href="https://en.glosbe.com/">Glosbe</a>
-						<ul>
-							<li>Most Languages</li>
-						</ul>
 					</li><li>
 						<a href="http://www.merriam-webster.com/">Merriam Webster</a>
-						<ul>
-							<li>English</li>
-							<li>Spanish</li>
-						</ul>
+						
 					</li><li>
 						<a href="http://www.sealang.net/">Sea Lang</a>
-						<ul>
-							<li>English</li>
-							<li>Russian</li>
-						</ul>
 					</li><li>
 						<a href="http://www.wordreference.com/">Word Reference</a>
-						<ul>
-							<li>Arabic</li>
-							<li>Chinese</li>
-							<li>Czech</li>
-							<li>English</li>
-							<li>French</li>
-							<li>Greek</li>
-							<li>Italian</li>
-							<li>Japanese</li>
-							<li>Korean</li>
-							<li>Polish</li>
-							<li>Portuguese</li>
-							<li>Romanian</li>
-							<li>Spanish</li>
-							<li>Turkish</li>
-						</ul>
 					</li><li>
 						<a href="http://www.csse.monash.edu.au/~jwb/cgi-bin/wwwjdic.cgi?1C">WWWJDIC</a>
-						<ul>
-							<li>English</li>
-							<li>Japanese</li>
-						</ul>
 					</li><li>
 						<a href="https://translate.google.com/">Google Translate</a>
-						<ul>
-							<li>Afrikaans</li>
-							<li>Dutch</li>
-							<li>Hmong</li>
-							<li>Macedonian</li>
-							<li>Slovenian</li>
-							<li>Albanian</li>
-							<li>English</li>
-							<li>Hungarian</li>
-							<li>Malay</li>
-							<li>Somali</li>
-							<li>Arabic</li>
-							<li>Esperanto</li>
-							<li>Icelandic</li>
-							<li>Maltese</li>
-							<li>Spanish</li>
-							<li>Armenian</li>
-							<li>Estonian</li>
-							<li>Igbo</li>
-							<li>Maori</li>
-							<li>Swahili</li>
-							<li>Azerbaijani</li>
-							<li>Filipino</li>
-							<li>Indonesian</li>
-							<li>Marathi</li>
-							<li>Swedish</li>
-							<li>Basque</li>
-							<li>Finnish</li>
-							<li>Irish</li>
-							<li>Mongolian</li>
-							<li>Tamil</li>
-							<li>Belarusian</li>
-							<li>French</li>
-							<li>Italian</li>
-							<li>Nepali</li>
-							<li>Telugu</li>
-							<li>Bengali</li>
-							<li>Galician</li>
-							<li>Japanese</li>
-							<li>Norwegian</li>
-							<li>Thai</li>
-							<li>Bosnian</li>
-							<li>Georgian</li>
-							<li>Javanese</li>
-							<li>Persian</li>
-							<li>Turkish</li>
-							<li>Bulgarian</li>
-							<li>German</li>
-							<li>Kannada</li>
-							<li>Polish</li>
-							<li>Ukrainian</li>
-							<li>Catalan</li>
-							<li>Greek</li>
-							<li>Khmer</li>
-							<li>Portuguese</li>
-							<li>Urdu</li>
-							<li>Cebuano</li>
-							<li>Gujarati</li>
-							<li>Korean</li>
-							<li>Punjabi</li>
-							<li>Vietnamese</li>
-							<li>Chinese</li>
-							<li>Haitian Creole</li>
-							<li>Lao</li>
-							<li>Romanian</li>
-							<li>Welsh</li>
-							<li>Croatian</li>
-							<li>Hausa</li>
-							<li>Latin</li>
-							<li>Russian</li>
-							<li>Yiddish</li>
-							<li>Czech</li>
-							<li>Hebrew</li>
-							<li>Latvian</li>
-							<li>Serbian</li>
-							<li>Yoruba</li>
-							<li>Danish</li>
-							<li>Hindi</li>
-							<li>Lithuanian</li>
-							<li>Slovak</li>
-							<li>Zulu</li>
-						</ul>
 					</li>
 				</ul>
+				<h2>Supported Language Pairs</h2>
+				<table>
+					<tr><th></th><th>To:</th>@for(to <- tos){<th>@{to}</th>}</tr>
+					<tr><th>From:</th></tr>
+					@for(from <- froms){
+						<tr><th>@{from}</th><th></th>
+						@for(to <- tos){
+							<td>@if(pairs.contains((from, to))){ X }</td>
+						}
+						</tr>
+					}
+				</table>
 			</div>
 		</div>
     </div>

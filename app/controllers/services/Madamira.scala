@@ -68,6 +68,8 @@ object LookupMadamira extends Translator {
     "yud" -> "MSA"  // Judeo-Tripolitanian
   )
 
+  def getPairs = dialects.map { case (lang, _) => (lang, "eng") }.toSet
+
   def genInputXML(dialect: String, text: String) = {
     raw"""<?xml version="1.0" encoding="UTF-8"?>
     <madamira_input xmlns="urn:edu.columbia.ccls.madamira.configuration:0.1">

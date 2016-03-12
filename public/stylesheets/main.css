@@ -71,6 +71,19 @@ div{ font-weight: lighter; }
 	border-radius      				: 10px;
 }
 
+table {
+	font-family: Courier;
+}
+
+table th {
+	padding: 2px;
+}
+
+table td {
+	text-align: center;
+	border: 1px solid grey;
+}
+
 .footer{
 	position           				: relative;
 	bottom: 		    			: 0px;

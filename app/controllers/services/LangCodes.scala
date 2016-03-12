@@ -117,6 +117,22 @@ object LangCodes {
     } else None
   }
 
+  def GoogleToISO639_3(code: String) = {
+    if (ISO639_3to1.contains(code)) Some(code)
+    else if(ISO639_1to3.contains(code)) {
+      ISO639_1to3.get(code)
+    } else if(code == "zh-TW") Some("zho")
+	else None
+  }
+
+  def GoogleToISO639_1(code: String) = {
+    if (ISO639_1to3.contains(code)) Some(code)
+    else if(ISO639_3to1.contains(code)) {
+      ISO639_3to1.get(code)
+    } else if(code == "zh-TW") Some("zh")
+	else None
+  }
+
   def convert(source: Symbol, target: Symbol, code: String) : Option[String] = {
     if(source == target){ return Some(code) }
     if(source == 'iso639_3) {

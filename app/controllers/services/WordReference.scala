@@ -36,6 +36,11 @@ object LookupWordReference extends Translator {
     "tr" -> "tr" //Turkish
   )
 
+  def getPairs = {
+    val codes = codeMap.keySet
+    codes.map((_,"eng")) ++ codes.map(("eng",_))	
+  }
+
   val PartsList = List("Entries","PrincipalTranslations","AdditionalTranslations")
 
   def mapEntries(json: JsObject)(body: (JsObject => JsObject)) = {

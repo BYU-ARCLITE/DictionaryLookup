@@ -30,16 +30,22 @@ object LookupWWWJDIC extends Translator {
   val codeFormat = 'iso639_1
 
   /** Maps the languages to the dictionary letter **/
-  val dictionaries = Map("en" -> "1",
-                         "de" -> "G",
-                         "fr" -> "H",
-                         "ru" -> "I",
-                         "sv" -> "J",
-                         "hu" -> "K",
-                         "es" -> "L",
-                         "nl" -> "M",
-                         "sl" -> "N",
-                         "it" -> "O")
+  val codeMap = Map("en" -> "1",
+                    "de" -> "G",
+                    "fr" -> "H",
+                    "ru" -> "I",
+                    "sv" -> "J",
+                    "hu" -> "K",
+                    "es" -> "L",
+                    "nl" -> "M",
+                    "sl" -> "N",
+                    "it" -> "O")
+
+  def getPairs = {
+    val codes = codeMap.keySet
+    codes.map((_,"ja")) ++ codes.map(("ja",_))	
+  }
+
   /**
    *  Translate To and From Japanese for all of the languages in the list above.
    *  Uses the xml.Elem and XML class
@@ -78,11 +84,11 @@ object LookupWWWJDIC extends Translator {
   def translate(user: User, src: String, dst: String, text: String)
                (implicit request: RequestHeader, restart: TRestart) = {
     (if (src == "ja") {
-      dictionaries.get(dst).flatMap { dcode =>
+      codeMap.get(dst).flatMap { dcode =>
         getTranslations(text, dcode)
       }
     } else if (dst == "ja") {
-      dictionaries.get(src).flatMap { dcode =>
+      codeMap.get(src).flatMap { dcode =>
         getTranslations(text, dcode)
       }
     } else None).map { defs =>

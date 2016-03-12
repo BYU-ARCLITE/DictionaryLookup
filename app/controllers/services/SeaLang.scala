@@ -29,6 +29,8 @@ object LookupSeaLang extends Translator {
   val expiration = Utils.getExpiration("seaLang")
   val codeFormat = 'iso639_3
 
+  def getPairs = Set(("eng","rus"),("rus","eng"),("rus","rus"))
+
   val ReExpr = raw""".*?см\. также\s*(.*?)\s*""".r
   def processSense(sense: JsObject): Option[Either[JsObject, String]] =
     (sense \ "$t").asOpt[String]

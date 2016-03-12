@@ -31,6 +31,9 @@ object LookupGlosbe extends Translator {
   val expiration = Utils.getExpiration("glosbe")
   val codeFormat = 'iso639_3
 
+  /** Glosbe lacks a well-defined list. It's just whatever people have added. */
+  def getPairs = Set[(String, String)]()
+
   /**
    * Grabs all the definitions with the direct translations
    */
