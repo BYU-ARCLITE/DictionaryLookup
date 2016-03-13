@@ -4,6 +4,7 @@ import models.User
 import Utils._
 import scala.concurrent.{ExecutionContext, Future, Await}
 import scala.concurrent.duration._
+import scala.collection.mutable.{Map, ListBuffer}
 import play.api.libs.json._
 import play.api.libs.ws.WS
 import play.api.Play.{current, configuration}
@@ -28,8 +29,9 @@ object LookupMerriamWebster extends Translator {
     val body = url.openStream
     val XMLDoc = XML.load(body)
     val response = (XMLDoc \\ "entry_list")
+    var resultMap = scala.collection.mutable.Map[(String, Seq[String]), ListBuffer[JsObject]]()
 
-    for {
+    val results = for {
       entry <- response \\ "entry"
       pos <- entry \ "fl"
     } yield {
@@ -50,7 +52,7 @@ object LookupMerriamWebster extends Translator {
       }
 
       var reps = Seq("Orthographic")
-      var lemmaReps = Map("Orthographic" -> Seq(word))
+      var lemmaReps = collection.immutable.Map("Orthographic" -> Seq(word))
 
       if (ipa.size > 0) {
         reps = reps ++ Seq("IPA")
@@ -62,7 +64,8 @@ object LookupMerriamWebster extends Translator {
         lemmaReps = lemmaReps ++ Map("WAV" -> sound)
       }
 
-      Json.obj(
+      val definitionKey = (pos.text -> lemmaReps("Orthographic"))
+      val definition = Json.obj(
         "representations" -> reps,
         "pos" -> pos.text,
         "lemmaForm" -> "lemma",
@@ -77,7 +80,17 @@ object LookupMerriamWebster extends Translator {
           )
         )
       )
+
+      if (!resultMap.contains(definitionKey)) {
+        resultMap += (definitionKey -> ListBuffer(definition))
+      } else {
+        resultMap(definitionKey) += definition
+      }
+
+      definition
     }
+    println(resultMap.toString)
+    results
   }
 
   /**
