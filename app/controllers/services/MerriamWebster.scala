@@ -84,7 +84,7 @@ object LookupMerriamWebster extends Translator {
       if (!resultMap.contains(definitionKey)) {
         resultMap += (definitionKey -> ListBuffer(definition))
       } else {
-        resultMap(definitionKey) += definition
+        (resultMap(definitionKey)(0) \\ "senses").asInstanceOf[JsArray] :+ (definition \\ "senses")
       }
 
       definition
