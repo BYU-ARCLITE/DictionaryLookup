@@ -29,7 +29,7 @@ object LookupMerriamWebster extends Translator {
     val body = url.openStream
     val XMLDoc = XML.load(body)
     val response = (XMLDoc \\ "entry_list")
-    var resultMap = scala.collection.mutable.Map[(String, Seq[String]), ListBuffer[JsObject]]()
+    var resultMap = scala.collection.mutable.Map[(String, Seq[String]), JsObject]()
 
     val results = for {
       entry <- response \\ "entry"
@@ -65,14 +65,26 @@ object LookupMerriamWebster extends Translator {
       }
 
       val definitionKey = (pos.text -> lemmaReps("Orthographic"))
-      val definition = Json.obj(
+      val keyExists = resultMap.contains(definitionKey)
+
+      val senses = (entry \\ "dt").map { dt =>
+          Json.obj("definition" -> dt.text.replace("<br>", "\n"))
+        }
+      if (keyExists) {
+        println("EXISTS SANTI IS A G")
+        // println((JsArray(senses.map(o=>Json.parse(o.toString))) ++ ((resultMap(definitionKey) \\ "senses"))).toString)
+        val oldsenses = (resultMap(definitionKey) \\ "senses").map(o=>Json.parse(o.toString))(0)
+        val newsenses = JsArray()
+        println(oldsenses(0).getClass.toString)
+        println(senses.toString)
+      }
+
+      var definition = Json.obj(
         "representations" -> reps,
         "pos" -> pos.text,
         "lemmaForm" -> "lemma",
         "forms" -> Json.obj("lemma" -> Json.toJson(lemmaReps)),
-        "senses" -> (entry \\ "dt").map { dt =>
-          Json.obj("definition" -> dt.text.replace("<br>", "\n"))
-        },
+        "senses" -> senses,
         "sources" -> Json.arr(
           Json.obj(
             "name" -> name,
@@ -82,14 +94,14 @@ object LookupMerriamWebster extends Translator {
       )
 
       if (!resultMap.contains(definitionKey)) {
-        resultMap += (definitionKey -> ListBuffer(definition))
+        resultMap += (definitionKey -> definition)
       } else {
-        (resultMap(definitionKey)(0) \\ "senses").asInstanceOf[JsArray] :+ (definition \\ "senses")
+        resultMap(definitionKey) = definition
       }
 
       definition
     }
-    println(resultMap.toString)
+    // println(resultMap.toString)
     results
   }
 
