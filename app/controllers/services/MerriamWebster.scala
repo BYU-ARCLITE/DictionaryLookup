@@ -67,16 +67,11 @@ object LookupMerriamWebster extends Translator {
       val definitionKey = (pos.text -> lemmaReps("Orthographic"))
       val keyExists = resultMap.contains(definitionKey)
 
-      val senses = (entry \\ "dt").map { dt =>
+      var senses = (entry \\ "dt").map { dt =>
           Json.obj("definition" -> dt.text.replace("<br>", "\n"))
         }
       if (keyExists) {
-        println("EXISTS SANTI IS A G")
-        // println((JsArray(senses.map(o=>Json.parse(o.toString))) ++ ((resultMap(definitionKey) \\ "senses"))).toString)
-        val oldsenses = (resultMap(definitionKey) \\ "senses").map(o=>Json.parse(o.toString))(0)
-        val newsenses = JsArray()
-        println(oldsenses(0).getClass.toString)
-        println(senses.toString)
+        senses = senses ++ (resultMap(definitionKey) \ "senses").as[Seq[JsObject]]
       }
 
       var definition = Json.obj(
@@ -85,8 +80,7 @@ object LookupMerriamWebster extends Translator {
         "lemmaForm" -> "lemma",
         "forms" -> Json.obj("lemma" -> Json.toJson(lemmaReps)),
         "senses" -> senses,
-        "sources" -> Json.arr(
-          Json.obj(
+        "sources" -> Json.arr(          Json.obj(
             "name" -> name,
             "attribution" -> attr
           )
@@ -102,7 +96,7 @@ object LookupMerriamWebster extends Translator {
       definition
     }
     // println(resultMap.toString)
-    results
+    resultMap.values.toList
   }
 
   /**
