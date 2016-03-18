@@ -1,19 +1,18 @@
-# Dictionary Lookup Service
-Written by Joshua Monson for the ARCLITE Lab, Brigham Young University.
+# Y-Lex Dictionary Lookup Service
+Written for the ARCLITE Lab, Brigham Young University.
+Contributors: Joshua Monson, Logan Kearsley, Santiago Verdu, Dagan Holbrook, David Ostler
 
 ## About
-This is a web service for providing trans-lingual dictionary lookups.
-
-Current Version: **1.0**
-
-### What does this version do?
-This provides an HTTP interface for accessing a dictionary.
+This is a web service for providing multilingual dictionary lookups.
+It provides an HTTP interface for accessing a variety of dictionaries and translation services with a standardized lexicographical response format.
 
 ## Installation
-This is a Play 2.1 application. So you need the Play Framework version 2.1. Earler version don't work because they are built with older versions of Scala. Version 2.1 uses Scala 2.10 which contains the TrieMap class--needed for the dictionary structure. See http://www.playframework.org/ for instructions on how to run and deploy a Play application.
+This is a Play 2.4 application. See http://www.playframework.org/ for instructions on how to run and deploy a Play application.
+See conf/application.conf.example for a template of the available and required configuration options.
 
 ## Adding Dictionaries
-The dictionaries the ARCLITE lab uses are property of Brigham Young University, but you can create and add your own.
+In addition to accessing external services like WordReference and Google Translate, Y-Lex makes use of its own local dictionaries to reduce xternal API usage. The dictionaries the ARCLITE lab uses are property of Brigham Young University, but you can create and add your own.
+
 As of version 1.0, a dictionary is the following Scala type:
 
     TrieMap[String, ListBuffer[String]]
@@ -22,22 +21,8 @@ The following class handles serializing and deserializing dictionaries and has b
 
     edu.byu.arclite.dictionary.Dictionary
 
-You can use the <code>Dictionary.saveToFile(dictionary, file)</code> method to save the dictionary to a file. When TrieMaps are serialized and saved into files, they should be saved under the <code>dictionaries</code> folder. The naming convention is:
+You can use the <code>Dictionary.saveToFile(dictionary, file)</code> method to save the dictionary to a file. When TrieMaps are serialized and saved into files, they should be saved under the <code>dictionaries</code> folder (although this default can be overridden byt setting "byu.dictpath" in the config file). The naming convention is:
 
     {srcLang}-{destLang}.bin
 
-So a dictionary going from English to French would be saved here: <code>dictionaries/en-fr.bin</code>.
-
-
-### Configure translation keys
-
-DictionaryLookup supports text translations using WordReference and Google Translate. To use these services you must specify the
-right authentication credentials in the configuration file.
-
-For WordReference, enter the API key:
-
-    wordReference.key="word reference key goes here"
-
-For Google Translate, enter the API key:
-
-    google.key="Google Translate key goes here"
+So a dictionary going from English to French would be saved here: <code>dictionaries/eng-fra.bin</code>.
