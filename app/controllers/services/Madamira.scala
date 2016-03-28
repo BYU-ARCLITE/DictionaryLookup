@@ -224,7 +224,7 @@ object LookupMadamira extends Translator {
 
     if (dst != "eng") None
     else dialects.get(src).flatMap { dialect =>
-      val inputXmlData = genInputXML(dialect, text)
+      val inputXmlData = genInputXML("MSA", text)
 
       val url = "http://127.0.0.1:8223"
       val result = Http(url)
