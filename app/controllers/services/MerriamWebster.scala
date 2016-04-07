@@ -31,6 +31,8 @@ object LookupMerriamWebster extends Translator {
     val response = (XMLDoc \\ "entry_list")
     var resultMap = scala.collection.mutable.Map[(String, Seq[String]), JsObject]()
 
+    println("This is the " + response)
+
     val results = for {
       entry <- response \\ "entry"
       pos <- entry \ "fl"
@@ -110,27 +112,24 @@ object LookupMerriamWebster extends Translator {
         val key = spanishKey.get
         val url = "http://www.dictionaryapi.com/api/v1/references/spanish/xml/" + text.replaceAll("[^\\p{L}\\p{Nd}]+", "%20").trim +"?key="+key
         val attr = s"""
-          <a href="http://www.spanishcentral.com/translate/$text"
+        <div id ="attr" height:50;>
+        <a target="_blank" style="float:left margin-left : 1px; margin-top:50px" href="http://www.spanishcentral.com/translate/$text"
             target="Merriam-Webster">$text at SpanishCentral.com</a>
-          <br/>Merriam-Webster's Spanish-English Dictionary
-          <div class="merriamLogo">
-            <a href="http://www.spanishcentral.com/translate/$text"
-              target="Merriam-Webster"><img src="$logoURL"/></a>
-          </div>
+        <a href="http://www.spanishcentral.com/translate/$text" target="Merriam-Webster"><img src="$logoURL"/></a>        <br><br><br>
+        </div>
         """
         parseXMLResponse(url, attr, "hw")
       } else if(src == "eng" && dst == "eng" && collegiateKey.isDefined){
         val key = collegiateKey.get
         val url = "http://www.dictionaryapi.com/api/v1/references/collegiate/xml/" + text.replaceAll("[^\\p{L}\\p{Nd}]+", "%20").trim +"?key="+key
         val attr = s"""
-          <a href="http://www.merriam-webster.com/dictionary/$text"
-            target="Merriam-Webster">$text at Merriam-Webster.com</a>
-          <br/> Merriam-Webster's Collegiate® Dictionary
-          <div class="merriamLogo">
-            <a href="http://www.merriam-webster.com/dictionary/$text"
-              target="Merriam-Webster"><img src="$logoURL"/></a>
-          </div>
+        <div id ="attr" height:50;>
+        <a target="_blank" style="float:left margin-left : 1px; margin-top:50px" href="http://www.merriam-webster.com/dictionary/$text"
+            target="Merriam-Webster">Merriam-Webster.com</a>
+        <a href="http://www.spanishcentral.com/translate/$text" target="Merriam-Webster"><img src="$logoURL"/></a>        <br><br><br>
+        </div>
         """
+
         parseXMLResponse(url, attr, "ew")
       } else Seq[JsObject]()
 

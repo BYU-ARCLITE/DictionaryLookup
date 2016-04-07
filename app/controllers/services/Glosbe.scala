@@ -33,7 +33,7 @@ object LookupGlosbe extends Translator {
   /**
    * Grabs all the definitions with the direct translations
    */
-  def processResults(text: String, phrases:Seq[JsObject], dst: String): Seq[JsObject] = {
+  def processResults(text: String, phrases:Seq[JsObject], dst: String, src: String): Seq[JsObject] = {
     val targets = LangCodes.convert('iso639_3, 'iso639_1, dst) match {
     case Some(p2code) => Seq(dst, p2code)
     case _ => Seq(dst)
@@ -46,6 +46,7 @@ object LookupGlosbe extends Translator {
       }.toList
     }
 
+    println("THIS IS PHRASES " + phrases);
     val lemmas = for {phrase  <- phrases } yield {
 
       val term = (phrase \ "phrase")
@@ -61,6 +62,17 @@ object LookupGlosbe extends Translator {
 
       if (senses.size == 0) None
       else {
+        println(phrase);
+        val logo = routes.Assets.at(file = "images/GlosbeLogo.png");
+        val attr = s""" 
+        <div id ="attr" height:50;>
+        
+        <a target="_blank" style="float:left margin-left : 1px; margin-top:50px" href="https://en.glosbe.com/$src/$dst/$text">Glosbe Inc.</a> 
+        <img src= "$logo" style="float:left; margin-right:25px;" height= "50px" width= "50px"> </img> 
+        <br><br><br>
+        </div>
+        """
+
         val lemma = Json.obj(
           "representations" -> Json.arr("Orthographic"),
           "lemmaForm" -> "lemma",
@@ -73,7 +85,7 @@ object LookupGlosbe extends Translator {
             Json.obj("definition" -> definition)
           },
           "sources" -> Json.arr(
-            Json.obj("name" -> name, "attribution" -> s"<i>$name</i>")
+            Json.obj("name" -> name, "attribution" -> attr)
           )
         )
         Some(lemma)
@@ -102,7 +114,7 @@ object LookupGlosbe extends Translator {
     else {
       (json \ "tuc").asOpt[Seq[JsObject]].flatMap { tuc =>
         val phrase = (json \ "phrase").as[String]
-        val lemmas = processResults(phrase, tuc, dest)
+        val lemmas = processResults(phrase, tuc, dest, src)
 
         if (lemmas.size == 0) None
         else {
